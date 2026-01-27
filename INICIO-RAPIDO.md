@@ -1,20 +1,20 @@
-# 🚀 Guía de Inicio Rápido - BeniceAstro
+# Guía de Inicio Rápido - BeniceAstro
 
-## ✅ Pasos Completados
+## Pasos Completados
 
-1. ✅ Proyecto Astro inicializado
-2. ✅ Dependencias instaladas
-3. ✅ Estructura de archivos creada
-4. ✅ Configuración de TypeScript y Tailwind
-5. ✅ Sistema de autenticación implementado
-6. ✅ Catálogo de productos con filtros
-7. ✅ Carrito y checkout completo
-8. ✅ Panel de administración
-9. ✅ APIs y funcionalidades avanzadas
+1. Proyecto Astro inicializado
+2. Dependencias instaladas
+3. Estructura de archivos creada
+4. Configuración de TypeScript y Tailwind
+5. Sistema de autenticación implementado
+6. Catálogo de productos con filtros
+7. Carrito y checkout completo
+8. Panel de administración
+9. APIs y funcionalidades avanzadas
 
-## 📋 Próximos Pasos
+## Próximos Pasos
 
-### 1️⃣ Configurar Supabase
+### 1. Configurar Supabase
 
 1. Ve a [https://supabase.com](https://supabase.com) y crea una cuenta
 2. Crea un nuevo proyecto
@@ -22,7 +22,7 @@
    - URL del proyecto
    - Anon/Public Key
 
-### 2️⃣ Configurar Variables de Entorno
+### 2. Configurar Variables de Entorno
 
 Crea un archivo `.env` en la raíz del proyecto:
 
@@ -31,7 +31,7 @@ SUPABASE_URL=https://tu-proyecto.supabase.co
 SUPABASE_ANON_KEY=tu-clave-anon-aqui
 ```
 
-### 3️⃣ Crear Base de Datos
+### 3. Crear Base de Datos
 
 1. Abre tu proyecto en Supabase
 2. Ve a **SQL Editor**
@@ -40,13 +40,13 @@ SUPABASE_ANON_KEY=tu-clave-anon-aqui
 5. Haz click en **Run** o presiona `Ctrl+Enter`
 
 Esto creará:
-- ✅ Todas las tablas necesarias
-- ✅ Políticas de seguridad (RLS)
-- ✅ Funciones SQL (stored procedures)
-- ✅ 17 productos de ejemplo
-- ✅ 3 códigos promocionales
+- Todas las tablas necesarias
+- Políticas de seguridad (RLS)
+- Funciones SQL (stored procedures)
+- 17 productos de ejemplo
+- 3 códigos promocionales
 
-### 4️⃣ Iniciar el Servidor de Desarrollo
+### 4. Iniciar el Servidor de Desarrollo
 
 ```bash
 npm run dev
@@ -54,7 +54,7 @@ npm run dev
 
 La aplicación estará disponible en: **http://localhost:4321**
 
-## 🧪 Probar la Aplicación
+## Probar la Aplicación
 
 ### Crear Usuario Regular
 1. Ve a `/registro`
@@ -85,14 +85,14 @@ Códigos incluidos en la base de datos:
 3. Suscríbete con tu email
 4. Recibirás un código promocional generado automáticamente
 
-## 🎯 Funcionalidades Clave
+## Funcionalidades Clave
 
-### 🔍 Buscador Instantáneo
+### Buscador Instantáneo
 - Escribe en la barra de búsqueda del header
 - Resultados en tiempo real
 - Implementado con debounce de 300ms
 
-### 🎨 Filtros de Productos
+### Filtros de Productos
 Ve a `/productos` y prueba:
 - Filtro por tipo de animal (Perro, Gato, Otros)
 - Filtro por tamaño (Mini, Mediano, Grande)
@@ -100,13 +100,13 @@ Ve a `/productos` y prueba:
 - Filtro por edad
 - Combinación de múltiples filtros
 
-### 🛒 Carrito de Compras
+### Carrito de Compras
 - Añade productos al carrito
 - Modifica cantidades
 - Aplica códigos promocionales
 - El carrito persiste entre sesiones
 
-### 📦 Gestión de Pedidos
+### Gestión de Pedidos
 En `/mis-pedidos`:
 - Ver historial completo
 - **Cancelar pedidos** (solo en estado "Pagado")
@@ -114,18 +114,18 @@ En `/mis-pedidos`:
 - **Solicitar devoluciones** (solo entregados)
   - Modal con instrucciones
 
-### 📊 Panel de Administración
+### Panel de Administración
 En `/admin` (solo para admins):
 - KPIs del mes actual
 - Gráfico de ventas (últimos 7 días)
 - Tabla de gestión de pedidos
 - Cambiar estados de pedidos
 
-## 📁 Archivos Importantes
+## Archivos Importantes
 
 ```
 BeniceAstro/
-├── supabase-schema.sql      # ⚠️ IMPORTANTE: Ejecutar en Supabase
+├── supabase-schema.sql      # IMPORTANTE: Ejecutar en Supabase
 ├── .env.example              # Plantilla de variables de entorno
 ├── README.md                 # Documentación completa
 ├── package.json              # Dependencias
@@ -138,7 +138,7 @@ BeniceAstro/
     └── types/index.ts        # Definiciones TypeScript
 ```
 
-## 🐛 Solución de Problemas
+## Solución de Problemas
 
 ### Error: "Cannot find module '@supabase/supabase-js'"
 ```bash
@@ -160,7 +160,7 @@ npm install
 2. Comprueba que el proyecto de Supabase está activo
 3. Revisa que las políticas RLS están habilitadas
 
-## 🚀 Despliegue a Producción
+## Despliegue a Producción
 
 ### Opción 1: Vercel
 ```bash
@@ -179,14 +179,14 @@ No olvides configurar:
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
 
-## 📚 Recursos Adicionales
+## Recursos Adicionales
 
 - [Documentación de Astro](https://docs.astro.build)
 - [Documentación de Supabase](https://supabase.com/docs)
 - [Tailwind CSS](https://tailwindcss.com/docs)
 - [Chart.js](https://www.chartjs.org/docs)
 
-## 💡 Características Técnicas Destacadas
+## Características Técnicas Destacadas
 
 1. **Row Level Security (RLS)**
    - Los usuarios solo ven sus propios pedidos
@@ -208,7 +208,7 @@ No olvides configurar:
    - Endpoints para búsqueda, newsletter, pedidos
    - Lógica de negocio en el servidor
 
-## ✨ Próximas Mejoras Sugeridas
+## Próximas Mejoras Sugeridas
 
 - [ ] Integración con Stripe para pagos reales
 - [ ] Sistema de emails transaccionales
@@ -219,8 +219,8 @@ No olvides configurar:
 
 ---
 
-**¿Listo para empezar?** Ejecuta `npm run dev` y abre http://localhost:4321
+**Listo para empezar?** Ejecuta `npm run dev` y abre http://localhost:4321
 
-**¿Problemas?** Revisa el README.md o contacta al equipo de desarrollo.
+**Problemas?** Revisa el README.md o contacta al equipo de desarrollo.
 
-🐾 **¡Disfruta construyendo con BeniceAstro!**
+**Disfruta construyendo con BeniceAstro!**

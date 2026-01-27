@@ -1,69 +1,69 @@
-# 🐾 BeniceAstro - Tienda Online Veterinaria
+# BeniceAstro - Tienda Online Veterinaria
 
 Tienda online completa para productos de animales domésticos construida con Astro, Supabase y TypeScript.
 
-## ✨ Características Principales
+## Características Principales
 
-### 🔐 Autenticación y Usuarios
-- ✅ Sistema completo de registro y login con Supabase Auth
-- ✅ Recuperación y cambio de contraseña funcional
-- ✅ Perfil de usuario editable
-- ✅ Sección "Mis Pedidos" con historial completo
+### Autenticación y Usuarios
+- Sistema completo de registro y login con Supabase Auth
+- Recuperación y cambio de contraseña funcional
+- Perfil de usuario editable
+- Sección "Mis Pedidos" con historial completo
 
-### 📧 Newsletter y Descuentos
-- ✅ Popup automático de suscripción a newsletter
-- ✅ Generación automática de códigos promocionales
-- ✅ Sistema de códigos de descuento aplicables al carrito
-- ✅ Validación de códigos con fecha de expiración
+### Newsletter y Descuentos
+- Popup automático de suscripción a newsletter
+- Generación automática de códigos promocionales
+- Sistema de códigos de descuento aplicables al carrito
+- Validación de códigos con fecha de expiración
 
-### 🔍 Buscador Instantáneo (Live Search)
-- ✅ Búsqueda en tiempo real sin recargar la página
-- ✅ Resultados flotantes con imagen y precio
-- ✅ Implementación con debounce (300ms)
-- ✅ API Route con consultas ILIKE en Supabase
-- ✅ Mensaje "No encontrado" cuando no hay resultados
+### Buscador Instantáneo (Live Search)
+- Búsqueda en tiempo real sin recargar la página
+- Resultados flotantes con imagen y precio
+- Implementación con debounce (300ms)
+- API Route con consultas ILIKE en Supabase
+- Mensaje "No encontrado" cuando no hay resultados
 
-### 🎯 Filtrado Avanzado de Productos
+### Filtrado Avanzado de Productos
 Filtros combinables por:
-- ✅ Tipo de animal (Perro, Gato, Otros)
-- ✅ Tamaño (Mini, Mediano, Grande)
-- ✅ Categoría (Alimentación, Higiene, Salud, Accesorios, Juguetes)
-- ✅ Edad (Cachorro/Joven, Adulto, Senior)
+- Tipo de animal (Perro, Gato, Otros)
+- Tamaño (Mini, Mediano, Grande)
+- Categoría (Alimentación, Higiene, Salud, Accesorios, Juguetes)
+- Edad (Cachorro/Joven, Adulto, Senior)
 
-### 🛒 Carrito y Checkout
-- ✅ Carrito persistente con localStorage
-- ✅ Gestión de cantidades y stock
-- ✅ Aplicación de códigos promocionales
-- ✅ Proceso de checkout con creación de pedidos
-- ✅ Reducción automática de stock
+### Carrito y Checkout
+- Carrito persistente con localStorage
+- Gestión de cantidades y stock
+- Aplicación de códigos promocionales
+- Proceso de checkout con creación de pedidos
+- Reducción automática de stock
 
-### 📦 Gestión Post-Venta
+### Gestión Post-Venta
 
 #### Cancelación de Pedidos
-- ✅ Botón "Cancelar Pedido" solo para pedidos en estado "Pagado"
-- ✅ Restauración automática de stock mediante stored procedure
-- ✅ Operación atómica con transacciones SQL
+- Botón "Cancelar Pedido" solo para pedidos en estado "Pagado"
+- Restauración automática de stock mediante stored procedure
+- Operación atómica con transacciones SQL
 
 #### Devoluciones
-- ✅ Botón "Solicitar Devolución" para pedidos entregados
-- ✅ Modal informativo con:
+- Botón "Solicitar Devolución" para pedidos entregados
+- Modal informativo con:
   - Dirección de envío para devolución
   - Confirmación de email
   - Información de reembolso (5-7 días)
 
-### 👨‍💼 Panel de Administración
+### Panel de Administración
 
 #### Dashboard con Analíticas
-- ✅ KPI Cards:
-  - 💰 Ventas Totales del Mes
-  - ⏳ Pedidos Pendientes
-  - 🏆 Producto Más Vendido
-- ✅ Gráfico de ventas de los últimos 7 días (Chart.js)
-- ✅ Tabla de gestión de pedidos
-- ✅ Actualización de estados de pedidos
-- ✅ Consultas SQL optimizadas con agregaciones
+- KPI Cards:
+  - Ventas Totales del Mes
+  - Pedidos Pendientes
+  - Producto Más Vendido
+- Gráfico de ventas de los últimos 7 días (Chart.js)
+- Tabla de gestión de pedidos
+- Actualización de estados de pedidos
+- Consultas SQL optimizadas con agregaciones
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 - **Framework:** Astro 4.x con SSR (Server-Side Rendering)
 - **Base de Datos:** Supabase (PostgreSQL)
@@ -73,7 +73,7 @@ Filtros combinables por:
 - **Gráficos:** Chart.js
 - **Arquitectura:** Islands Architecture
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 src/
@@ -103,7 +103,7 @@ src/
     └── global.css     # Estilos globales
 ```
 
-## 🚀 Instalación y Configuración
+## Instalación y Configuración
 
 ### 1. Clonar e instalar dependencias
 
@@ -137,10 +137,10 @@ Ejecuta el archivo `supabase-schema.sql` en el editor SQL de Supabase:
 - Ejecuta el script
 
 Esto creará:
-- ✅ Tablas: users, products, orders, order_items, newsletters, promo_codes
-- ✅ Políticas RLS (Row Level Security)
-- ✅ Funciones SQL: `create_order_and_reduce_stock`, `cancel_order_and_restore_stock`
-- ✅ Datos de ejemplo (17 productos y 3 códigos promocionales)
+- Tablas: users, products, orders, order_items, newsletters, promo_codes
+- Políticas RLS (Row Level Security)
+- Funciones SQL: `create_order_and_reduce_stock`, `cancel_order_and_restore_stock`
+- Datos de ejemplo (17 productos y 3 códigos promocionales)
 
 ### 4. Ejecutar en desarrollo
 
@@ -157,7 +157,7 @@ npm run build
 npm run preview
 ```
 
-## 📝 Funciones SQL Importantes
+## Funciones SQL Importantes
 
 ### `create_order_and_reduce_stock`
 Función transaccional que:
@@ -172,7 +172,7 @@ Función transaccional que:
 2. Restaura el stock de todos los productos
 3. Cambia el estado a "cancelado"
 
-## 🎯 Datos de Prueba
+## Datos de Prueba
 
 El sistema incluye:
 - **17 productos** de ejemplo (perros, gatos y otros animales)
@@ -181,7 +181,7 @@ El sistema incluye:
   - `VERANO20` - 20% descuento (activo)
   - `BLACKFRIDAY30` - 30% descuento (expirado)
 
-## 👤 Usuarios
+## Usuarios
 
 ### Usuario Regular
 - Regístrate en `/registro`
@@ -191,39 +191,39 @@ El sistema incluye:
 - Usa un email que contenga "admin" (ej: admin@beniceastro.com)
 - Acceso adicional al panel de administración en `/admin`
 
-## 🔒 Seguridad
+## Seguridad
 
-- ✅ Row Level Security (RLS) en todas las tablas
-- ✅ Autenticación con Supabase Auth
-- ✅ Validación de permisos en rutas protegidas
-- ✅ Funciones SQL con SECURITY DEFINER
-- ✅ Validación de stock antes de crear pedidos
+- Row Level Security (RLS) en todas las tablas
+- Autenticación con Supabase Auth
+- Validación de permisos en rutas protegidas
+- Funciones SQL con SECURITY DEFINER
+- Validación de stock antes de crear pedidos
 
-## 🎨 Características UX
+## Características UX
 
-- ✅ Diseño responsive y moderno
-- ✅ Feedback visual en todas las acciones
-- ✅ Estados de carga y mensajes de error
-- ✅ Badges de estado con colores semánticos
-- ✅ Carrito persistente entre sesiones
-- ✅ Contador de carrito en tiempo real
+- Diseño responsive y moderno
+- Feedback visual en todas las acciones
+- Estados de carga y mensajes de error
+- Badges de estado con colores semánticos
+- Carrito persistente entre sesiones
+- Contador de carrito en tiempo real
 
-## 📊 Estados de Pedidos
+## Estados de Pedidos
 
-1. **Pendiente** 🟡 - Pedido creado, esperando pago
-2. **Pagado** 🔵 - Pago confirmado, listo para envío
-3. **Enviado** 🟣 - Pedido en camino
-4. **Entregado** 🟢 - Pedido recibido por el cliente
-5. **Cancelado** 🔴 - Pedido cancelado (stock restaurado)
+1. **Pendiente** - Pedido creado, esperando pago
+2. **Pagado** - Pago confirmado, listo para envío
+3. **Enviado** - Pedido en camino
+4. **Entregado** - Pedido recibido por el cliente
+5. **Cancelado** - Pedido cancelado (stock restaurado)
 
-## 🛡️ Políticas RLS
+## Políticas RLS
 
 - Los usuarios solo pueden ver sus propios pedidos
 - Los productos son visibles para todos (lectura pública)
 - Las newsletters pueden ser creadas por cualquiera
 - Los códigos promocionales activos son visibles para todos
 
-## 📦 Dependencias Principales
+## Dependencias Principales
 
 ```json
 {
@@ -236,21 +236,21 @@ El sistema incluye:
 }
 ```
 
-## 🎓 Valor Educativo
+## Valor Educativo
 
 Este proyecto demuestra:
-- ✅ Arquitectura Islands de Astro
-- ✅ Integración completa con Supabase
-- ✅ Gestión de estado con localStorage
-- ✅ API Routes en Astro
-- ✅ TypeScript estricto
-- ✅ Stored Procedures y transacciones SQL
-- ✅ Row Level Security (RLS)
-- ✅ Visualización de datos con Chart.js
-- ✅ Diseño responsive con Tailwind CSS
-- ✅ UX moderna y accesible
+- Arquitectura Islands de Astro
+- Integración completa con Supabase
+- Gestión de estado con localStorage
+- API Routes en Astro
+- TypeScript estricto
+- Stored Procedures y transacciones SQL
+- Row Level Security (RLS)
+- Visualización de datos con Chart.js
+- Diseño responsive con Tailwind CSS
+- UX moderna y accesible
 
-## 🚧 Próximas Mejoras
+## Próximas Mejoras
 
 - [ ] Integración con pasarela de pago real (Stripe)
 - [ ] Sistema de envío de emails transaccionales
@@ -260,16 +260,16 @@ Este proyecto demuestra:
 - [ ] Notificaciones push
 - [ ] Chat de soporte en tiempo real
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es de uso educativo y demostrativo.
 
-## 👨‍💻 Desarrollo
+## Desarrollo
 
 Desarrollado como ejemplo completo de tienda online moderna usando las últimas tecnologías web.
 
 ---
 
-**¡Gracias por usar BeniceAstro! 🐾**
+**Gracias por usar BeniceAstro**
 
 Para cualquier duda o sugerencia, contacta con nosotros.
