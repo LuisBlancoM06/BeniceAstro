@@ -55,8 +55,8 @@ export default function AddToCartButton({
           flex-1 flex items-center justify-center gap-2 py-3 px-6 font-bold rounded-xl 
           transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5
           ${isAdded 
-            ? 'bg-gradient-to-r from-green-400 to-green-500 text-white' 
-            : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 hover:from-yellow-500 hover:to-orange-500'
+            ? 'bg-green-500 text-white' 
+            : 'bg-purple-600 text-white hover:bg-orange-500'
           }
         `}
       >

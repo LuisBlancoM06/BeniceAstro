@@ -29,6 +29,26 @@ import Layout from '../layouts/Layout.astro';
             placeholder="tu@email.com"
           />
         </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Teléfono</label>
+          <input
+            type="tel"
+            id="phone"
+            class="input"
+            placeholder="600 123 456"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">Dirección</label>
+          <input
+            type="text"
+            id="address"
+            class="input"
+            placeholder="Calle, número, ciudad, CP"
+          />
+        </div>
         
         <div class="mb-4">
           <label class="block text-sm font-medium mb-2">Contraseña</label>
@@ -80,6 +100,8 @@ import Layout from '../layouts/Layout.astro';
 
       const fullName = (document.getElementById('full-name') as HTMLInputElement).value;
       const email = (document.getElementById('email') as HTMLInputElement).value;
+      const phone = (document.getElementById('phone') as HTMLInputElement).value;
+      const address = (document.getElementById('address') as HTMLInputElement).value;
       const password = (document.getElementById('password') as HTMLInputElement).value;
       const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement).value;
 
@@ -111,6 +133,8 @@ import Layout from '../layouts/Layout.astro';
             id: data.user.id,
             email: email,
             full_name: fullName,
+            phone: phone || null,
+            address: address || null,
             role: 'user'
           });
         }

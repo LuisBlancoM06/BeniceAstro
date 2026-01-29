@@ -13,78 +13,177 @@ const { data: user } = await supabase
   .select('*')
   .eq('id', session.user.id)
   .single();
+
+// Obtener estadísticas del usuario
+const { count: totalOrders } = await supabase
+  .from('orders')
+  .select('*', { count: 'exact', head: true })
+  .eq('user_id', session.user.id);
+
+const { data: totalSpentData } = await supabase
+  .from('orders')
+  .select('total')
+  .eq('user_id', session.user.id)
+  .in('status', ['pagado', 'enviado', 'entregado']);
+
+const totalSpent = totalSpentData?.reduce((sum, order) => sum + Number(order.total), 0) || 0;
 ---
 
 <Layout title="Mi Perfil">
-  <div class="max-w-2xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold mb-8">Mi Perfil</h1>
-
-    <div class="card mb-6">
-      <h2 class="text-2xl font-bold mb-4">Información Personal</h2>
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
       
-      <form id="profile-form">
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Nombre Completo</label>
-          <input
-            type="text"
-            id="full-name"
-            value={user?.full_name || ''}
-            class="input"
-          />
+      <!-- Header con avatar -->
+      <div class="bg-white rounded-2xl shadow-sm p-8 mb-6">
+        <div class="flex items-center gap-6">
+          <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center">
+            <span class="text-4xl">👤</span>
+          </div>
+          <div class="flex-1">
+            <h1 class="text-3xl font-bold text-gray-800">{user?.full_name || 'Usuario'}</h1>
+            <p class="text-gray-600">{session.user.email}</p>
+            <p class="text-sm text-gray-500 mt-1">Miembro desde {new Date(user?.created_at || Date.now()).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+          </div>
+          <div class="hidden md:flex gap-8">
+            <div class="text-center">
+              <p class="text-3xl font-bold text-purple-600">{totalOrders || 0}</p>
+              <p class="text-sm text-gray-500">Pedidos</p>
+            </div>
+            <div class="text-center">
+              <p class="text-3xl font-bold text-green-600">{totalSpent.toFixed(0)}€</p>
+              <p class="text-sm text-gray-500">Total gastado</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Información Personal -->
+        <div class="bg-white rounded-2xl shadow-sm p-6">
+          <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+            <span>👤</span> Información Personal
+          </h2>
+          
+          <form id="profile-form" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+              <input
+                type="text"
+                id="full-name"
+                value={user?.full_name || ''}
+                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Tu nombre"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={session.user.email}
+                disabled
+                class="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+              <input
+                type="tel"
+                id="phone"
+                value={user?.phone || ''}
+                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="+34 600 000 000"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección de envío</label>
+              <textarea
+                id="address"
+                rows="3"
+                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                placeholder="Calle, número, piso, ciudad, CP"
+              >{user?.address || ''}</textarea>
+            </div>
+
+            <div id="profile-message" class="hidden p-3 rounded-lg text-sm"></div>
+
+            <button type="submit" class="w-full py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-colors">
+              Guardar Cambios
+            </button>
+          </form>
         </div>
 
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Email</label>
-          <input
-            type="email"
-            value={session.user.email}
-            disabled
-            class="input bg-gray-100"
-          />
-          <p class="text-sm text-gray-600 mt-1">El email no puede ser modificado</p>
+        <!-- Seguridad -->
+        <div class="space-y-6">
+          <!-- Cambiar Contraseña -->
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+              <span>🔐</span> Cambiar Contraseña
+            </h2>
+            
+            <form id="password-form" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña</label>
+                <input
+                  type="password"
+                  id="new-password"
+                  minlength="6"
+                  class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                <input
+                  type="password"
+                  id="confirm-password"
+                  class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  placeholder="Repite la contraseña"
+                />
+              </div>
+
+              <div id="password-message" class="hidden p-3 rounded-lg text-sm"></div>
+
+              <button type="submit" class="w-full py-3 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 transition-colors">
+                Actualizar Contraseña
+              </button>
+            </form>
+          </div>
+
+          <!-- Accesos Rápidos -->
+          <div class="bg-white rounded-2xl shadow-sm p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+              <span>⚡</span> Accesos Rápidos
+            </h2>
+            <div class="space-y-2">
+              <a href="/mis-pedidos" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-2xl">📦</span>
+                <div>
+                  <p class="font-medium">Mis Pedidos</p>
+                  <p class="text-sm text-gray-500">Ver historial de compras</p>
+                </div>
+              </a>
+              <a href="/favoritos" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                <span class="text-2xl">❤️</span>
+                <div>
+                  <p class="font-medium">Favoritos</p>
+                  <p class="text-sm text-gray-500">Productos guardados</p>
+                </div>
+              </a>
+              <button id="logout-btn" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors">
+                <span class="text-2xl">🚪</span>
+                <div class="text-left">
+                  <p class="font-medium">Cerrar Sesión</p>
+                  <p class="text-sm text-red-400">Salir de tu cuenta</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div id="success-message" class="hidden mb-4 p-3 bg-green-100 text-green-700 rounded-lg"></div>
-        <div id="error-message" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg"></div>
-
-        <button type="submit" class="btn btn-primary">
-          Guardar Cambios
-        </button>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2 class="text-2xl font-bold mb-4">Cambiar Contraseña</h2>
-      
-      <form id="password-form">
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Nueva Contraseña</label>
-          <input
-            type="password"
-            id="new-password"
-            minlength="6"
-            placeholder="Mínimo 6 caracteres"
-            class="input"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Confirmar Contraseña</label>
-          <input
-            type="password"
-            id="confirm-password"
-            placeholder="Repite tu contraseña"
-            class="input"
-          />
-        </div>
-
-        <div id="password-success" class="hidden mb-4 p-3 bg-green-100 text-green-700 rounded-lg"></div>
-        <div id="password-error" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg"></div>
-
-        <button type="submit" class="btn btn-secondary">
-          Actualizar Contraseña
-        </button>
-      </form>
+      </div>
     </div>
   </div>
 
@@ -93,41 +192,40 @@ const { data: user } = await supabase
 
     // Actualizar perfil
     const profileForm = document.getElementById('profile-form');
-    const successMessage = document.getElementById('success-message');
-    const errorMessage = document.getElementById('error-message');
+    const profileMessage = document.getElementById('profile-message');
 
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const fullName = (document.getElementById('full-name') as HTMLInputElement).value;
+      const phone = (document.getElementById('phone') as HTMLInputElement).value;
+      const address = (document.getElementById('address') as HTMLTextAreaElement).value;
+      
       const { data: { session } } = await supabase.auth.getSession();
 
       try {
         const { error } = await supabase
           .from('users')
-          .update({ full_name: fullName })
+          .update({ full_name: fullName, phone, address })
           .eq('id', session!.user.id);
 
         if (error) throw error;
 
-        successMessage!.textContent = 'Perfil actualizado correctamente';
-        successMessage!.classList.remove('hidden');
-        errorMessage!.classList.add('hidden');
+        profileMessage!.textContent = '✅ Perfil actualizado correctamente';
+        profileMessage!.className = 'p-3 rounded-lg text-sm bg-green-100 text-green-700';
+        profileMessage!.classList.remove('hidden');
 
-        setTimeout(() => {
-          successMessage!.classList.add('hidden');
-        }, 3000);
+        setTimeout(() => profileMessage!.classList.add('hidden'), 3000);
       } catch (error: any) {
-        errorMessage!.textContent = error.message || 'Error al actualizar el perfil';
-        errorMessage!.classList.remove('hidden');
-        successMessage!.classList.add('hidden');
+        profileMessage!.textContent = '❌ ' + (error.message || 'Error al actualizar');
+        profileMessage!.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
+        profileMessage!.classList.remove('hidden');
       }
     });
 
     // Cambiar contraseña
     const passwordForm = document.getElementById('password-form');
-    const passwordSuccess = document.getElementById('password-success');
-    const passwordError = document.getElementById('password-error');
+    const passwordMessage = document.getElementById('password-message');
 
     passwordForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -135,35 +233,44 @@ const { data: user } = await supabase
       const newPassword = (document.getElementById('new-password') as HTMLInputElement).value;
       const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement).value;
 
+      if (newPassword.length < 6) {
+        passwordMessage!.textContent = '❌ La contraseña debe tener al menos 6 caracteres';
+        passwordMessage!.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
+        passwordMessage!.classList.remove('hidden');
+        return;
+      }
+
       if (newPassword !== confirmPassword) {
-        passwordError!.textContent = 'Las contraseñas no coinciden';
-        passwordError!.classList.remove('hidden');
-        passwordSuccess!.classList.add('hidden');
+        passwordMessage!.textContent = '❌ Las contraseñas no coinciden';
+        passwordMessage!.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
+        passwordMessage!.classList.remove('hidden');
         return;
       }
 
       try {
-        const { error } = await supabase.auth.updateUser({
-          password: newPassword
-        });
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
 
         if (error) throw error;
 
-        passwordSuccess!.textContent = 'Contraseña actualizada correctamente';
-        passwordSuccess!.classList.remove('hidden');
-        passwordError!.classList.add('hidden');
+        passwordMessage!.textContent = '✅ Contraseña actualizada correctamente';
+        passwordMessage!.className = 'p-3 rounded-lg text-sm bg-green-100 text-green-700';
+        passwordMessage!.classList.remove('hidden');
 
         (document.getElementById('new-password') as HTMLInputElement).value = '';
         (document.getElementById('confirm-password') as HTMLInputElement).value = '';
 
-        setTimeout(() => {
-          passwordSuccess!.classList.add('hidden');
-        }, 3000);
+        setTimeout(() => passwordMessage!.classList.add('hidden'), 3000);
       } catch (error: any) {
-        passwordError!.textContent = error.message || 'Error al actualizar la contraseña';
-        passwordError!.classList.remove('hidden');
-        passwordSuccess!.classList.add('hidden');
+        passwordMessage!.textContent = '❌ ' + (error.message || 'Error al actualizar');
+        passwordMessage!.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
+        passwordMessage!.classList.remove('hidden');
       }
+    });
+
+    // Cerrar sesión
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/';
     });
   </script>
 </Layout>

@@ -230,6 +230,46 @@ const statusColors: Record<string, string> = {
         const el = e.target as HTMLSelectElement;
         const returnId = el.dataset.returnId;
         const newStatus = el.value;
+        const currentStatus = el.dataset.currentStatus;
+
+        // Si cambia a completada, generar factura de abono
+        if (newStatus === 'completada' && currentStatus !== 'completada') {
+          if (!confirm('¿Completar devolución y generar factura de abono?')) {
+            el.value = currentStatus || 'solicitada';
+            return;
+          }
+
+          try {
+            // Obtener datos de la devolución
+            const { data: returnData } = await supabase
+              .from('returns')
+              .select('*, orders(*)')
+              .eq('id', returnId)
+              .single();
+
+            if (returnData && returnData.refund_amount) {
+              // Generar número de factura de abono
+              const { data: invoiceNum } = await supabase.rpc('generate_invoice_number', { inv_type: 'abono' });
+              
+              // Crear factura de abono (importes negativos)
+              const subtotal = -Math.abs(returnData.refund_amount / 1.21);
+              const taxAmount = -Math.abs(returnData.refund_amount - (returnData.refund_amount / 1.21));
+              const total = -Math.abs(returnData.refund_amount);
+
+              await supabase.from('invoices').insert({
+                order_id: returnData.order_id,
+                user_id: returnData.user_id,
+                invoice_number: invoiceNum,
+                invoice_type: 'abono',
+                subtotal: subtotal,
+                tax_amount: taxAmount,
+                total: total
+              });
+            }
+          } catch (err) {
+            console.error('Error generando abono:', err);
+          }
+        }
 
         const { error } = await supabase
           .from('returns')
@@ -238,6 +278,12 @@ const statusColors: Record<string, string> = {
 
         if (error) {
           alert('Error al actualizar estado');
+        } else {
+          el.dataset.currentStatus = newStatus;
+          if (newStatus === 'completada') {
+            alert('Devolución completada y factura de abono generada');
+            window.location.reload();
+          }
         }
       });
     });

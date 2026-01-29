@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Recomendador de Productos">
-  <div class="bg-gradient-to-b from-yellow-50 to-white min-h-screen py-12">
+  <div class="bg-purple-50 min-h-screen py-12">
     <div class="max-w-4xl mx-auto px-4">
       
       <!-- Header -->
@@ -23,10 +23,10 @@ import Layout from '../layouts/Layout.astro';
         <div class="bg-gray-100 px-6 py-4">
           <div class="flex justify-between items-center mb-2">
             <span class="text-sm font-medium text-gray-600">Progreso</span>
-            <span class="text-sm font-medium text-yellow-600" id="progress-text">Paso 1 de 4</span>
+            <span class="text-sm font-medium text-purple-600" id="progress-text">Paso 1 de 4</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
-            <div id="progress-bar" class="bg-gradient-to-r from-yellow-400 to-orange-500 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+            <div id="progress-bar" class="bg-purple-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
           </div>
         </div>
 
@@ -39,15 +39,15 @@ import Layout from '../layouts/Layout.astro';
               ¿Qué tipo de mascota tienes?
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-yellow-400 hover:bg-yellow-50 transition-all" data-value="perro">
+              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all" data-value="perro">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">🐕</div>
                 <p class="text-lg font-semibold text-gray-800">Perro</p>
               </button>
-              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-yellow-400 hover:bg-yellow-50 transition-all" data-value="gato">
+              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all" data-value="gato">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">🐈</div>
                 <p class="text-lg font-semibold text-gray-800">Gato</p>
               </button>
-              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-yellow-400 hover:bg-yellow-50 transition-all" data-value="otros">
+              <button class="pet-type-btn group p-8 border-2 border-gray-200 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all" data-value="otros">
                 <div class="text-6xl mb-4 group-hover:scale-110 transition-transform">🐹</div>
                 <p class="text-lg font-semibold text-gray-800">Otros</p>
               </button>
