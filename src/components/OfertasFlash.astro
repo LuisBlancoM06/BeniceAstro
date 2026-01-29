@@ -24,7 +24,7 @@ const showSection = ofertasActive && hasOfertas;
 ---
 
 {showSection && (
-  <section class="py-6 bg-gradient-to-r from-purple-600 via-purple-500 to-orange-400 relative overflow-hidden">
+  <section class="py-6 bg-purple-700 relative overflow-hidden">
     <!-- Efectos de fondo -->
     <div class="absolute inset-0 opacity-20">
       <div class="absolute top-0 left-0 w-20 h-20 bg-white rounded-full blur-2xl"></div>
@@ -104,7 +104,7 @@ const showSection = ofertasActive && hasOfertas;
 
                     <a 
                       href={`/producto/${product.slug || product.id}`}
-                      class="block w-full text-center py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white text-sm font-bold rounded-lg hover:from-orange-500 hover:to-orange-400 transition-all"
+                      class="block w-full text-center py-2 bg-purple-700 text-white text-sm font-bold rounded-lg hover:bg-orange-500 transition-all"
                     >
                       ¡Lo quiero!
                     </a>

@@ -44,7 +44,7 @@ const { count: totalUsers } = await supabase
           <p class="text-gray-600 mt-1">Bienvenido al panel de administración</p>
         </div>
         <div class="flex gap-3">
-          <a href="/admin/productos" class="btn bg-yellow-500 text-white hover:bg-yellow-600">
+          <a href="/admin/productos" class="btn bg-orange-500 text-white hover:bg-orange-600">
             📦 Gestionar Productos
           </a>
           <a href="/admin/productos/nuevo" class="btn btn-primary">
@@ -159,7 +159,7 @@ const { count: totalUsers } = await supabase
         <div class="bg-white rounded-xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-gray-800">⚠️ Productos con Stock Bajo</h2>
-            <a href="/admin/productos" class="text-sm text-yellow-600 hover:underline">Ver todos</a>
+            <a href="/admin/productos" class="text-sm text-purple-700 hover:underline">Ver todos</a>
           </div>
           <div id="low-stock-list" class="space-y-3">
             <div class="animate-pulse space-y-3">
@@ -174,7 +174,7 @@ const { count: totalUsers } = await supabase
         <div class="bg-white rounded-xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-semibold text-gray-800">📦 Últimos Pedidos</h2>
-            <a href="/admin/pedidos" class="text-sm text-yellow-600 hover:underline">Ver todos</a>
+            <a href="/admin/pedidos" class="text-sm text-purple-700 hover:underline">Ver todos</a>
           </div>
           <div id="recent-orders-list" class="space-y-3">
             <div class="animate-pulse space-y-3">
@@ -244,7 +244,7 @@ const { count: totalUsers } = await supabase
           topProductDiv!.innerHTML = `
             <div class="text-5xl mb-4">🏆</div>
             <p class="font-bold text-gray-800 text-lg">${data.kpis.topProduct.name}</p>
-            <p class="text-yellow-600 font-medium">${data.kpis.topProduct.quantity} unidades vendidas</p>
+            <p class="text-purple-700 font-medium">${data.kpis.topProduct.quantity} unidades vendidas</p>
           `;
         } else {
           topProductDiv!.innerHTML = `
