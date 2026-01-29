@@ -22,13 +22,28 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- RLS para users
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+-- Los usuarios pueden ver su propio perfil
 CREATE POLICY "Users pueden ver su propio perfil"
   ON public.users FOR SELECT
   USING (auth.uid() = id);
 
-CREATE POLICY "Users pueden actualizar su propio perfil"
+-- Los usuarios pueden actualizar su perfil PERO NO el rol
+-- El rol solo puede cambiarlo un admin directamente en Supabase
+CREATE POLICY "Users pueden actualizar su propio perfil excepto rol"
   ON public.users FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (
+    auth.uid() = id 
+    AND (
+      -- Si el rol no cambia, permitir
+      role = (SELECT role FROM public.users WHERE id = auth.uid())
+    )
+  );
+
+-- Los usuarios pueden insertar su propio perfil al registrarse
+CREATE POLICY "Users pueden crear su perfil"
+  ON public.users FOR INSERT
+  WITH CHECK (auth.uid() = id AND role = 'user');
 
 -- =============================================
 -- TABLA: products
@@ -319,10 +334,14 @@ CREATE TABLE IF NOT EXISTS public.newsletters (
 -- RLS para newsletters
 ALTER TABLE public.newsletters ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Newsletters pueden ser creadas por cualquiera"
+-- Cualquiera puede suscribirse al newsletter (solo INSERT, validando email)
+CREATE POLICY "Newsletters INSERT con validación"
   ON public.newsletters FOR INSERT
   TO public
-  WITH CHECK (true);
+  WITH CHECK (
+    email IS NOT NULL 
+    AND email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+  );
 
 CREATE POLICY "Admins pueden ver newsletters"
   ON public.newsletters FOR SELECT
@@ -430,7 +449,7 @@ BEGIN
   result := prefix || '-' || year_part || '-' || LPAD(sequence_num::TEXT, 6, '0');
   RETURN result;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Función: Cancelar pedido y restaurar stock
 CREATE OR REPLACE FUNCTION cancel_order_and_restore_stock(order_uuid UUID)
@@ -462,7 +481,7 @@ BEGIN
   SET status = 'cancelado', updated_at = NOW()
   WHERE id = order_uuid;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Función: Crear pedido y reducir stock
 CREATE OR REPLACE FUNCTION create_order_and_reduce_stock(
@@ -511,7 +530,7 @@ BEGIN
 
   RETURN new_order_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Función: Contar pedidos por estado
 CREATE OR REPLACE FUNCTION get_order_status_counts()
@@ -524,7 +543,7 @@ BEGIN
   FROM public.orders o
   GROUP BY o.status;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Función: Obtener estadísticas del dashboard
 CREATE OR REPLACE FUNCTION get_dashboard_stats()
@@ -546,7 +565,7 @@ BEGIN
     (SELECT COUNT(*) FROM public.orders WHERE status = 'pendiente')::BIGINT,
     (SELECT COUNT(*) FROM public.products WHERE stock < 10)::BIGINT;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- =============================================
 -- DATOS DE EJEMPLO: Productos
@@ -619,7 +638,7 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER update_orders_updated_at
   BEFORE UPDATE ON public.orders

@@ -43,7 +43,21 @@ export const POST: APIRoute = async ({ request }) => {
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
-    if (authError || !user?.email?.includes('admin')) {
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Verificar rol de admin en la base de datos
+    const { data: userData } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!userData || userData.role !== 'admin') {
       return new Response(JSON.stringify({ error: 'No tienes permisos de administrador' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' }
