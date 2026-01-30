@@ -15,13 +15,59 @@ const hasProducts = products && products.length > 0;
 <Layout title="Inicio">
   <div class="bg-white min-h-screen">
     
-    <!-- Hero Banner compacto -->
-    <div class="bg-purple-700 py-8">
-      <div class="max-w-7xl mx-auto px-4 text-center">
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-2">
-          Venice - Tu tienda de mascotas
-        </h1>
-        <p class="text-purple-200">Todo lo que tu mascota necesita en un solo lugar</p>
+    <!-- Hero Carousel con imágenes -->
+    <div class="relative h-80 md:h-96 overflow-hidden bg-gray-100">
+      <!-- Slides -->
+      <div id="hero-slider" class="relative h-full">
+        <div class="hero-slide absolute inset-0 opacity-100 transition-all duration-700 ease-in-out" data-slide="0">
+          <img src="/images/hero/perros.jpg" alt="Productos para perros" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=1200&h=400&fit=crop'">
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-900/70 to-transparent flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+              <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Todo para tu Perro</h2>
+              <p class="text-white/90 text-lg mb-6 max-w-md">Los mejores productos para el cuidado de tu mejor amigo</p>
+              <a href="/animales/perros" class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full transition-all shadow-lg hover:shadow-xl">Ver productos →</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide absolute inset-0 opacity-0 translate-x-full transition-all duration-700 ease-in-out" data-slide="1">
+          <img src="/images/hero/gatos.jpg" alt="Productos para gatos" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=1200&h=400&fit=crop'">
+          <div class="absolute inset-0 bg-gradient-to-r from-orange-900/70 to-transparent flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+              <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Mima a tu Gato</h2>
+              <p class="text-white/90 text-lg mb-6 max-w-md">Alimentación premium y accesorios para felinos exigentes</p>
+              <a href="/animales/gatos" class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full transition-all shadow-lg hover:shadow-xl">Descubrir →</a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-slide absolute inset-0 opacity-0 translate-x-full transition-all duration-700 ease-in-out" data-slide="2">
+          <img src="/images/hero/favoritos.jpg" alt="Tus favoritos" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=1200&h=400&fit=crop'">
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-900/70 to-transparent flex items-center">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+              <h2 class="text-3xl md:text-5xl font-bold text-white mb-4">Tus Favoritos</h2>
+              <p class="text-white/90 text-lg mb-6 max-w-md">Guarda los productos que más te gustan y encuéntralos fácilmente</p>
+              <a href="/cuenta/favoritos" class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full transition-all shadow-lg hover:shadow-xl">Ver favoritos ❤️</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones de navegación -->
+      <button id="hero-prev" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-10">
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      <button id="hero-next" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all hover:scale-110 z-10">
+        <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+      
+      <!-- Indicadores -->
+      <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <button class="hero-dot w-3 h-3 rounded-full bg-white/90 transition-all" data-dot="0"></button>
+        <button class="hero-dot w-3 h-3 rounded-full bg-white/50 transition-all" data-dot="1"></button>
+        <button class="hero-dot w-3 h-3 rounded-full bg-white/50 transition-all" data-dot="2"></button>
       </div>
     </div>
 
@@ -109,7 +155,7 @@ const hasProducts = products && products.length > 0;
               </div>
             </div>
 
-            <!-- Precio -->
+            <!-- Precio con slider -->
             <div class="filter-section border-b border-gray-100 py-3">
               <button class="filter-toggle flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-purple-600 transition-colors">
                 <span>Precio</span>
@@ -117,23 +163,28 @@ const hasProducts = products && products.length > 0;
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
               </button>
-              <div class="filter-content mt-2 space-y-1">
-                <label class="flex items-center py-1 cursor-pointer">
-                  <input type="radio" name="precio" class="w-4 h-4 border-gray-300 text-purple-500 focus:ring-purple-400">
-                  <span class="ml-2 text-sm text-gray-600">0€ - 20€</span>
-                </label>
-                <label class="flex items-center py-1 cursor-pointer">
-                  <input type="radio" name="precio" class="w-4 h-4 border-gray-300 text-purple-500 focus:ring-purple-400">
-                  <span class="ml-2 text-sm text-gray-600">20€ - 50€</span>
-                </label>
-                <label class="flex items-center py-1 cursor-pointer">
-                  <input type="radio" name="precio" class="w-4 h-4 border-gray-300 text-purple-500 focus:ring-purple-400">
-                  <span class="ml-2 text-sm text-gray-600">50€ - 100€</span>
-                </label>
-                <label class="flex items-center py-1 cursor-pointer">
-                  <input type="radio" name="precio" class="w-4 h-4 border-gray-300 text-purple-500 focus:ring-purple-400">
-                  <span class="ml-2 text-sm text-gray-600">Más de 100€</span>
-                </label>
+              <div class="filter-content mt-2">
+                <div class="px-1">
+                  <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span id="price-min-label">0€</span>
+                    <span id="price-max-label">200€</span>
+                  </div>
+                  <div class="relative h-2 mb-4">
+                    <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
+                    <div id="price-range-track" class="absolute h-full bg-purple-500 rounded-full" style="left: 0%; right: 0%;"></div>
+                    <input type="range" id="price-min" min="0" max="200" value="0" step="5" 
+                      class="price-slider absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer">
+                    <input type="range" id="price-max" min="0" max="200" value="200" step="5" 
+                      class="price-slider absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer">
+                  </div>
+                  <div class="flex gap-2 items-center">
+                    <input type="number" id="price-min-input" value="0" min="0" max="200" 
+                      class="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-center focus:ring-2 focus:ring-purple-400 focus:border-transparent">
+                    <span class="text-gray-400">—</span>
+                    <input type="number" id="price-max-input" value="200" min="0" max="200" 
+                      class="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-center focus:ring-2 focus:ring-purple-400 focus:border-transparent">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -227,7 +278,6 @@ const hasProducts = products && products.length > 0;
             <div class="flex items-center gap-3">
               <span class="text-sm text-gray-500">Ordenar por</span>
               <select class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer bg-white">
-                <option value="relevancia">Relevancia</option>
                 <option value="precio-asc">Precio: menor a mayor</option>
                 <option value="precio-desc">Precio: mayor a menor</option>
                 <option value="nombre">Nombre A-Z</option>
@@ -360,6 +410,35 @@ const hasProducts = products && products.length > 0;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* Estilos para el slider de precio dual */
+    .price-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      z-index: 10;
+    }
+    .price-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #7e22ce;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 20;
+    }
+    .price-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #7e22ce;
+      cursor: pointer;
+      border: 3px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
   </style>
 
   <script>
@@ -421,5 +500,150 @@ const hasProducts = products && products.length > 0;
         }, 2000);
       });
     });
+
+    // Hero Carousel
+    function initHeroCarousel() {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots = document.querySelectorAll('.hero-dot');
+      const prevBtn = document.getElementById('hero-prev');
+      const nextBtn = document.getElementById('hero-next');
+      
+      if (slides.length === 0) return;
+      
+      let currentSlide = 0;
+      let autoplayInterval: number;
+      
+      function goToSlide(index: number) {
+        // Ocultar slide actual
+        slides[currentSlide].classList.remove('opacity-100', 'translate-x-0');
+        slides[currentSlide].classList.add('opacity-0', '-translate-x-full');
+        dots[currentSlide].classList.remove('bg-white/90');
+        dots[currentSlide].classList.add('bg-white/50');
+        
+        // Preparar nuevo slide
+        currentSlide = index;
+        if (currentSlide >= slides.length) currentSlide = 0;
+        if (currentSlide < 0) currentSlide = slides.length - 1;
+        
+        slides[currentSlide].classList.remove('opacity-0', '-translate-x-full', 'translate-x-full');
+        slides[currentSlide].classList.add('translate-x-full');
+        
+        setTimeout(() => {
+          slides[currentSlide].classList.remove('translate-x-full');
+          slides[currentSlide].classList.add('opacity-100', 'translate-x-0');
+        }, 50);
+        
+        dots[currentSlide].classList.remove('bg-white/50');
+        dots[currentSlide].classList.add('bg-white/90');
+      }
+      
+      function nextSlide() {
+        goToSlide(currentSlide + 1);
+      }
+      
+      function prevSlide() {
+        goToSlide(currentSlide - 1);
+      }
+      
+      function startAutoplay() {
+        autoplayInterval = window.setInterval(nextSlide, 3000);
+      }
+      
+      function stopAutoplay() {
+        clearInterval(autoplayInterval);
+      }
+      
+      // Event listeners
+      nextBtn?.addEventListener('click', () => {
+        stopAutoplay();
+        nextSlide();
+        startAutoplay();
+      });
+      
+      prevBtn?.addEventListener('click', () => {
+        stopAutoplay();
+        prevSlide();
+        startAutoplay();
+      });
+      
+      dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+          stopAutoplay();
+          goToSlide(index);
+          startAutoplay();
+        });
+      });
+      
+      // Iniciar autoplay
+      startAutoplay();
+    }
+    
+    // Price Range Slider
+    function initPriceSlider() {
+      const minSlider = document.getElementById('price-min') as HTMLInputElement;
+      const maxSlider = document.getElementById('price-max') as HTMLInputElement;
+      const minInput = document.getElementById('price-min-input') as HTMLInputElement;
+      const maxInput = document.getElementById('price-max-input') as HTMLInputElement;
+      const minLabel = document.getElementById('price-min-label');
+      const maxLabel = document.getElementById('price-max-label');
+      const track = document.getElementById('price-range-track');
+      
+      if (!minSlider || !maxSlider) return;
+      
+      function updateTrack() {
+        const min = parseInt(minSlider.value);
+        const max = parseInt(maxSlider.value);
+        const maxVal = parseInt(minSlider.max);
+        
+        const leftPercent = (min / maxVal) * 100;
+        const rightPercent = 100 - (max / maxVal) * 100;
+        
+        if (track) {
+          track.style.left = leftPercent + '%';
+          track.style.right = rightPercent + '%';
+        }
+        
+        if (minLabel) minLabel.textContent = min + '€';
+        if (maxLabel) maxLabel.textContent = max + '€';
+        if (minInput) minInput.value = String(min);
+        if (maxInput) maxInput.value = String(max);
+      }
+      
+      minSlider.addEventListener('input', () => {
+        if (parseInt(minSlider.value) > parseInt(maxSlider.value)) {
+          minSlider.value = maxSlider.value;
+        }
+        updateTrack();
+      });
+      
+      maxSlider.addEventListener('input', () => {
+        if (parseInt(maxSlider.value) < parseInt(minSlider.value)) {
+          maxSlider.value = minSlider.value;
+        }
+        updateTrack();
+      });
+      
+      minInput?.addEventListener('change', () => {
+        let val = parseInt(minInput.value) || 0;
+        if (val > parseInt(maxSlider.value)) val = parseInt(maxSlider.value);
+        if (val < 0) val = 0;
+        minSlider.value = String(val);
+        updateTrack();
+      });
+      
+      maxInput?.addEventListener('change', () => {
+        let val = parseInt(maxInput.value) || 200;
+        if (val < parseInt(minSlider.value)) val = parseInt(minSlider.value);
+        if (val > 200) val = 200;
+        maxSlider.value = String(val);
+        updateTrack();
+      });
+      
+      updateTrack();
+    }
+    
+    // Inicializar todo
+    initHeroCarousel();
+    initPriceSlider();
   </script>
 </Layout>

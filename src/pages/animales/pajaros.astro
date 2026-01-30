@@ -1,42 +1,35 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
 
 const { data: products } = await supabase
   .from('products')
   .select('*')
-  .in('animal_type', ['roedor', 'hamster', 'conejo', 'cobaya'])
+  .eq('animal_type', 'pajaro')
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🥕', description: 'Piensos y heno' },
-  { id: 'jaulas', name: 'Jaulas', icon: '🏠', description: 'Jaulas y terrarios' },
-  { id: 'lechos', name: 'Lechos', icon: '🛏️', description: 'Virutas y sustratos' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🎡', description: 'Ruedas y juguetes' },
-];
-
-const animalTypes = [
-  { id: 'hamster', name: 'Hámsters', icon: '🐹' },
-  { id: 'conejo', name: 'Conejos', icon: '🐰' },
-  { id: 'cobaya', name: 'Cobayas', icon: '🐹' },
-  { id: 'raton', name: 'Ratones', icon: '🐭' },
+  { id: 'alimentacion', name: 'Alimentación', icon: '🌾', description: 'Semillas y mezclas' },
+  { id: 'jaulas', name: 'Jaulas', icon: '🏠', description: 'Jaulas y voladeros' },
+  { id: 'accesorios', name: 'Accesorios', icon: '🪹', description: 'Nidos y perchas' },
+  { id: 'salud', name: 'Salud', icon: '💊', description: 'Vitaminas y cuidados' },
 ];
 ---
 
-<Layout title="Productos para Roedores">
-  <section class="relative bg-amber-500 text-white py-16">
+<Layout title="Productos para Pájaros">
+  <section class="relative bg-green-500 text-white py-16">
     <div class="absolute inset-0 bg-black/10"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <nav class="text-sm mb-4 opacity-80">
         <a href="/" class="hover:underline">Inicio</a>
         <span class="mx-2">›</span>
-        <span>Roedores</span>
+        <span>Pájaros</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🐹</span>
+        <span class="text-6xl">🦜</span>
         <div>
-          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Roedores</h1>
-          <p class="text-xl opacity-90">Hámsters, conejos, cobayas y más</p>
+          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Pájaros</h1>
+          <p class="text-xl opacity-90">Alimentación, jaulas y accesorios para aves</p>
         </div>
       </div>
       <div class="mt-8 flex flex-wrap gap-4">
@@ -52,30 +45,13 @@ const animalTypes = [
     </div>
   </section>
 
-  <!-- Por tipo de animal -->
-  <section class="py-8 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap gap-4 justify-center">
-        {animalTypes.map((animal) => (
-          <a 
-            href={`/roedores?tipo=${animal.id}`}
-            class="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full hover:bg-purple-100 hover:text-purple-700 transition-colors"
-          >
-            <span class="text-2xl">{animal.icon}</span>
-            <span class="font-medium">{animal.name}</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
   <section class="py-12 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-2xl font-bold mb-6">Categorías</h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((cat) => (
           <a 
-            href={`/roedores?categoria=${cat.id}`}
+            href={`/pajaros?categoria=${cat.id}`}
             class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
           >
             <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
@@ -90,7 +66,7 @@ const animalTypes = [
   <section class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Productos para roedores</h2>
+        <h2 class="text-2xl font-bold">Productos para pájaros</h2>
         <select class="border rounded-lg px-4 py-2">
           <option>Más relevantes</option>
           <option>Precio: menor a mayor</option>
@@ -106,9 +82,9 @@ const animalTypes = [
 
       {(!products || products.length === 0) && (
         <div class="text-center py-16">
-          <span class="text-6xl mb-4 block">🐹</span>
+          <span class="text-6xl mb-4 block">🦜</span>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
-          <p class="text-gray-500">Pronto añadiremos más productos para roedores</p>
+          <p class="text-gray-500">Pronto añadiremos más productos para pájaros</p>
           <a href="/productos" class="inline-block mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
             Ver todos los productos
           </a>
@@ -135,3 +111,4 @@ const animalTypes = [
     });
   });
 </script>
+

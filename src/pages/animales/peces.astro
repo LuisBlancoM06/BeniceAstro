@@ -1,35 +1,35 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
 
 const { data: products } = await supabase
   .from('products')
   .select('*')
-  .eq('animal_type', 'pajaro')
+  .eq('animal_type', 'pez')
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🌾', description: 'Semillas y mezclas' },
-  { id: 'jaulas', name: 'Jaulas', icon: '🏠', description: 'Jaulas y voladeros' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🪹', description: 'Nidos y perchas' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Vitaminas y cuidados' },
+  { id: 'alimentacion', name: 'Alimentación', icon: '🐟', description: 'Escamas y pellets' },
+  { id: 'acuarios', name: 'Acuarios', icon: '🏺', description: 'Peceras y kits' },
+  { id: 'decoracion', name: 'Decoración', icon: '🪸', description: 'Plantas y rocas' },
+  { id: 'equipamiento', name: 'Equipamiento', icon: '🔧', description: 'Filtros y calentadores' },
 ];
 ---
 
-<Layout title="Productos para Pájaros">
-  <section class="relative bg-green-500 text-white py-16">
+<Layout title="Productos para Peces">
+  <section class="relative bg-blue-500 text-white py-16">
     <div class="absolute inset-0 bg-black/10"></div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <nav class="text-sm mb-4 opacity-80">
         <a href="/" class="hover:underline">Inicio</a>
         <span class="mx-2">›</span>
-        <span>Pájaros</span>
+        <span>Peces</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🦜</span>
+        <span class="text-6xl">🐠</span>
         <div>
-          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Pájaros</h1>
-          <p class="text-xl opacity-90">Alimentación, jaulas y accesorios para aves</p>
+          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Peces</h1>
+          <p class="text-xl opacity-90">Acuarios, alimentación y accesorios</p>
         </div>
       </div>
       <div class="mt-8 flex flex-wrap gap-4">
@@ -51,7 +51,7 @@ const categories = [
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((cat) => (
           <a 
-            href={`/pajaros?categoria=${cat.id}`}
+            href={`/peces?categoria=${cat.id}`}
             class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
           >
             <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
@@ -66,7 +66,7 @@ const categories = [
   <section class="py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold">Productos para pájaros</h2>
+        <h2 class="text-2xl font-bold">Productos para peces</h2>
         <select class="border rounded-lg px-4 py-2">
           <option>Más relevantes</option>
           <option>Precio: menor a mayor</option>
@@ -82,9 +82,9 @@ const categories = [
 
       {(!products || products.length === 0) && (
         <div class="text-center py-16">
-          <span class="text-6xl mb-4 block">🦜</span>
+          <span class="text-6xl mb-4 block">🐠</span>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
-          <p class="text-gray-500">Pronto añadiremos más productos para pájaros</p>
+          <p class="text-gray-500">Pronto añadiremos más productos para peces</p>
           <a href="/productos" class="inline-block mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">
             Ver todos los productos
           </a>
@@ -111,3 +111,4 @@ const categories = [
     });
   });
 </script>
+

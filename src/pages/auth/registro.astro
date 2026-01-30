@@ -1,5 +1,5 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout title="Registro">
@@ -89,7 +89,7 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <script>
-    import { supabase } from '../lib/supabase';
+    import { supabase } from '../../lib/supabase';
 
     const form = document.getElementById('register-form');
     const errorMessage = document.getElementById('error-message');
@@ -161,3 +161,4 @@ import Layout from '../layouts/Layout.astro';
     });
   </script>
 </Layout>
+

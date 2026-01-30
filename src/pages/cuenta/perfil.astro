@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { createServerClient } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { createServerClient } from '../../lib/supabase';
 
 const supabase = createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
@@ -189,7 +189,7 @@ const totalSpent = totalSpentData?.reduce((sum, order) => sum + Number(order.tot
   </div>
 
   <script>
-    import { supabase } from '../lib/supabase';
+    import { supabase } from '../../lib/supabase';
 
     // Actualizar perfil
     const profileForm = document.getElementById('profile-form');
@@ -278,3 +278,4 @@ const totalSpent = totalSpentData?.reduce((sum, order) => sum + Number(order.tot
     });
   </script>
 </Layout>
+

@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
 
 // Obtener productos de perros
 const { data: products } = await supabase
@@ -12,7 +12,6 @@ const { data: products } = await supabase
 // Categorías específicas para perros
 const categories = [
   { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos, húmedos y snacks' },
-  { id: 'higiene', name: 'Higiene', icon: '🛁', description: 'Champús, cepillos y más' },
   { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios y vitaminas' },
   { id: 'accesorios', name: 'Accesorios', icon: '🎒', description: 'Collares, correas y camas' },
   { id: 'juguetes', name: 'Juguetes', icon: '🎾', description: 'Pelotas, mordedores y más' },
@@ -257,3 +256,4 @@ const ages = [
     });
   });
 </script>
+

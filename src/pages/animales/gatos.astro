@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import { supabase } from '../lib/supabase';
+import Layout from '../../layouts/Layout.astro';
+import { supabase } from '../../lib/supabase';
 
 // Obtener productos de gatos
 const { data: products } = await supabase
@@ -11,7 +11,6 @@ const { data: products } = await supabase
 
 const categories = [
   { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos y húmedos' },
-  { id: 'higiene', name: 'Arena y Limpieza', icon: '🧹', description: 'Arenas y areneros' },
   { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios' },
   { id: 'accesorios', name: 'Accesorios', icon: '🛋️', description: 'Camas y rascadores' },
   { id: 'juguetes', name: 'Juguetes', icon: '🐭', description: 'Ratones y cañas' },
@@ -168,3 +167,4 @@ const ages = [
     });
   });
 </script>
+
