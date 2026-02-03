@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {
-  return Astro.redirect('/login');
+  return Astro.redirect('/auth/login');
 }
 
 // Verificar rol de admin en la base de datos

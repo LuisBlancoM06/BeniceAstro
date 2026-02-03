@@ -5,7 +5,7 @@ import { createServerClient } from '../../lib/supabase';
 // Proteger ruta
 const supabase = createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
-if (!session) return Astro.redirect('/login');
+if (!session) return Astro.redirect('/auth/login');
 
 const { data: userData } = await supabase
   .from('users')
