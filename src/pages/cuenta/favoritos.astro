@@ -75,7 +75,7 @@ if (accessToken) {
 <script>
   import { createElement } from 'react';
   import { createRoot } from 'react-dom/client';
-  import ProductCard from '../components/ProductCard';
+  import ProductCard from '../../components/ProductCard.tsx';
 
   function loadFavorites() {
     const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
