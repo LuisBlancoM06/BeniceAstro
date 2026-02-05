@@ -261,64 +261,8 @@ const hasProducts = products && products.length > 0;
           {hasProducts ? (
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {products.map((product: any) => (
-                <div class="product-card bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group relative">
-                  {product.discount && (
-                    <div class="absolute top-3 left-3 z-10">
-                      <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                        -{product.discount}% Dto.
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div class="relative aspect-square bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-                    <img 
-                      src={product.image || 'https://via.placeholder.com/300x300?text=Producto'} 
-                      alt={product.name}
-                      class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                    />
-                  </div>
-
-                  <div class="p-5">
-                    <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2 min-h-[48px] group-hover:text-purple-600 transition-colors">
-                      <span class="font-bold">{product.brand || 'Venice'}</span> {product.name}
-                    </h3>
-
-                    <div class="flex items-center gap-1 mb-3">
-                      <div class="flex text-orange-400 gap-0.5">
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                        <svg class="w-4 h-4 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-                      </div>
-                      <span class="text-sm text-gray-500 ml-1">4.8 (128)</span>
-                    </div>
-
-                    <div class="mb-3">
-                      <span class="text-2xl font-bold text-gray-900">{product.price}€</span>
-                      {product.original_price && (
-                        <span class="text-sm text-gray-400 line-through ml-2">{product.original_price}€</span>
-                      )}
-                    </div>
-
-                    <div class="flex items-center gap-1 mb-4 text-xs text-gray-500">
-                      <span class="text-purple-500">Venice</span>
-                      Vendido por <span class="font-semibold text-purple-600">Venice</span>
-                    </div>
-
-                    <button 
-                      class="add-to-cart w-full flex items-center justify-center gap-2 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-orange-500 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                      data-product-id={product.id}
-                      data-product-name={product.name}
-                      data-product-price={product.price}
-                      data-product-image={product.image}
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                      </svg>
-                      Añadir al carrito
-                    </button>
-                  </div>
+                <div class="product-card" data-product={JSON.stringify(product)}>
+                  <!-- Renderizado por React -->
                 </div>
               ))}
             </div>
@@ -620,5 +564,24 @@ const hasProducts = products && products.length > 0;
     // Inicializar todo
     initHeroCarousel();
     initPriceSlider();
+  </script>
+
+  <!-- Script para renderizar ProductCards con React -->
+  <script>
+    import { createElement } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import ProductCard from '../components/ProductCard.tsx';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const productCards = document.querySelectorAll('.product-card');
+      productCards.forEach((container) => {
+        const productData = container.getAttribute('data-product');
+        if (productData) {
+          const product = JSON.parse(productData);
+          const root = createRoot(container);
+          root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        }
+      });
+    });
   </script>
 </Layout>
