@@ -19,26 +19,32 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Obtener IP del visitante
+  // Obtener IP real del visitante (orden de prioridad por fiabilidad)
+  const headers = context.request.headers;
   const ip =
-    context.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    context.request.headers.get('x-real-ip') ||
-    context.clientAddress ||
+    headers.get('cf-connecting-ip') ||                          // Cloudflare
+    headers.get('x-real-ip') ||                                 // Nginx proxy
+    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||   // Proxy genérico (primera IP = cliente real)
+    headers.get('x-client-ip') ||                               // Apache
+    headers.get('true-client-ip') ||                            // Akamai / Cloudflare Enterprise
+    context.clientAddress ||                                    // Astro Node adapter
     'desconocida';
 
   const userAgent = context.request.headers.get('user-agent') || '';
   const referer = context.request.headers.get('referer') || '';
 
-  // No bloquear la respuesta — insertar en background
+  // Registrar visita antes de continuar
   try {
-    supabase.from('visits').insert({
+    const { error } = await supabase.from('visits').insert({
       ip_address: ip,
       page: path,
       user_agent: userAgent,
       referer: referer,
-    }).then(() => {});
+    });
+    if (error) {
+      console.error('Error tracking visit:', error.message, error.details);
+    }
   } catch (e) {
-    // Silenciar errores de tracking para no afectar la página
     console.error('Error tracking visit:', e);
   }
 
