@@ -38,9 +38,14 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
     return false;
   });
 
-  const finalPrice = product.on_sale && product.sale_price ? product.sale_price : product.price;
-  const discount = product.on_sale && product.sale_price 
-    ? Math.round((1 - product.sale_price / product.price) * 100)
+  // Normalizar on_sale (puede venir como string "true" o boolean true)
+  const isOnSale = product.on_sale === true || product.on_sale === 'true';
+  const salePrice = product.sale_price ? Number(product.sale_price) : null;
+  const regularPrice = Number(product.price);
+  
+  const finalPrice = isOnSale && salePrice ? salePrice : regularPrice;
+  const discount = isOnSale && salePrice 
+    ? Math.round((1 - salePrice / regularPrice) * 100)
     : 0;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -51,12 +56,20 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
     
     setIsAddingToCart(true);
     
-    addToCart({
+    // Pasar precio original y precio de oferta si aplica
+    const cartItem: any = {
       id: product.id,
       name: product.name,
-      price: finalPrice,
+      price: regularPrice,
       image: product.image_url,
-    }, 1);
+    };
+    
+    // Si está en oferta, agregar el precio de oferta
+    if (isOnSale && salePrice) {
+      cartItem.salePrice = salePrice;
+    }
+    
+    addToCart(cartItem, 1);
     
     await new Promise(resolve => setTimeout(resolve, 400));
     setIsAddingToCart(false);
@@ -93,6 +106,10 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
   };
 
   const animalLabel = product.animal_type === 'perro' ? 'Perro' : product.animal_type === 'gato' ? 'Gato' : 'Otros';
+  
+  // Imagen con fallback
+  const imageUrl = product.image_url || 'https://via.placeholder.com/400x400?text=Sin+imagen';
+  const [imgError, setImgError] = useState(false);
 
   return (
     <div 
@@ -104,10 +121,11 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
       <div className="relative aspect-square overflow-hidden bg-gray-100">
         <a href={`/producto/${product.slug || product.id}`}>
           <img
-            src={product.image_url}
+            src={imgError ? 'https://via.placeholder.com/400x400?text=Sin+imagen' : imageUrl}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
+            onError={() => setImgError(true)}
           />
         </a>
         
@@ -221,9 +239,9 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
           <span className="text-xl font-bold text-purple-600">
             {finalPrice.toFixed(2)}€
           </span>
-          {product.on_sale && product.sale_price && (
+          {isOnSale && salePrice && (
             <span className="text-sm text-gray-400 line-through">
-              {product.price.toFixed(2)}€
+              {regularPrice.toFixed(2)}€
             </span>
           )}
         </div>

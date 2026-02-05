@@ -136,48 +136,46 @@ const { data: products } = await query;
           {products && products.length > 0 ? `${products.length} productos encontrados` : 'No se encontraron productos'}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {products && products.map((product) => (
-            <div class="card hover:shadow-xl transition-shadow">
-              <img 
-                src={product.image_url} 
-                alt={product.name}
-                class="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <h3 class="font-bold text-lg mb-2">{product.name}</h3>
-              <p class="text-gray-600 text-sm mb-4 line-clamp-2">
-                {product.description}
-              </p>
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-2xl font-bold text-blue-600">
-                  {product.price}€
-                </span>
-                <span class="text-sm text-gray-500">
-                  Stock: {product.stock}
-                </span>
-              </div>
-              <div class="flex gap-2 mb-4">
-                <span class="badge bg-gray-100 text-gray-800 text-xs">
-                  {product.animal_type}
-                </span>
-                <span class="badge bg-gray-100 text-gray-800 text-xs">
-                  {product.category}
-                </span>
-              </div>
-              <button 
-                class="btn btn-primary w-full add-to-cart"
-                data-product={JSON.stringify(product)}
-              >
-                Añadir al Carrito
-              </button>
+            <div class="product-card" data-product={JSON.stringify(product)}>
+              <!-- Renderizado por React -->
             </div>
           ))}
         </div>
+
+        {(!products || products.length === 0) && (
+          <div class="text-center py-16">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
+            <p class="text-gray-500">Prueba con otros filtros</p>
+          </div>
+        )}
       </div>
     </div>
   </div>
 
+  <!-- Script para renderizar ProductCards -->
   <script>
+    import { createElement } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import ProductCard from '../components/ProductCard.tsx';
+    
+    // Renderizar las tarjetas de producto con React
+    document.addEventListener('DOMContentLoaded', () => {
+      const productCards = document.querySelectorAll('.product-card');
+      productCards.forEach((container) => {
+        const productData = container.getAttribute('data-product');
+        if (productData) {
+          const product = JSON.parse(productData);
+          const root = createRoot(container);
+          root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        }
+      });
+    });
+
     // Aplicar filtros
     const form = document.getElementById('filter-form');
     const applyButton = document.getElementById('apply-filters');
@@ -185,16 +183,20 @@ const { data: products } = await query;
     // Cargar valores de filtro desde URL
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('tipo')) {
-      (document.querySelector(`input[name="tipo"][value="${urlParams.get('tipo')}"]`) as HTMLInputElement)?.click();
+      const el = document.querySelector(`input[name="tipo"][value="${urlParams.get('tipo')}"]`) as HTMLInputElement;
+      if (el) el.checked = true;
     }
     if (urlParams.get('tamano')) {
-      (document.querySelector(`input[name="tamano"][value="${urlParams.get('tamano')}"]`) as HTMLInputElement)?.click();
+      const el = document.querySelector(`input[name="tamano"][value="${urlParams.get('tamano')}"]`) as HTMLInputElement;
+      if (el) el.checked = true;
     }
     if (urlParams.get('categoria')) {
-      (document.querySelector(`input[name="categoria"][value="${urlParams.get('categoria')}"]`) as HTMLInputElement)?.click();
+      const el = document.querySelector(`input[name="categoria"][value="${urlParams.get('categoria')}"]`) as HTMLInputElement;
+      if (el) el.checked = true;
     }
     if (urlParams.get('edad')) {
-      (document.querySelector(`input[name="edad"][value="${urlParams.get('edad')}"]`) as HTMLInputElement)?.click();
+      const el = document.querySelector(`input[name="edad"][value="${urlParams.get('edad')}"]`) as HTMLInputElement;
+      if (el) el.checked = true;
     }
 
     applyButton?.addEventListener('click', () => {
@@ -207,36 +209,6 @@ const { data: products } = await query;
       if (formData.get('edad')) params.set('edad', formData.get('edad') as string);
 
       window.location.href = `/productos?${params.toString()}`;
-    });
-
-    // Añadir al carrito
-    document.querySelectorAll('.add-to-cart').forEach(button => {
-      button.addEventListener('click', (e) => {
-        const product = JSON.parse((e.target as HTMLElement).dataset.product || '{}');
-        
-        // Obtener carrito actual
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        
-        // Buscar si el producto ya está en el carrito
-        const existingItem = cart.find((item: any) => item.product.id === product.id);
-        
-        if (existingItem) {
-          existingItem.quantity += 1;
-        } else {
-          cart.push({ product, quantity: 1 });
-        }
-        
-        // Guardar carrito
-        localStorage.setItem('cart', JSON.stringify(cart));
-        
-        // Actualizar contador
-        const cartCount = document.getElementById('cart-count');
-        const count = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
-        if (cartCount) cartCount.textContent = count.toString();
-        
-        // Feedback visual
-        alert('Producto añadido al carrito');
-      });
     });
   </script>
 </Layout>
