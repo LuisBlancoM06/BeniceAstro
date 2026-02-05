@@ -1,23 +1,23 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
+import { createServerClient, supabase } from '../../../lib/supabase';
+import type { AstroCookies } from 'astro';
 
-// Función helper para verificar si es admin
-async function isAdmin(request: Request): Promise<boolean> {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader) return false;
-
-  const token = authHeader.replace('Bearer ', '');
-  const { data: { user } } = await supabase.auth.getUser(token);
+// Función helper para verificar si es admin usando cookies
+async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supabaseClient: ReturnType<typeof createServerClient> }> {
+  const supabaseClient = createServerClient(cookies);
+  const { data: { session } } = await supabaseClient.auth.getSession();
   
-  if (!user) return false;
+  if (!session?.user) {
+    return { isAdmin: false, supabaseClient };
+  }
 
-  const { data: userData } = await supabase
+  const { data: userData } = await supabaseClient
     .from('users')
     .select('role')
-    .eq('id', user.id)
+    .eq('id', session.user.id)
     .single();
 
-  return userData?.role === 'admin';
+  return { isAdmin: userData?.role === 'admin', supabaseClient };
 }
 
 // GET: Obtener todos los productos o uno específico
@@ -58,9 +58,9 @@ export const GET: APIRoute = async ({ request, url }) => {
 };
 
 // POST: Crear nuevo producto
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   // Verificar autenticación admin
-  const isAdminUser = await isAdmin(request);
+  const { isAdmin: isAdminUser, supabaseClient } = await isAdmin(cookies);
   if (!isAdminUser) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), {
       status: 401,
@@ -89,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
         .replace(/(^-|-$)/g, '');
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('products')
       .insert([{
         name: body.name,
@@ -125,8 +125,8 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 // PUT: Actualizar producto
-export const PUT: APIRoute = async ({ request }) => {
-  const isAdminUser = await isAdmin(request);
+export const PUT: APIRoute = async ({ request, cookies }) => {
+  const { isAdmin: isAdminUser, supabaseClient } = await isAdmin(cookies);
   if (!isAdminUser) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), {
       status: 401,
@@ -160,7 +160,7 @@ export const PUT: APIRoute = async ({ request }) => {
     if (body.sale_price !== undefined) updateData.sale_price = body.sale_price ? parseFloat(body.sale_price) : null;
     if (body.slug !== undefined) updateData.slug = body.slug;
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('products')
       .update(updateData)
       .eq('id', body.id)
@@ -183,8 +183,8 @@ export const PUT: APIRoute = async ({ request }) => {
 };
 
 // DELETE: Eliminar producto
-export const DELETE: APIRoute = async ({ request, url }) => {
-  const isAdminUser = await isAdmin(request);
+export const DELETE: APIRoute = async ({ request, url, cookies }) => {
+  const { isAdmin: isAdminUser, supabaseClient } = await isAdmin(cookies);
   if (!isAdminUser) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), {
       status: 401,
@@ -202,7 +202,7 @@ export const DELETE: APIRoute = async ({ request, url }) => {
       });
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('products')
       .delete()
       .eq('id', id);

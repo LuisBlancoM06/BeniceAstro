@@ -186,8 +186,6 @@ const supabase = createServerClient(Astro.cookies);
   </div>
 
   <script>
-    import { supabase } from '../../../lib/supabase';
-
     const form = document.getElementById('product-form') as HTMLFormElement;
     const nameInput = form.querySelector('input[name="name"]') as HTMLInputElement;
     const slugInput = document.getElementById('slug-input') as HTMLInputElement;
@@ -253,14 +251,12 @@ const supabase = createServerClient(Astro.cookies);
       };
 
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
         const response = await fetch('/api/admin/products', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(data)
         });
 
