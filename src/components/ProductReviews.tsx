@@ -244,7 +244,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
                     filterRating === rating ? 'bg-purple-100' : ''
                   }`}
                 >
-                  <span className="w-8">{rating}★</span>
+                  <span className="w-8">{rating}</span>
                   <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                     <div 
                       className="h-full bg-yellow-400 rounded-full transition-all"
@@ -293,7 +293,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
                       <span className="font-medium text-gray-900">{review.user_name}</span>
                       {review.verified_purchase && (
                         <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
-                          ✓ Compra verificada
+                          Compra verificada
                         </span>
                       )}
                     </div>
@@ -328,7 +328,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
 
           {filteredReviews.length === 0 && (
             <div className="text-center py-12">
-              <span className="text-4xl mb-4 block">📝</span>
+              <svg className="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               <p className="text-gray-500">No hay reseñas con esta puntuación</p>
             </div>
           )}

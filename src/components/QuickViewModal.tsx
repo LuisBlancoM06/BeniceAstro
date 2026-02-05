@@ -157,7 +157,7 @@ export default function QuickViewModal() {
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
               <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium capitalize">
-                {product.animal_type === 'otros' ? '🐹 Otros' : product.animal_type === 'perro' ? '🐕 Perro' : '🐈 Gato'}
+                {product.animal_type === 'otros' ? 'Otros' : product.animal_type === 'perro' ? 'Perro' : 'Gato'}
               </span>
               <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium capitalize">
                 {product.category}

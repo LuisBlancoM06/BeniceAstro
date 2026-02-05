@@ -66,7 +66,7 @@ export default function CookieBanner() {
             // Vista principal
             <div className="p-6">
               <div className="flex items-start gap-4">
-                <span className="text-4xl">🍪</span>
+                <svg className="w-10 h-10 text-purple-600" fill="currentColor" viewBox="0 0 24 24"><path d="M21.598 11.064a1.006 1.006 0 0 0-.854-.172A2.938 2.938 0 0 1 20 11c-1.654 0-3-1.346-3-3 0-.217.031-.444.099-.716a1.004 1.004 0 0 0-1.299-1.126A9.067 9.067 0 0 0 12 6c-4.963 0-9 4.037-9 9s4.037 9 9 9 9-4.037 9-9a8.93 8.93 0 0 0-.402-2.936zM12 22c-3.859 0-7-3.14-7-7s3.141-7 7-7a7.007 7.007 0 0 1 2.762.568c-.022.086-.042.172-.058.258A4.996 4.996 0 0 0 20 13a4.96 4.96 0 0 0 1.408-.202A7.012 7.012 0 0 1 12 22z"/><circle cx="8.5" cy="14.5" r="1.5"/><circle cx="10.5" cy="10.5" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-gray-900 mb-2">
                     Tu privacidad es importante

@@ -1,0 +1,247 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { createServerClient } from '../../lib/supabase';
+
+const supabase = createServerClient(Astro.cookies);
+
+// Obtener estado actual de ofertas
+const { data: settings } = await supabase
+  .from('settings')
+  .select('*')
+  .eq('key', 'ofertas_flash_enabled')
+  .single();
+
+const ofertasEnabled = settings?.value === 'true';
+
+// Obtener productos en oferta
+const { data: ofertaProducts } = await supabase
+  .from('products')
+  .select('*')
+  .eq('on_sale', true)
+  .order('name');
+
+// Obtener todos los productos para poder añadir a ofertas
+const { data: allProducts } = await supabase
+  .from('products')
+  .select('id, name, price, stock')
+  .eq('on_sale', false)
+  .order('name');
+---
+
+<AdminLayout title="Ofertas Flash" currentPage="ofertas">
+  
+  <!-- Toggle Principal -->
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">Estado de Ofertas Flash</h2>
+        <p class="text-gray-500 text-sm mt-1">Activa o desactiva la sección de ofertas en la tienda</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input 
+          type="checkbox" 
+          id="ofertas-toggle"
+          class="sr-only peer" 
+          checked={ofertasEnabled}
+        />
+        <div class="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-purple-600"></div>
+        <span class="ms-3 text-sm font-medium text-gray-900" id="toggle-text">
+          {ofertasEnabled ? 'Activado' : 'Desactivado'}
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Productos en Oferta -->
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-lg font-semibold text-gray-800">Productos en Oferta ({ofertaProducts?.length || 0})</h2>
+    </div>
+    
+    {ofertaProducts && ofertaProducts.length > 0 ? (
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio Original</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Precio Oferta</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descuento</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {ofertaProducts.map((product: any) => {
+              const descuento = product.sale_price 
+                ? Math.round((1 - product.sale_price / product.price) * 100) 
+                : 0;
+              return (
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <img 
+                        src={product.image_url || 'https://via.placeholder.com/40'} 
+                        alt={product.name}
+                        class="w-10 h-10 rounded-lg object-cover"
+                      />
+                      <span class="font-medium text-gray-800">{product.name}</span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-gray-500 line-through">{product.price}€</td>
+                  <td class="px-4 py-3 font-bold text-green-600">{product.sale_price || product.price}€</td>
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-1 text-xs font-bold bg-orange-100 text-orange-800 rounded-full">
+                      -{descuento}%
+                    </span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class={`px-2 py-1 text-xs font-medium rounded ${
+                      product.stock > 10 ? 'bg-green-100 text-green-800' : 
+                      product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {product.stock} uds
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-right">
+                    <button 
+                      class="remove-oferta-btn px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                      data-id={product.id}
+                    >
+                      Quitar oferta
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div class="text-center py-8 text-gray-500">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+        </svg>
+        <p>No hay productos en oferta actualmente</p>
+      </div>
+    )}
+  </div>
+
+  <!-- Añadir Producto a Oferta -->
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Añadir Producto a Oferta</h2>
+    
+    <form id="add-oferta-form" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+        <select name="product_id" required class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400">
+          <option value="">Seleccionar producto...</option>
+          {allProducts?.map((p: any) => (
+            <option value={p.id} data-price={p.price}>{p.name} - {p.price}€</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Oferta (€)</label>
+        <input 
+          type="number" 
+          name="sale_price" 
+          step="0.01" 
+          min="0" 
+          required 
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400"
+          placeholder="19.99"
+        />
+      </div>
+      <div class="flex items-end">
+        <button type="submit" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+          Añadir a Ofertas
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    import { createClient } from '@supabase/supabase-js';
+
+    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+    // Toggle ofertas
+    const toggle = document.getElementById('ofertas-toggle') as HTMLInputElement;
+    const toggleText = document.getElementById('toggle-text');
+
+    toggle?.addEventListener('change', async () => {
+      const enabled = toggle.checked;
+      
+      try {
+        const response = await fetch('/api/admin/ofertas-toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled })
+        });
+
+        if (response.ok) {
+          toggleText!.textContent = enabled ? 'Activado' : 'Desactivado';
+        } else {
+          toggle.checked = !enabled;
+          alert('Error al cambiar estado');
+        }
+      } catch (err) {
+        toggle.checked = !enabled;
+        console.error(err);
+      }
+    });
+
+    // Quitar producto de oferta
+    document.querySelectorAll('.remove-oferta-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const productId = (btn as HTMLButtonElement).dataset.id;
+        
+        if (!confirm('¿Quitar este producto de las ofertas?')) return;
+
+        try {
+          const { error } = await supabase
+            .from('products')
+            .update({ on_sale: false, sale_price: null })
+            .eq('id', productId);
+
+          if (error) throw error;
+          window.location.reload();
+        } catch (err) {
+          console.error(err);
+          alert('Error al quitar producto de ofertas');
+        }
+      });
+    });
+
+    // Añadir producto a oferta
+    const form = document.getElementById('add-oferta-form') as HTMLFormElement;
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const productId = formData.get('product_id');
+      const salePrice = parseFloat(formData.get('sale_price') as string);
+
+      if (!productId || !salePrice) {
+        alert('Completa todos los campos');
+        return;
+      }
+
+      try {
+        const { error } = await supabase
+          .from('products')
+          .update({ on_sale: true, sale_price: salePrice })
+          .eq('id', productId);
+
+        if (error) throw error;
+        window.location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('Error al añadir producto a ofertas');
+      }
+    });
+  </script>
+</AdminLayout>

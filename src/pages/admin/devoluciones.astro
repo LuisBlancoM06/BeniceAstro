@@ -1,21 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../lib/supabase';
 
-// Proteger ruta
 const supabase = createServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) return Astro.redirect('/auth/login');
-
-const { data: userData } = await supabase
-  .from('users')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
-
-if (!userData || userData.role !== 'admin') {
-  return Astro.redirect('/');
-}
 
 // Obtener devoluciones
 const { data: returns } = await supabase
@@ -42,23 +29,8 @@ const statusColors: Record<string, string> = {
 };
 ---
 
-<Layout title="Devoluciones - Admin" hideNewsletterPopup={true}>
-  <div class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <div>
-          <nav class="text-sm text-gray-500 mb-2">
-            <a href="/admin" class="hover:text-purple-700">Dashboard</a>
-            <span class="mx-2">/</span>
-            <span class="text-gray-800">Devoluciones</span>
-          </nav>
-          <h1 class="text-3xl font-bold text-gray-800">Gestión de Devoluciones</h1>
-        </div>
-      </div>
-
-      <!-- Lista de devoluciones -->
+<AdminLayout title="Devoluciones" currentPage="devoluciones">
+  <!-- Lista de devoluciones -->
       <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         {returns && returns.length > 0 ? (
           <table class="w-full">
@@ -289,4 +261,4 @@ const statusColors: Record<string, string> = {
       });
     });
   </script>
-</Layout>
+</AdminLayout>

@@ -105,7 +105,7 @@ const getCategoryColor = (color: string) => {
     <section class="py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <span class="inline-block bg-purple-100 text-purple-700 px-4 py-1 rounded-full text-sm font-medium mb-4">
-          📚 Nuestro Blog
+          Nuestro Blog
         </span>
         <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Consejos para cuidar a tu mascota
@@ -135,7 +135,7 @@ const getCategoryColor = (color: string) => {
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl font-bold mb-8 flex items-center gap-2">
-          <span>⭐</span> Artículos destacados
+          <svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> Artículos destacados
         </h2>
         <div class="grid md:grid-cols-2 gap-8">
           {featuredArticles.map((article) => (
@@ -161,7 +161,7 @@ const getCategoryColor = (color: string) => {
                 <div class="flex items-center justify-between text-sm text-gray-500">
                   <span>{article.author}</span>
                   <span class="flex items-center gap-2">
-                    <span>📅 {new Date(article.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                    <span>{new Date(article.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                     <span>·</span>
                     <span>⏱️ {article.readTime}</span>
                   </span>
@@ -221,7 +221,7 @@ const getCategoryColor = (color: string) => {
     <section class="py-12">
       <div class="max-w-4xl mx-auto px-4">
         <div class="bg-purple-700 rounded-2xl p-8 md:p-12 text-white text-center">
-          <span class="text-4xl mb-4 block">✉️</span>
+          <span class="text-4xl mb-4 block"></span>
           <h2 class="text-2xl md:text-3xl font-bold mb-4">
             ¿Quieres recibir los mejores consejos?
           </h2>

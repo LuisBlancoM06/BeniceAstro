@@ -215,11 +215,11 @@ const discountPercent = hasDiscount
               data-product-image={product.image_url}
               data-product-stock={product.stock}
             >
-              {product.stock > 0 ? '🛒 Añadir al Carrito' : 'Sin Stock'}
+              {product.stock > 0 ? 'Añadir al Carrito' : 'Sin Stock'}
             </button>
 
             <p class="text-center text-sm text-gray-500">
-              🚚 Envío gratis en pedidos superiores a 49€
+              Envío gratis en pedidos superiores a 49€
             </p>
           </div>
 
@@ -236,19 +236,19 @@ const discountPercent = hasDiscount
             <h2 class="text-lg font-semibold text-gray-800">Características</h2>
             <ul class="space-y-2 text-gray-600">
               <li class="flex items-center gap-2">
-                <span class="text-purple-600">✓</span>
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <strong>Especie:</strong> {product.animal_type === 'perro' ? 'Perro' : product.animal_type === 'gato' ? 'Gato' : 'Otros animales'}
               </li>
               <li class="flex items-center gap-2">
-                <span class="text-purple-600">✓</span>
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <strong>Tamaño:</strong> {product.size === 'mini' ? 'Mini/Toy' : product.size === 'mediano' ? 'Mediano' : 'Grande'}
               </li>
               <li class="flex items-center gap-2">
-                <span class="text-purple-600">✓</span>
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <strong>Etapa de vida:</strong> {product.age_range === 'cachorro' ? 'Cachorro' : product.age_range === 'adulto' ? 'Adulto' : 'Senior'}
               </li>
               <li class="flex items-center gap-2">
-                <span class="text-purple-600">✓</span>
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <strong>Categoría:</strong> {product.category}
               </li>
             </ul>

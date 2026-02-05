@@ -1,21 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../lib/supabase';
 
-// Proteger ruta
 const supabase = createServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) return Astro.redirect('/auth/login');
-
-const { data: userData } = await supabase
-  .from('users')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
-
-if (!userData || userData.role !== 'admin') {
-  return Astro.redirect('/');
-}
 
 // Obtener parámetros de filtro
 const url = new URL(Astro.request.url);
@@ -81,29 +68,15 @@ const statusColors: Record<string, string> = {
 };
 
 const statusIcons: Record<string, string> = {
-  pendiente: '⏳',
-  pagado: '✅',
-  enviado: '🚚',
-  entregado: '📦',
-  cancelado: '❌'
+  pendiente: '',
+  pagado: '',
+  enviado: '',
+  entregado: '',
+  cancelado: ''
 };
 ---
 
-<Layout title="Pedidos - Admin" hideNewsletterPopup={true}>
-  <div class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <div>
-          <nav class="text-sm text-gray-500 mb-2">
-            <a href="/admin" class="hover:text-purple-700">Dashboard</a>
-            <span class="mx-2">/</span>
-            <span class="text-gray-800">Pedidos</span>
-          </nav>
-          <h1 class="text-3xl font-bold text-gray-800">📦 Gestión de Pedidos</h1>
-        </div>
-      </div>
+<AdminLayout title="Pedidos" currentPage="pedidos">
 
       <!-- Filtros por estado -->
       <div class="flex flex-wrap gap-3 mb-6">
@@ -117,31 +90,31 @@ const statusIcons: Record<string, string> = {
           href="/admin/pedidos?status=pendiente" 
           class={`px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === 'pendiente' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
         >
-          ⏳ Pendientes ({counts.pendiente})
+          Pendientes ({counts.pendiente})
         </a>
         <a 
           href="/admin/pedidos?status=pagado" 
           class={`px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === 'pagado' ? 'bg-green-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
         >
-          ✅ Pagados ({counts.pagado})
+          Pagados ({counts.pagado})
         </a>
         <a 
           href="/admin/pedidos?status=enviado" 
           class={`px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === 'enviado' ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
         >
-          🚚 Enviados ({counts.enviado})
+          Enviados ({counts.enviado})
         </a>
         <a 
           href="/admin/pedidos?status=entregado" 
           class={`px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === 'entregado' ? 'bg-purple-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
         >
-          📦 Entregados ({counts.entregado})
+          Entregados ({counts.entregado})
         </a>
         <a 
           href="/admin/pedidos?status=cancelado" 
           class={`px-4 py-2 rounded-full font-medium transition-colors ${statusFilter === 'cancelado' ? 'bg-red-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'}`}
         >
-          ❌ Cancelados ({counts.cancelado})
+          Cancelados ({counts.cancelado})
         </a>
       </div>
 
@@ -214,11 +187,11 @@ const statusIcons: Record<string, string> = {
                         data-order-id={order.id}
                         data-current-status={order.status}
                       >
-                        <option value="pendiente" selected={order.status === 'pendiente'}>⏳ Pendiente</option>
-                        <option value="pagado" selected={order.status === 'pagado'}>✅ Pagado</option>
-                        <option value="enviado" selected={order.status === 'enviado'}>🚚 Enviado</option>
-                        <option value="entregado" selected={order.status === 'entregado'}>📦 Entregado</option>
-                        <option value="cancelado" selected={order.status === 'cancelado'}>❌ Cancelado</option>
+                        <option value="pendiente" selected={order.status === 'pendiente'}>Pendiente</option>
+                        <option value="pagado" selected={order.status === 'pagado'}>Pagado</option>
+                        <option value="enviado" selected={order.status === 'enviado'}>Enviado</option>
+                        <option value="entregado" selected={order.status === 'entregado'}>Entregado</option>
+                        <option value="cancelado" selected={order.status === 'cancelado'}>Cancelado</option>
                       </select>
                     </div>
                   </div>
@@ -228,7 +201,7 @@ const statusIcons: Record<string, string> = {
           </div>
         ) : (
           <div class="p-12 text-center">
-            <div class="text-6xl mb-4">📦</div>
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
             <h3 class="text-xl font-bold text-gray-800 mb-2">No hay pedidos</h3>
             <p class="text-gray-500">
               {statusFilter ? `No hay pedidos con estado "${statusFilter}"` : 'Aún no se han realizado pedidos'}
@@ -312,4 +285,4 @@ const statusIcons: Record<string, string> = {
       });
     });
   </script>
-</Layout>
+</AdminLayout>

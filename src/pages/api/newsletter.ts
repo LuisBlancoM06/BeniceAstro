@@ -53,13 +53,13 @@ export const POST: APIRoute = async ({ request }) => {
       body: JSON.stringify({
         sender: { name: 'BeniceAstro', email: 'lblancom06@gmail.com' },
         to: [{ email }],
-        subject: '¡Bienvenido a BeniceAstro! 🐾 Tu código de descuento',
+        subject: '¡Bienvenido a BeniceAstro! Tu código de descuento',
         htmlContent: `
           <div style="font-family: Arial; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #4F46E5;">¡Gracias por suscribirte!</h1>
             <p>Tu código de descuento del 10%:</p>
             <h2 style="color: #4F46E5; background: #F3F4F6; padding: 20px; text-align: center; border-radius: 10px;">${promoCode}</h2>
-            <p style="color: #666; font-size: 12px;">Válido por 30 días - El equipo de BeniceAstro 🐕🐈</p>
+            <p style="color: #666; font-size: 12px;">Válido por 30 días - El equipo de BeniceAstro</p>
           </div>
         `
       })

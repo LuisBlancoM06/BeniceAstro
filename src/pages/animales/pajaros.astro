@@ -9,10 +9,10 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🌾', description: 'Semillas y mezclas' },
-  { id: 'jaulas', name: 'Jaulas', icon: '🏠', description: 'Jaulas y voladeros' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🪹', description: 'Nidos y perchas' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Vitaminas y cuidados' },
+  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Semillas y mezclas' },
+  { id: 'jaulas', name: 'Jaulas', icon: 'cage', description: 'Jaulas y voladeros' },
+  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Nidos y perchas' },
+  { id: 'salud', name: 'Salud', icon: 'health', description: 'Vitaminas y cuidados' },
 ];
 ---
 
@@ -26,7 +26,7 @@ const categories = [
         <span>Pájaros</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🦜</span>
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M22 8.5c0-1.5-1-2.5-2.5-2.5-.5 0-1 .2-1.5.5C17 5 15.5 4 13.5 4c-2.5 0-4.5 2-4.5 4.5 0 .5.1 1 .2 1.5H4c-1 0-2 .8-2 2s1 2 2 2h3c-.5 1-1 2.5-1 4 0 2.5 2 4.5 4.5 4.5S15 20.5 15 18c0-1.5-.5-3-1-4h5c1 0 2-.8 2-2s-1-2-2-2h-1.5c.5-.5.5-1 .5-1.5z"/></svg>
         <div>
           <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Pájaros</h1>
           <p class="text-xl opacity-90">Alimentación, jaulas y accesorios para aves</p>
@@ -38,8 +38,8 @@ const categories = [
           <span class="ml-2">Productos</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">🚚</span>
-          <span class="ml-2">Envío gratis +49€</span>
+          <span class="font-bold text-2xl">Envío</span>
+          <span class="ml-2">gratis +49€</span>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@ const categories = [
 
       {(!products || products.length === 0) && (
         <div class="text-center py-16">
-          <span class="text-6xl mb-4 block">🦜</span>
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M22 8.5c0-1.5-1-2.5-2.5-2.5-.5 0-1 .2-1.5.5C17 5 15.5 4 13.5 4c-2.5 0-4.5 2-4.5 4.5 0 .5.1 1 .2 1.5H4c-1 0-2 .8-2 2s1 2 2 2h3c-.5 1-1 2.5-1 4 0 2.5 2 4.5 4.5 4.5S15 20.5 15 18c0-1.5-.5-3-1-4h5c1 0 2-.8 2-2s-1-2-2-2h-1.5c.5-.5.5-1 .5-1.5z"/></svg>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
           <p class="text-gray-500">Pronto añadiremos más productos para pájaros</p>
           <a href="/productos" class="inline-block mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">

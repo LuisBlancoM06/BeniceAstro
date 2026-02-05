@@ -9,10 +9,10 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🐟', description: 'Escamas y pellets' },
-  { id: 'acuarios', name: 'Acuarios', icon: '🏺', description: 'Peceras y kits' },
-  { id: 'decoracion', name: 'Decoración', icon: '🪸', description: 'Plantas y rocas' },
-  { id: 'equipamiento', name: 'Equipamiento', icon: '🔧', description: 'Filtros y calentadores' },
+  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Escamas y pellets' },
+  { id: 'acuarios', name: 'Acuarios', icon: 'tank', description: 'Peceras y kits' },
+  { id: 'decoracion', name: 'Decoración', icon: 'decor', description: 'Plantas y rocas' },
+  { id: 'equipamiento', name: 'Equipamiento', icon: 'tools', description: 'Filtros y calentadores' },
 ];
 ---
 
@@ -26,7 +26,7 @@ const categories = [
         <span>Peces</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🐠</span>
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20a8 8 0 01-8-8 8 8 0 018-8 8 8 0 018 8 8 8 0 01-8 8zm5-9h-4V7l-5 5 5 5v-4h4v-2z"/></svg>
         <div>
           <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tus Peces</h1>
           <p class="text-xl opacity-90">Acuarios, alimentación y accesorios</p>
@@ -38,8 +38,8 @@ const categories = [
           <span class="ml-2">Productos</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">🚚</span>
-          <span class="ml-2">Envío gratis +49€</span>
+          <span class="font-bold text-2xl">Envío</span>
+          <span class="ml-2">gratis +49€</span>
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@ const categories = [
 
       {(!products || products.length === 0) && (
         <div class="text-center py-16">
-          <span class="text-6xl mb-4 block">🐠</span>
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20a8 8 0 01-8-8 8 8 0 018-8 8 8 0 018 8 8 8 0 01-8 8zm5-9h-4V7l-5 5 5 5v-4h4v-2z"/></svg>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
           <p class="text-gray-500">Pronto añadiremos más productos para peces</p>
           <a href="/productos" class="inline-block mt-4 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors">

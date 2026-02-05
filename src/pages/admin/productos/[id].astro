@@ -1,24 +1,8 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../../lib/supabase';
 
-// Proteger ruta - solo admins
 const supabase = createServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-
-if (!session) {
-  return Astro.redirect('/auth/login');
-}
-
-const { data: userData } = await supabase
-  .from('users')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
-
-if (!userData || userData.role !== 'admin') {
-  return Astro.redirect('/');
-}
 
 // Obtener ID del producto
 const { id } = Astro.params;
@@ -39,24 +23,12 @@ if (error || !product) {
 }
 ---
 
-<Layout title={`Editar: ${product.name} - Admin`}>
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-800">Editar Producto</h1>
-        <p class="text-gray-600 mt-1">Modifica los datos del producto</p>
-      </div>
-      <a href="/admin/productos" class="btn bg-gray-200 text-gray-700 hover:bg-gray-300">
-        ← Volver al listado
-      </a>
-    </div>
-
-    <!-- Formulario -->
+<AdminLayout title={`Editar: ${product.name}`} currentPage="productos">
+  <!-- Formulario -->
     <form id="product-form" class="bg-white rounded-lg shadow p-6 space-y-6" data-id={product.id}>
       <!-- Información básica -->
       <div class="border-b pb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">📦 Información Básica</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Información Básica</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
@@ -114,11 +86,11 @@ if (error || !product) {
               Categoría *
             </label>
             <select name="category" required class="input w-full">
-              <option value="alimentacion" selected={product.category === 'alimentacion'}>🍖 Alimentación</option>
-              <option value="higiene" selected={product.category === 'higiene'}>🧴 Higiene</option>
-              <option value="salud" selected={product.category === 'salud'}>💊 Salud</option>
-              <option value="accesorios" selected={product.category === 'accesorios'}>🎀 Accesorios</option>
-              <option value="juguetes" selected={product.category === 'juguetes'}>🎾 Juguetes</option>
+              <option value="alimentacion" selected={product.category === 'alimentacion'}>Alimentación</option>
+              <option value="higiene" selected={product.category === 'higiene'}>Higiene</option>
+              <option value="salud" selected={product.category === 'salud'}>Salud</option>
+              <option value="accesorios" selected={product.category === 'accesorios'}>Accesorios</option>
+              <option value="juguetes" selected={product.category === 'juguetes'}>Juguetes</option>
             </select>
           </div>
 
@@ -148,7 +120,7 @@ if (error || !product) {
 
       <!-- Imagen -->
       <div class="border-b pb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">📸 Imagen</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Imagen</h2>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -169,7 +141,7 @@ if (error || !product) {
 
       <!-- Oferta -->
       <div class="border-b pb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">🔥 Oferta</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Oferta</h2>
         
         <div class="flex items-start gap-4">
           <label class="flex items-center cursor-pointer">
@@ -192,7 +164,7 @@ if (error || !product) {
 
       <!-- URL amigable -->
       <div class="border-b pb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">🔗 URL Amigable</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">URL Amigable</h2>
         
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -219,14 +191,14 @@ if (error || !product) {
       <!-- Botones -->
       <div class="flex justify-between">
         <button type="button" id="delete-btn" class="btn bg-red-100 text-red-700 hover:bg-red-200">
-          🗑️ Eliminar Producto
+          Eliminar Producto
         </button>
         <div class="flex gap-4">
           <a href="/admin/productos" class="btn bg-gray-200 text-gray-700 hover:bg-gray-300">
             Cancelar
           </a>
           <button type="submit" class="btn btn-primary">
-            💾 Guardar Cambios
+            Guardar Cambios
           </button>
         </div>
       </div>
@@ -236,7 +208,7 @@ if (error || !product) {
   <!-- Modal de confirmación de eliminación -->
   <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-md w-full p-6">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">⚠️ Confirmar Eliminación</h3>
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmar Eliminación</h3>
       <p class="text-gray-600 mb-2">¿Estás seguro de que quieres eliminar el producto:</p>
       <p class="font-bold text-gray-800 mb-4">{product.name}</p>
       <p class="text-sm text-red-600 mb-6">Esta acción no se puede deshacer.</p>
@@ -322,7 +294,7 @@ if (error || !product) {
         const result = await response.json();
 
         if (response.ok) {
-          successMessage!.textContent = '✅ Producto actualizado exitosamente';
+          successMessage!.textContent = 'Producto actualizado exitosamente';
           successMessage?.classList.remove('hidden');
           
           // Scroll al mensaje
@@ -371,4 +343,4 @@ if (error || !product) {
       deleteModal?.classList.add('hidden');
     });
   </script>
-</Layout>
+</AdminLayout>

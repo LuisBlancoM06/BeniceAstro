@@ -1,24 +1,8 @@
 ---
-import Layout from '../../../layouts/Layout.astro';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../../lib/supabase';
 
-// Proteger ruta - solo admins
 const supabase = createServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-
-if (!session) {
-  return Astro.redirect('/auth/login');
-}
-
-const { data: userData } = await supabase
-  .from('users')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
-
-if (!userData || userData.role !== 'admin') {
-  return Astro.redirect('/');
-}
 
 // Obtener productos
 const { data: products } = await supabase
@@ -27,25 +11,8 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 ---
 
-<Layout title="Gestión de Productos - Admin">
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-800">Gestión de Productos</h1>
-        <p class="text-gray-600 mt-1">Administra el catálogo de tu tienda</p>
-      </div>
-      <div class="flex gap-3">
-        <a href="/admin" class="btn bg-gray-200 text-gray-700 hover:bg-gray-300">
-          ← Volver al Dashboard
-        </a>
-        <a href="/admin/productos/nuevo" class="btn btn-primary">
-          + Nuevo Producto
-        </a>
-      </div>
-    </div>
-
-    <!-- Filtros rápidos -->
+<AdminLayout title="Productos" currentPage="productos">
+  <!-- Filtros rápidos -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
       <div class="flex flex-wrap gap-4 items-center">
         <div>
@@ -148,7 +115,7 @@ const { data: products } = await supabase
               <td class="px-6 py-4 whitespace-nowrap">
                 {product.on_sale ? (
                   <span class="px-2 py-1 text-xs font-medium rounded bg-orange-100 text-orange-800">
-                    🔥 Oferta
+                    Oferta
                   </span>
                 ) : (
                   <span class="px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-600">
@@ -159,12 +126,12 @@ const { data: products } = await supabase
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <a href={`/admin/productos/${product.id}`} 
                    class="text-purple-700 hover:text-purple-900 mr-4">
-                  ✏️ Editar
+                  Editar
                 </a>
                 <button class="text-red-600 hover:text-red-900 delete-btn" 
                         data-id={product.id} 
                         data-name={product.name}>
-                  🗑️ Eliminar
+                  Eliminar
                 </button>
               </td>
             </tr>
@@ -186,7 +153,7 @@ const { data: products } = await supabase
   <!-- Modal de confirmación de eliminación -->
   <div id="delete-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-md w-full p-6">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">⚠️ Confirmar Eliminación</h3>
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirmar Eliminación</h3>
       <p class="text-gray-600 mb-2">¿Estás seguro de que quieres eliminar el producto:</p>
       <p class="font-bold text-gray-800 mb-4" id="delete-product-name"></p>
       <p class="text-sm text-red-600 mb-6">Esta acción no se puede deshacer.</p>
@@ -293,4 +260,4 @@ const { data: products } = await supabase
       productToDelete = null;
     });
   </script>
-</Layout>
+</AdminLayout>

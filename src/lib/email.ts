@@ -64,7 +64,7 @@ const baseTemplate = (content: string, title: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>🐾 Venice Pet Shop</h1>
+      <h1>Venice Pet Shop</h1>
     </div>
     <div class="content">
       ${content}
@@ -94,7 +94,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
   `).join('');
 
   const content = `
-    <div class="icon">✅</div>
+    <div class="icon">Confirmado</div>
     <h2>¡Gracias por tu pedido, ${data.customerName}!</h2>
     <p>Tu pedido ha sido confirmado y está siendo procesado. Aquí tienes el resumen:</p>
     
@@ -137,13 +137,13 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     </table>
 
     ${data.shippingAddress ? `
-    <h3>📦 Dirección de envío</h3>
+    <h3>Dirección de envío</h3>
     <p style="background: #f3f4f6; padding: 15px; border-radius: 8px;">${data.shippingAddress}</p>
     ` : ''}
 
-    <h3>🚚 ¿Qué sigue?</h3>
+    <h3>¿Qué sigue?</h3>
     <ol>
-      <li>Estamos preparando tu pedido con mucho cariño 🐾</li>
+      <li>Estamos preparando tu pedido con mucho cariño</li>
       <li>Te enviaremos un email cuando sea enviado con el número de seguimiento</li>
       <li>Recibirás tu pedido en 24-48 horas laborables</li>
     </ol>
@@ -162,7 +162,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     const response = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.to,
-      subject: `✅ Pedido confirmado #${data.orderId.slice(0, 8).toUpperCase()}`,
+      subject: `Pedido confirmado #${data.orderId.slice(0, 8).toUpperCase()}`,
       html: baseTemplate(content, 'Confirmación de Pedido'),
     });
     return { success: true, data: response };
@@ -175,7 +175,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 // Email de bienvenida
 export async function sendWelcomeEmail(data: WelcomeEmailData) {
   const content = `
-    <div class="icon">🎉</div>
+    <div class="icon">Bienvenido</div>
     <h2>¡Bienvenido a Venice Pet Shop, ${data.name}!</h2>
     
     <p>Estamos encantados de tenerte en nuestra familia. En Venice encontrarás todo lo que 
@@ -183,21 +183,21 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 
     <div style="display: grid; gap: 15px; margin: 25px 0;">
       <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">🐕</span>
+        <span style="font-size: 32px;">Perros</span>
         <div>
           <strong>Perros</strong>
           <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Piensos, snacks, juguetes y accesorios</p>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">🐈</span>
+        <span style="font-size: 32px;">Gatos</span>
         <div>
           <strong>Gatos</strong>
           <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Arena, rascadores, comida premium</p>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">🐹</span>
+        <span style="font-size: 32px;">Otros</span>
         <div>
           <strong>Pequeñas Mascotas</strong>
           <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Roedores, pájaros, peces y más</p>
@@ -206,7 +206,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
     </div>
 
     <div class="highlight">
-      <strong>🎁 ¡Regalo de bienvenida!</strong><br>
+      <strong>Regalo de bienvenida</strong><br>
       Usa el código <strong style="color: #7e22ce; font-size: 18px;">BIENVENIDO10</strong> 
       y obtén un 10% de descuento en tu primera compra.
     </div>
@@ -215,13 +215,13 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
       <a href="https://venice.com/productos" class="btn">Explorar productos</a>
     </p>
 
-    <h3>🌟 Ventajas de ser parte de Venice:</h3>
+    <h3>Ventajas de ser parte de Venice:</h3>
     <ul>
-      <li>✅ Envío gratis en pedidos superiores a 49€</li>
-      <li>✅ Devoluciones gratuitas en 30 días</li>
-      <li>✅ Atención al cliente personalizada</li>
-      <li>✅ Ofertas exclusivas para miembros</li>
-      <li>✅ Programa de puntos por cada compra</li>
+      <li>Envío gratis en pedidos superiores a 49€</li>
+      <li>Devoluciones gratuitas en 30 días</li>
+      <li>Atención al cliente personalizada</li>
+      <li>Ofertas exclusivas para miembros</li>
+      <li>Programa de puntos por cada compra</li>
     </ul>
 
     <p style="color: #6b7280; margin-top: 30px;">
@@ -233,7 +233,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
     const response = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.to,
-      subject: '🎉 ¡Bienvenido a Venice Pet Shop!',
+      subject: 'Bienvenido a Venice Pet Shop',
       html: baseTemplate(content, 'Bienvenido'),
     });
     return { success: true, data: response };
@@ -246,7 +246,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 // Email de envío de pedido
 export async function sendShippingNotification(data: ShippingEmailData) {
   const content = `
-    <div class="icon">🚚</div>
+    <div class="icon">Enviado</div>
     <h2>¡Tu pedido está en camino, ${data.customerName}!</h2>
     
     <p>¡Buenas noticias! Tu pedido ha sido enviado y está de camino a tu dirección.</p>
@@ -260,16 +260,16 @@ export async function sendShippingNotification(data: ShippingEmailData) {
 
     <p style="text-align: center; margin: 30px 0;">
       <a href="https://www.${data.carrier.toLowerCase()}.es/seguimiento/${data.trackingNumber}" class="btn">
-        📦 Rastrear pedido
+        Rastrear pedido
       </a>
     </p>
 
-    <h3>📅 Fecha estimada de entrega</h3>
+    <h3>Fecha estimada de entrega</h3>
     <p style="background: #f3f4f6; padding: 15px; border-radius: 8px; font-size: 18px; text-align: center;">
       <strong>24-48 horas laborables</strong>
     </p>
 
-    <h3>💡 Consejos para la entrega:</h3>
+    <h3>Consejos para la entrega:</h3>
     <ul>
       <li>Asegúrate de estar disponible en la dirección indicada</li>
       <li>El repartidor te llamará antes de llegar</li>
@@ -285,7 +285,7 @@ export async function sendShippingNotification(data: ShippingEmailData) {
     const response = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.to,
-      subject: `🚚 Tu pedido #${data.orderId.slice(0, 8).toUpperCase()} está en camino`,
+      subject: `Tu pedido #${data.orderId.slice(0, 8).toUpperCase()} está en camino`,
       html: baseTemplate(content, 'Pedido Enviado'),
     });
     return { success: true, data: response };
@@ -298,14 +298,14 @@ export async function sendShippingNotification(data: ShippingEmailData) {
 // Email de newsletter
 export async function sendNewsletterWelcome(email: string, promoCode: string) {
   const content = `
-    <div class="icon">📬</div>
+    <div class="icon">Newsletter</div>
     <h2>¡Gracias por suscribirte!</h2>
     
     <p>Ya formas parte de la comunidad Venice Pet Shop. Recibirás las mejores ofertas, 
     novedades y consejos para el cuidado de tus mascotas directamente en tu bandeja de entrada.</p>
 
     <div class="highlight">
-      <strong>🎁 ¡Aquí tienes tu código de descuento!</strong><br><br>
+      <strong>Aquí tienes tu código de descuento</strong><br><br>
       <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
         <span style="font-size: 28px; font-weight: bold; color: #7e22ce; letter-spacing: 3px;">
           ${promoCode}
@@ -328,7 +328,7 @@ export async function sendNewsletterWelcome(email: string, promoCode: string) {
     const response = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: '🎁 ¡Tu código de descuento exclusivo!',
+      subject: 'Tu código de descuento exclusivo',
       html: baseTemplate(content, 'Newsletter'),
     });
     return { success: true, data: response };
@@ -341,14 +341,14 @@ export async function sendNewsletterWelcome(email: string, promoCode: string) {
 // Email de cancelación de pedido
 export async function sendOrderCancellation(email: string, orderId: string, customerName: string) {
   const content = `
-    <div class="icon">❌</div>
+    <div class="icon">Cancelado</div>
     <h2>Pedido cancelado</h2>
     
     <p>Hola ${customerName},</p>
     <p>Tu pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido cancelado correctamente.</p>
 
     <div class="highlight">
-      <strong>💰 Reembolso</strong><br>
+      <strong>Reembolso</strong><br>
       El importe de tu pedido será reembolsado en un plazo de 3-5 días laborables 
       mediante el mismo método de pago utilizado.
     </div>
@@ -368,7 +368,7 @@ export async function sendOrderCancellation(email: string, orderId: string, cust
     const response = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: `❌ Pedido #${orderId.slice(0, 8).toUpperCase()} cancelado`,
+      subject: `Pedido #${orderId.slice(0, 8).toUpperCase()} cancelado`,
       html: baseTemplate(content, 'Pedido Cancelado'),
     });
     return { success: true, data: response };

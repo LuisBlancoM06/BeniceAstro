@@ -10,10 +10,10 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos y húmedos' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🛋️', description: 'Camas y rascadores' },
-  { id: 'juguetes', name: 'Juguetes', icon: '🐭', description: 'Ratones y cañas' },
+  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Piensos y húmedos' },
+  { id: 'salud', name: 'Salud', icon: 'health', description: 'Antiparasitarios' },
+  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Camas y rascadores' },
+  { id: 'juguetes', name: 'Juguetes', icon: 'toys', description: 'Ratones y cañas' },
 ];
 
 const ages = [
@@ -34,7 +34,7 @@ const ages = [
         <span>Gatos</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🐈</span>
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9 2 7 4 7 7v1.5C5.5 9 4 10.5 4 12.5c0 1.5.5 3 2 4v5.5c0 .5.5 1 1 1h2c.5 0 1-.5 1-1V20h4v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-5.5c1.5-1 2-2.5 2-4 0-2-1.5-3.5-3-4V7c0-3-2-5-5-5z"/></svg>
         <div>
           <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tu Gato</h1>
           <p class="text-xl opacity-90">Los mejores productos para consentir a tu felino</p>
@@ -46,12 +46,12 @@ const ages = [
           <span class="ml-2">Productos</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">🚚</span>
-          <span class="ml-2">Envío gratis +49€</span>
+          <span class="font-bold text-2xl">Envío</span>
+          <span class="ml-2">gratis +49€</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">😻</span>
-          <span class="ml-2">100% Michi approved</span>
+          <span class="font-bold text-2xl">100%</span>
+          <span class="ml-2">Michi approved</span>
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@ const ages = [
         <!-- Sidebar Filtros -->
         <aside class="lg:w-64 flex-shrink-0">
           <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-            <h3 class="font-bold text-lg mb-4">🎛️ Filtros</h3>
+            <h3 class="font-bold text-lg mb-4">Filtros</h3>
 
             <div class="mb-6">
               <h4 class="font-medium text-gray-700 mb-3">Edad</h4>
@@ -111,7 +111,7 @@ const ages = [
 
             <label class="flex items-center gap-2 cursor-pointer mb-6">
               <input type="checkbox" name="on_sale" class="rounded text-orange-500" />
-              <span class="font-medium">Solo ofertas 🔥</span>
+              <span class="font-medium">Solo ofertas</span>
             </label>
 
             <button class="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
@@ -139,7 +139,7 @@ const ages = [
 
           {(!products || products.length === 0) && (
             <div class="text-center py-16">
-              <span class="text-6xl mb-4 block">😿</span>
+              <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9 2 7 4 7 7v1.5C5.5 9 4 10.5 4 12.5c0 1.5.5 3 2 4v5.5c0 .5.5 1 1 1h2c.5 0 1-.5 1-1V20h4v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-5.5c1.5-1 2-2.5 2-4 0-2-1.5-3.5-3-4V7c0-3-2-5-5-5z"/></svg>
               <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
               <p class="text-gray-500">Pronto añadiremos más productos para gatos</p>
             </div>

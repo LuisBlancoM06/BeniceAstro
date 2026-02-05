@@ -11,10 +11,10 @@ const { data: products } = await supabase
 
 // Categorías específicas para perros
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos, húmedos y snacks' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios y vitaminas' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🎒', description: 'Collares, correas y camas' },
-  { id: 'juguetes', name: 'Juguetes', icon: '🎾', description: 'Pelotas, mordedores y más' },
+  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Piensos, húmedos y snacks' },
+  { id: 'salud', name: 'Salud', icon: 'health', description: 'Antiparasitarios y vitaminas' },
+  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Collares, correas y camas' },
+  { id: 'juguetes', name: 'Juguetes', icon: 'toys', description: 'Pelotas, mordedores y más' },
 ];
 
 const sizes = [
@@ -41,7 +41,7 @@ const ages = [
         <span>Perros</span>
       </nav>
       <div class="flex items-center gap-4">
-        <span class="text-6xl">🐕</span>
+        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
         <div>
           <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tu Perro</h1>
           <p class="text-xl opacity-90">Encuentra los mejores productos para el cuidado de tu mejor amigo</p>
@@ -53,7 +53,7 @@ const ages = [
           <span class="ml-2">Productos</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">🚚</span>
+          <svg class="w-8 h-8 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"></path></svg>
           <span class="ml-2">Envío gratis +49€</span>
         </div>
         <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
@@ -149,7 +149,7 @@ const ages = [
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" name="on_sale" class="rounded text-purple-600 focus:ring-purple-500" />
                 <span class="font-medium">Solo ofertas</span>
-                <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">🔥</span>
+                <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">HOT</span>
               </label>
             </div>
 
@@ -185,7 +185,7 @@ const ages = [
 
           {(!products || products.length === 0) && (
             <div class="text-center py-16">
-              <span class="text-6xl mb-4 block">🐕</span>
+              <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
               <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
               <p class="text-gray-500">Pronto añadiremos más productos para perros</p>
             </div>

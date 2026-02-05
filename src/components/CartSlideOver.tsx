@@ -32,7 +32,8 @@ export default function CartSlideOver() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            🛒 Tu Carrito
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            Tu Carrito
             {count > 0 && (
               <span className="bg-purple-700 text-white text-sm px-2 py-0.5 rounded-full">
                 {count}
@@ -53,7 +54,7 @@ export default function CartSlideOver() {
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <div className="text-6xl mb-4">🛒</div>
+              <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h3>
               <p className="text-gray-500 mb-6">¡Añade algunos productos para tu mascota!</p>
               <button 
@@ -132,7 +133,7 @@ export default function CartSlideOver() {
                   onClick={clearCart}
                   className="w-full text-center text-gray-500 hover:text-red-500 text-sm py-2 transition-colors"
                 >
-                  🗑️ Vaciar carrito
+                  Vaciar carrito
                 </button>
               )}
             </div>
@@ -172,7 +173,7 @@ export default function CartSlideOver() {
             {subtotal < 49 && (
               <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
                 <p className="text-yellow-800">
-                  🚚 ¡Añade <strong>{(49 - subtotal).toFixed(2)}€</strong> más para envío GRATIS!
+                  ¡Añade <strong>{(49 - subtotal).toFixed(2)}€</strong> más para envío GRATIS!
                 </p>
               </div>
             )}
@@ -199,8 +200,9 @@ export default function CartSlideOver() {
             {/* Métodos de pago */}
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500 mb-2">Métodos de pago seguros</p>
-              <div className="flex justify-center gap-2 text-2xl">
-                💳 🔒
+              <div className="flex justify-center gap-2">
+                <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
               </div>
             </div>
           </div>

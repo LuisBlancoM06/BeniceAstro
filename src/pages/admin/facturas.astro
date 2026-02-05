@@ -1,21 +1,8 @@
 ---
-import Layout from '../../layouts/Layout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../lib/supabase';
 
-// Proteger ruta
 const supabase = createServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
-if (!session) return Astro.redirect('/auth/login');
-
-const { data: userData } = await supabase
-  .from('users')
-  .select('role')
-  .eq('id', session.user.id)
-  .single();
-
-if (!userData || userData.role !== 'admin') {
-  return Astro.redirect('/');
-}
 
 // Obtener facturas
 const { data: invoices } = await supabase
@@ -36,29 +23,8 @@ const { data: invoices } = await supabase
   .limit(50);
 ---
 
-<Layout title="Facturas - Admin" hideNewsletterPopup={true}>
-  <div class="bg-gray-50 min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      
-      <!-- Header -->
-      <div class="flex justify-between items-center mb-8">
-        <div>
-          <nav class="text-sm text-gray-500 mb-2">
-            <a href="/admin" class="hover:text-yellow-600">Dashboard</a>
-            <span class="mx-2">/</span>
-            <span class="text-gray-800">Facturas</span>
-          </nav>
-          <h1 class="text-3xl font-bold text-gray-800">🧾 Gestión de Facturas</h1>
-        </div>
-        
-        <div class="flex gap-3">
-          <button id="export-btn" class="btn bg-green-500 text-white hover:bg-green-600">
-            📥 Exportar CSV
-          </button>
-        </div>
-      </div>
-
-      <!-- Filtros -->
+<AdminLayout title="Facturas" currentPage="facturas">
+  <!-- Filtros -->
       <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
@@ -175,7 +141,7 @@ const { data: invoices } = await supabase
             ) : (
               <tr>
                 <td colspan="8" class="px-6 py-12 text-center">
-                  <div class="text-6xl mb-4">🧾</div>
+                  <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                   <p class="text-gray-500">No hay facturas todavía</p>
                 </td>
               </tr>
@@ -205,4 +171,4 @@ const { data: invoices } = await supabase
       alert('Función de exportación CSV en desarrollo');
     });
   </script>
-</Layout>
+</AdminLayout>

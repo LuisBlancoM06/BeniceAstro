@@ -92,7 +92,7 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
     window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   };
 
-  const animalEmoji = product.animal_type === 'perro' ? '🐕' : product.animal_type === 'gato' ? '🐈' : '🐹';
+  const animalLabel = product.animal_type === 'perro' ? 'Perro' : product.animal_type === 'gato' ? 'Gato' : 'Otros';
 
   return (
     <div 
@@ -203,7 +203,7 @@ export default function ProductCard({ product, showQuickActions = true }: Produc
       <div className="p-4">
         {/* Tipo de animal */}
         <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-          {animalEmoji} {product.animal_type.charAt(0).toUpperCase() + product.animal_type.slice(1)}
+          {animalLabel}
         </span>
         
         {/* Nombre */}

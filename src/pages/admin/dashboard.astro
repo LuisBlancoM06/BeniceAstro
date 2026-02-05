@@ -41,12 +41,12 @@ const { count: totalUsers } = await supabase
       <!-- Header -->
       <div class="flex justify-between items-center mb-8">
         <div>
-          <h1 class="text-3xl font-bold text-gray-800">🐾 Dashboard Venice</h1>
+          <h1 class="text-3xl font-bold text-gray-800">Dashboard Venice</h1>
           <p class="text-gray-600 mt-1">Bienvenido al panel de administración</p>
         </div>
         <div class="flex gap-3">
           <a href="/admin/productos" class="btn bg-orange-500 text-white hover:bg-orange-600">
-            📦 Gestionar Productos
+            Gestionar Productos
           </a>
           <a href="/admin/productos/nuevo" class="btn btn-primary">
             + Nuevo Producto
@@ -135,7 +135,7 @@ const { count: totalUsers } = await supabase
         <!-- Gráfico de Ventas -->
         <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-semibold text-gray-800">📈 Ventas Últimos 7 Días</h2>
+            <h2 class="text-lg font-semibold text-gray-800">Ventas Últimos 7 Días</h2>
             <span class="text-sm text-gray-500" id="chart-total">Cargando...</span>
           </div>
           <div class="h-64">
@@ -145,7 +145,7 @@ const { count: totalUsers } = await supabase
 
         <!-- Producto más vendido -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-          <h2 class="text-lg font-semibold text-gray-800 mb-4">🏆 Producto Más Vendido</h2>
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Producto Más Vendido</h2>
           <div id="top-product" class="flex flex-col items-center text-center py-4">
             <div class="animate-pulse bg-gray-200 rounded w-32 h-32 mb-4"></div>
             <span class="text-gray-400">Cargando...</span>
@@ -159,7 +159,7 @@ const { count: totalUsers } = await supabase
         <!-- Stock Bajo -->
         <div class="bg-white rounded-xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">⚠️ Productos con Stock Bajo</h2>
+            <h2 class="text-lg font-semibold text-gray-800">Productos con Stock Bajo</h2>
             <a href="/admin/productos" class="text-sm text-purple-700 hover:underline">Ver todos</a>
           </div>
           <div id="low-stock-list" class="space-y-3">
@@ -174,7 +174,7 @@ const { count: totalUsers } = await supabase
         <!-- Últimos Pedidos -->
         <div class="bg-white rounded-xl shadow-sm p-6">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-semibold text-gray-800">📦 Últimos Pedidos</h2>
+            <h2 class="text-lg font-semibold text-gray-800">Últimos Pedidos</h2>
             <a href="/admin/pedidos" class="text-sm text-purple-700 hover:underline">Ver todos</a>
           </div>
           <div id="recent-orders-list" class="space-y-3">
@@ -189,31 +189,31 @@ const { count: totalUsers } = await supabase
 
       <!-- Accesos Rápidos -->
       <div class="mt-8 bg-white rounded-xl shadow-sm p-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">🚀 Accesos Rápidos</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Accesos Rápidos</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <a href="/admin/productos" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-yellow-50 transition-colors">
-            <span class="text-2xl">📦</span>
+            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
             <div>
               <p class="font-medium text-gray-800">Productos</p>
               <p class="text-sm text-gray-500">{totalProducts} total</p>
             </div>
           </a>
           <a href="/admin/productos/nuevo" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-green-50 transition-colors">
-            <span class="text-2xl">➕</span>
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
             <div>
               <p class="font-medium text-gray-800">Nuevo Producto</p>
               <p class="text-sm text-gray-500">Añadir al catálogo</p>
             </div>
           </a>
           <a href="/admin/ofertas" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors">
-            <span class="text-2xl">🔥</span>
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path></svg>
             <div>
               <p class="font-medium text-gray-800">Ofertas Flash</p>
               <p class="text-sm text-gray-500">Gestionar promociones</p>
             </div>
           </a>
           <a href="/admin/facturas" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors">
-            <span class="text-2xl">🧾</span>
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             <div>
               <p class="font-medium text-gray-800">Facturas</p>
               <p class="text-sm text-gray-500">Ver facturación</p>
@@ -243,13 +243,13 @@ const { count: totalUsers } = await supabase
         const topProductDiv = document.getElementById('top-product');
         if (data.kpis.topProduct) {
           topProductDiv!.innerHTML = `
-            <div class="text-5xl mb-4">🏆</div>
+            <svg class="w-16 h-16 mb-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
             <p class="font-bold text-gray-800 text-lg">${data.kpis.topProduct.name}</p>
             <p class="text-purple-700 font-medium">${data.kpis.topProduct.quantity} unidades vendidas</p>
           `;
         } else {
           topProductDiv!.innerHTML = `
-            <div class="text-5xl mb-4">📊</div>
+            <svg class="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             <p class="text-gray-500">Sin datos de ventas este mes</p>
           `;
         }
@@ -308,7 +308,7 @@ const { count: totalUsers } = await supabase
         } else {
           lowStockList!.innerHTML = `
             <div class="text-center py-6 text-gray-500">
-              <span class="text-3xl">✅</span>
+              <svg class="w-12 h-12 mx-auto text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
               <p class="mt-2">Todo el stock está bien</p>
             </div>
           `;
@@ -338,7 +338,7 @@ const { count: totalUsers } = await supabase
         } else {
           ordersListDiv!.innerHTML = `
             <div class="text-center py-6 text-gray-500">
-              <span class="text-3xl">📦</span>
+              <svg class="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
               <p class="mt-2">No hay pedidos recientes</p>
             </div>
           `;
