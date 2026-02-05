@@ -1,0 +1,325 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { createServerClient } from '../../lib/supabase';
+
+const supabase = createServerClient(Astro.cookies);
+
+// Proteger ruta
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) return Astro.redirect('/auth/login');
+
+const { data: userData } = await supabase
+  .from('users')
+  .select('role')
+  .eq('id', session.user.id)
+  .single();
+
+if (!userData || userData.role !== 'admin') return Astro.redirect('/');
+
+// Parámetros de filtro
+const filtroFecha = Astro.url.searchParams.get('fecha') || '';
+const filtroIP = Astro.url.searchParams.get('ip') || '';
+const page = parseInt(Astro.url.searchParams.get('page') || '1');
+const perPage = 50;
+
+// Consultar visitas
+let query = supabase
+  .from('visits')
+  .select('*', { count: 'exact' })
+  .order('created_at', { ascending: false })
+  .range((page - 1) * perPage, page * perPage - 1);
+
+if (filtroIP) {
+  query = query.ilike('ip_address', `%${filtroIP}%`);
+}
+
+if (filtroFecha) {
+  const startDate = `${filtroFecha}T00:00:00`;
+  const endDate = `${filtroFecha}T23:59:59`;
+  query = query.gte('created_at', startDate).lte('created_at', endDate);
+}
+
+const { data: visitas, count: totalVisitas } = await query;
+const totalPages = Math.ceil((totalVisitas || 0) / perPage);
+
+// Stats rápidos
+const hoy = new Date().toISOString().split('T')[0];
+
+const { count: visitasHoy } = await supabase
+  .from('visits')
+  .select('*', { count: 'exact', head: true })
+  .gte('created_at', `${hoy}T00:00:00`)
+  .lte('created_at', `${hoy}T23:59:59`);
+
+// IPs únicas hoy - obtener datos y contar en JS
+const { data: ipsHoyData } = await supabase
+  .from('visits')
+  .select('ip_address')
+  .gte('created_at', `${hoy}T00:00:00`)
+  .lte('created_at', `${hoy}T23:59:59`);
+
+const ipsUnicasHoy = new Set(ipsHoyData?.map(v => v.ip_address)).size;
+
+// Top IPs (últimos 7 días)
+const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+const { data: visitasSemana } = await supabase
+  .from('visits')
+  .select('ip_address, page')
+  .gte('created_at', hace7dias);
+
+// Agrupar por IP
+const ipCounts: Record<string, { count: number; pages: Set<string>; lastSeen?: string }> = {};
+visitasSemana?.forEach(v => {
+  if (!ipCounts[v.ip_address]) {
+    ipCounts[v.ip_address] = { count: 0, pages: new Set() };
+  }
+  ipCounts[v.ip_address].count++;
+  ipCounts[v.ip_address].pages.add(v.page);
+});
+
+const topIPs = Object.entries(ipCounts)
+  .sort((a, b) => b[1].count - a[1].count)
+  .slice(0, 10);
+
+// Páginas más visitadas (últimos 7 días)
+const pageCounts: Record<string, number> = {};
+visitasSemana?.forEach(v => {
+  pageCounts[v.page] = (pageCounts[v.page] || 0) + 1;
+});
+
+const topPages = Object.entries(pageCounts)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
+---
+
+<AdminLayout title="Visitas" currentPage="visitas">
+  <div class="space-y-6">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">👁️ Registro de Visitas</h1>
+        <p class="text-gray-500 mt-1">Control de quién entra a tu página</p>
+      </div>
+      <span class="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+        {totalVisitas || 0} visitas totales
+      </span>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center gap-3">
+          <div class="bg-green-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-800">{visitasHoy || 0}</p>
+            <p class="text-sm text-gray-500">Visitas hoy</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center gap-3">
+          <div class="bg-blue-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-800">{ipsUnicasHoy}</p>
+            <p class="text-sm text-gray-500">Visitantes únicos hoy</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border p-5">
+        <div class="flex items-center gap-3">
+          <div class="bg-purple-100 p-3 rounded-lg">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-2xl font-bold text-gray-800">{visitasSemana?.length || 0}</p>
+            <p class="text-sm text-gray-500">Visitas últimos 7 días</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top IPs y Top Páginas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Top IPs -->
+      <div class="bg-white rounded-xl shadow-sm border">
+        <div class="p-5 border-b">
+          <h2 class="font-semibold text-gray-800">🔝 Top IPs (7 días)</h2>
+        </div>
+        <div class="p-4">
+          {topIPs.length === 0 ? (
+            <p class="text-gray-400 text-center py-4">Sin datos aún</p>
+          ) : (
+            <div class="space-y-3">
+              {topIPs.map(([ip, data], i) => (
+                <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                  <div class="flex items-center gap-3">
+                    <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-orange-500' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-amber-600' : 'bg-gray-300'}`}>
+                      {i + 1}
+                    </span>
+                    <div>
+                      <a href={`?ip=${ip}`} class="font-mono text-sm font-medium text-purple-700 hover:underline">{ip}</a>
+                      <p class="text-xs text-gray-400">{data.pages.size} páginas visitadas</p>
+                    </div>
+                  </div>
+                  <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
+                    {data.count} visitas
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Top Páginas -->
+      <div class="bg-white rounded-xl shadow-sm border">
+        <div class="p-5 border-b">
+          <h2 class="font-semibold text-gray-800">📄 Páginas más visitadas (7 días)</h2>
+        </div>
+        <div class="p-4">
+          {topPages.length === 0 ? (
+            <p class="text-gray-400 text-center py-4">Sin datos aún</p>
+          ) : (
+            <div class="space-y-3">
+              {topPages.map(([pagina, count], i) => (
+                <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                  <div class="flex items-center gap-3">
+                    <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-green-400' : i === 2 ? 'bg-green-300' : 'bg-gray-300'}`}>
+                      {i + 1}
+                    </span>
+                    <span class="text-sm font-medium text-gray-700">{pagina}</span>
+                  </div>
+                  <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
+                    {count}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white rounded-xl shadow-sm border p-5">
+      <form method="get" class="flex flex-wrap items-end gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">Filtrar por IP</label>
+          <input type="text" name="ip" value={filtroIP} placeholder="Ej: 213.195..."
+            class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">Filtrar por fecha</label>
+          <input type="date" name="fecha" value={filtroFecha}
+            class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
+        </div>
+        <button type="submit" class="px-4 py-2 bg-purple-700 text-white rounded-lg text-sm hover:bg-purple-800 transition">
+          Filtrar
+        </button>
+        <a href="/admin/visitas" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300 transition">
+          Limpiar
+        </a>
+      </form>
+    </div>
+
+    <!-- Tabla de visitas -->
+    <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-600 text-left">
+            <tr>
+              <th class="px-4 py-3 font-medium">IP</th>
+              <th class="px-4 py-3 font-medium">Página</th>
+              <th class="px-4 py-3 font-medium">Navegador</th>
+              <th class="px-4 py-3 font-medium">Referencia</th>
+              <th class="px-4 py-3 font-medium">Fecha/Hora</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {(!visitas || visitas.length === 0) ? (
+              <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-gray-400">
+                  No hay visitas registradas aún. Empezarán a aparecer cuando alguien entre a tu página.
+                </td>
+              </tr>
+            ) : (
+              visitas.map((v) => {
+                // Parsear user agent para mostrar algo legible
+                const ua = v.user_agent || '';
+                let browser = 'Desconocido';
+                if (ua.includes('Chrome') && !ua.includes('Edg')) browser = '🌐 Chrome';
+                else if (ua.includes('Firefox')) browser = '🦊 Firefox';
+                else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = '🧭 Safari';
+                else if (ua.includes('Edg')) browser = '🔷 Edge';
+                else if (ua.includes('bot') || ua.includes('Bot') || ua.includes('crawl')) browser = '🤖 Bot';
+                
+                const fecha = new Date(v.created_at);
+                const fechaStr = fecha.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const horaStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                return (
+                  <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3">
+                      <a href={`?ip=${v.ip_address}`} class="font-mono text-purple-700 hover:underline font-medium">
+                        {v.ip_address}
+                      </a>
+                    </td>
+                    <td class="px-4 py-3 text-gray-700 max-w-[200px] truncate" title={v.page}>
+                      {v.page}
+                    </td>
+                    <td class="px-4 py-3 text-gray-500">{browser}</td>
+                    <td class="px-4 py-3 text-gray-400 max-w-[150px] truncate" title={v.referer || ''}>
+                      {v.referer ? new URL(v.referer).hostname : '-'}
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
+                      <span class="font-medium">{fechaStr}</span> <span class="text-gray-400">{horaStr}</span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      {totalPages > 1 && (
+        <div class="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
+          <span class="text-sm text-gray-500">
+            Página {page} de {totalPages}
+          </span>
+          <div class="flex gap-2">
+            {page > 1 && (
+              <a href={`?page=${page - 1}${filtroIP ? `&ip=${filtroIP}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
+                class="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-100">
+                ← Anterior
+              </a>
+            )}
+            {page < totalPages && (
+              <a href={`?page=${page + 1}${filtroIP ? `&ip=${filtroIP}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
+                class="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-100">
+                Siguiente →
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+
+  </div>
+</AdminLayout>
