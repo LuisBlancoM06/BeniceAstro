@@ -79,52 +79,10 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
             </span>
           </a>
           
-          <!-- Mega menú desktop -->
+          <!-- Menú desktop -->
           <div class="hidden lg:flex items-center space-x-1">
-            <!-- Perros -->
-            <div class="relative group">
-              <a href="/animales/perros" class="flex items-center gap-1 px-3 py-2 text-gray-700 hover:text-purple-600 font-medium">
-                Perros
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </a>
-              <div class="absolute left-0 mt-0 w-64 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
-                <div class="p-4">
-                  <h3 class="font-bold text-purple-700 mb-3">Para tu perro</h3>
-                  <div class="space-y-2">
-                    <a href="/animales/perros?categoria=alimentacion" class="block text-gray-600 hover:text-purple-600 hover:pl-2 transition-all">Alimentación</a>
-                    <a href="/animales/perros?categoria=salud" class="block text-gray-600 hover:text-purple-600 hover:pl-2 transition-all">Salud</a>
-                    <a href="/animales/perros?categoria=accesorios" class="block text-gray-600 hover:text-purple-600 hover:pl-2 transition-all">Accesorios</a>
-                    <a href="/animales/perros?categoria=juguetes" class="block text-gray-600 hover:text-purple-600 hover:pl-2 transition-all">Juguetes</a>
-                  </div>
-                  <a href="/animales/perros" class="block mt-4 text-purple-600 font-medium hover:underline">Ver todo →</a>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gatos -->
-            <div class="relative group">
-              <a href="/animales/gatos" class="flex items-center gap-1 px-3 py-2 text-gray-700 hover:text-purple-600 font-medium">
-                Gatos
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </a>
-              <div class="absolute left-0 mt-0 w-64 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
-                <div class="p-4">
-                  <h3 class="font-bold text-orange-500 mb-3">Para tu gato</h3>
-                  <div class="space-y-2">
-                    <a href="/animales/gatos?categoria=alimentacion" class="block text-gray-600 hover:text-orange-500 hover:pl-2 transition-all">Alimentación</a>
-                    <a href="/animales/gatos?categoria=salud" class="block text-gray-600 hover:text-orange-500 hover:pl-2 transition-all">Salud</a>
-                    <a href="/animales/gatos?categoria=accesorios" class="block text-gray-600 hover:text-orange-500 hover:pl-2 transition-all">Accesorios</a>
-                    <a href="/animales/gatos?categoria=juguetes" class="block text-gray-600 hover:text-orange-500 hover:pl-2 transition-all">Juguetes</a>
-                  </div>
-                  <a href="/animales/gatos" class="block mt-4 text-orange-500 font-medium hover:underline">Ver todo →</a>
-                </div>
-              </div>
-            </div>
-
+            <a href="/animales/perros" class="px-3 py-2 text-gray-700 hover:text-purple-600 font-medium transition-colors">Perros</a>
+            <a href="/animales/gatos" class="px-3 py-2 text-gray-700 hover:text-purple-600 font-medium transition-colors">Gatos</a>
             <a href="/ofertas" class="px-3 py-2 text-red-600 hover:text-red-700 font-bold flex items-center gap-1">
               Ofertas
             </a>

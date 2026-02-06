@@ -144,13 +144,13 @@
   const copyBtn = document.getElementById('copy-code-btn');
   const startShoppingBtn = document.getElementById('start-shopping-btn');
 
-  // Comprobar si debe mostrarse el popup
+  // Comprobar si debe mostrarse el popup (solo la primera visita)
   function shouldShowPopup(): boolean {
-    // No mostrar si ya se cerró/suscribió (cookie de 7 días)
-    if (document.cookie.includes('newsletter_dismissed=true')) {
+    // No mostrar si ya se cerró alguna vez
+    if (localStorage.getItem('newsletter_dismissed')) {
       return false;
     }
-    // No mostrar si ya está suscrito (localStorage)
+    // No mostrar si ya está suscrito
     if (localStorage.getItem('newsletter_subscribed')) {
       return false;
     }
@@ -166,12 +166,10 @@
     }
   }
 
-  // Cerrar popup y setear cookie
+  // Cerrar popup y guardar en localStorage (no vuelve a aparecer)
   function dismissPopup() {
     popup?.classList.add('hidden');
-    // Cookie de 7 días
-    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
-    document.cookie = `newsletter_dismissed=true; expires=${expires}; path=/`;
+    localStorage.setItem('newsletter_dismissed', 'true');
   }
 
   // Generar código promocional
