@@ -2,213 +2,349 @@
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabase';
 
-// Obtener parámetros de búsqueda
-const url = new URL(Astro.request.url);
-const animalType = url.searchParams.get('tipo');
-const size = url.searchParams.get('tamano');
-const category = url.searchParams.get('categoria');
-const ageRange = url.searchParams.get('edad');
-
-// Construir consulta con filtros
-let query = supabase.from('products').select('*');
-
-if (animalType) query = query.eq('animal_type', animalType);
-if (size) query = query.eq('size', size);
-if (category) query = query.eq('category', category);
-if (ageRange) query = query.eq('age_range', ageRange);
-
-const { data: products } = await query;
+// Obtener TODOS los productos (filtrado se hace en cliente)
+const { data: allProducts } = await supabase.from('products').select('*');
 ---
 
 <Layout title="Productos">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h1 class="text-4xl font-bold mb-8">Catálogo de Productos</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
       <!-- Filtros -->
       <div class="lg:col-span-1">
-        <div class="card sticky top-4">
-          <h2 class="text-xl font-bold mb-4">Filtros</h2>
+        <div class="sticky top-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-gray-800">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            Filtros
+          </h2>
           
-          <form id="filter-form">
-            <!-- Tipo de Animal -->
-            <div class="mb-6">
-              <h3 class="font-semibold mb-2">Tipo de Animal</h3>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tipo" value="" checked class="mr-2">
-                Todos
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tipo" value="perro" class="mr-2">
-                Perros
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tipo" value="gato" class="mr-2">
-                Gatos
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tipo" value="otros" class="mr-2">
-                Otros
-              </label>
-            </div>
-
-            <!-- Tamaño -->
-            <div class="mb-6">
-              <h3 class="font-semibold mb-2">Tamaño</h3>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tamano" value="" checked class="mr-2">
-                Todos
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tamano" value="mini" class="mr-2">
-                Mini
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tamano" value="mediano" class="mr-2">
-                Mediano
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="tamano" value="grande" class="mr-2">
-                Grande
-              </label>
-            </div>
-
-            <!-- Categoría -->
-            <div class="mb-6">
-              <h3 class="font-semibold mb-2">Categoría</h3>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="" checked class="mr-2">
-                Todas
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="alimentacion" class="mr-2">
-                Alimentación
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="higiene" class="mr-2">
-                Higiene
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="salud" class="mr-2">
-                Salud
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="accesorios" class="mr-2">
-                Accesorios
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="categoria" value="juguetes" class="mr-2">
-                Juguetes
-              </label>
-            </div>
-
-            <!-- Edad -->
-            <div class="mb-6">
-              <h3 class="font-semibold mb-2">Edad</h3>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="edad" value="" checked class="mr-2">
-                Todas
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="edad" value="cachorro" class="mr-2">
-                Cachorro/Joven
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="edad" value="adulto" class="mr-2">
-                Adulto
-              </label>
-              <label class="flex items-center mb-2">
-                <input type="radio" name="edad" value="senior" class="mr-2">
-                Senior
-              </label>
-            </div>
-
-            <button type="button" id="apply-filters" class="btn btn-primary w-full">
-              Aplicar Filtros
+          <!-- Especie -->
+          <div class="filter-section border-t border-gray-100 pt-4" data-open="true">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Especie</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
             </button>
-          </form>
+            <div class="filter-content space-y-2">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="animal_type" value="perro" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Perro</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="animal_type" value="gato" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Gato</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="animal_type" value="otros" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Otros animales</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Categoría -->
+          <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Categoría</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="filter-content space-y-2 hidden">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="category" value="alimentacion" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Alimentación</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="category" value="higiene" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Higiene</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="category" value="salud" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Salud</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="category" value="accesorios" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Accesorios</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="category" value="juguetes" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Juguetes</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Productos en Oferta -->
+          <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Productos en Oferta</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="filter-content space-y-2 hidden">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="on_sale" value="true" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Solo ofertas</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Precio -->
+          <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Precio</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="filter-content space-y-2 hidden">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="price_range" value="0-10" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Menos de 10€</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="price_range" value="10-25" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">10€ - 25€</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="price_range" value="25-50" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">25€ - 50€</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="price_range" value="50-999" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Más de 50€</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Edad -->
+          <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Edad</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="filter-content space-y-2 hidden">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="age_range" value="cachorro" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Cachorro / Joven</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="age_range" value="adulto" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Adulto</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="age_range" value="senior" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Senior</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Tamaño raza -->
+          <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+            <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
+              <span>Tamaño raza</span>
+              <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="filter-content space-y-2 hidden">
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="size" value="mini" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Mini</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="size" value="mediano" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Mediano</span>
+              </label>
+              <label class="flex items-center gap-2.5 cursor-pointer group">
+                <input type="checkbox" data-filter="size" value="grande" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Grande</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Limpiar filtros -->
+          <button type="button" id="clear-filters" class="mt-5 w-full text-sm text-purple-600 hover:text-purple-800 font-medium py-2 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors hidden">
+            ✕ Limpiar filtros
+          </button>
         </div>
       </div>
 
       <!-- Grid de Productos -->
       <div class="lg:col-span-3">
-        <div class="mb-4 text-gray-600">
-          {products && products.length > 0 ? `${products.length} productos encontrados` : 'No se encontraron productos'}
+        <!-- Barra superior -->
+        <div class="flex items-center justify-between mb-5">
+          <p class="text-sm text-gray-500">
+            <span id="result-count" class="text-purple-700 font-bold">{allProducts?.length || 0}</span> Resultados
+          </p>
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500 hidden sm:inline">Ordenar por</span>
+            <select id="sort-select" class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent cursor-pointer">
+              <option value="default">Relevancia</option>
+              <option value="price-asc">Precio: menor a mayor</option>
+              <option value="price-desc">Precio: mayor a menor</option>
+              <option value="name-asc">Nombre: A - Z</option>
+              <option value="name-desc">Nombre: Z - A</option>
+            </select>
+          </div>
         </div>
 
         <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          {products && products.map((product) => (
-            <div class="product-card" data-product={JSON.stringify(product)}>
-              <!-- Renderizado por React -->
-            </div>
-          ))}
+          <!-- Renderizado por JS -->
         </div>
 
-        {(!products || products.length === 0) && (
-          <div class="text-center py-16">
-            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-            </svg>
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
-            <p class="text-gray-500">Prueba con otros filtros</p>
-          </div>
-        )}
+        <div id="no-results" class="text-center py-16 hidden">
+          <svg class="w-16 h-16 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <h3 class="text-lg font-semibold text-gray-700 mb-1">No hay productos con estos filtros</h3>
+          <p class="text-sm text-gray-400">Prueba cambiando o quitando filtros</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Script para renderizar ProductCards -->
+  <!-- Datos de productos para JS -->
+  <script define:vars={{ allProducts }}>
+    window.__ALL_PRODUCTS = allProducts || [];
+  </script>
+
   <script>
     import { createElement } from 'react';
     import { createRoot } from 'react-dom/client';
     import ProductCard from '../components/ProductCard.tsx';
-    
-    // Renderizar las tarjetas de producto con React
-    document.addEventListener('DOMContentLoaded', () => {
-      const productCards = document.querySelectorAll('.product-card');
-      productCards.forEach((container) => {
-        const productData = container.getAttribute('data-product');
-        if (productData) {
-          const product = JSON.parse(productData);
-          const root = createRoot(container);
-          root.render(createElement(ProductCard, { product, showQuickActions: true }));
+
+    const allProducts: any[] = (window as any).__ALL_PRODUCTS || [];
+    let currentSort = 'default';
+
+    // --- Secciones colapsables ---
+    document.querySelectorAll('.filter-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.closest('.filter-section')!;
+        const content = section.querySelector('.filter-content')!;
+        const arrow = section.querySelector('.filter-arrow')!;
+        const isOpen = section.getAttribute('data-open') === 'true';
+        
+        if (isOpen) {
+          content.classList.add('hidden');
+          arrow.classList.add('-rotate-90');
+          section.setAttribute('data-open', 'false');
+        } else {
+          content.classList.remove('hidden');
+          arrow.classList.remove('-rotate-90');
+          section.setAttribute('data-open', 'true');
         }
       });
     });
 
-    // Aplicar filtros
-    const form = document.getElementById('filter-form');
-    const applyButton = document.getElementById('apply-filters');
-
-    // Cargar valores de filtro desde URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('tipo')) {
-      const el = document.querySelector(`input[name="tipo"][value="${urlParams.get('tipo')}"]`) as HTMLInputElement;
-      if (el) el.checked = true;
-    }
-    if (urlParams.get('tamano')) {
-      const el = document.querySelector(`input[name="tamano"][value="${urlParams.get('tamano')}"]`) as HTMLInputElement;
-      if (el) el.checked = true;
-    }
-    if (urlParams.get('categoria')) {
-      const el = document.querySelector(`input[name="categoria"][value="${urlParams.get('categoria')}"]`) as HTMLInputElement;
-      if (el) el.checked = true;
-    }
-    if (urlParams.get('edad')) {
-      const el = document.querySelector(`input[name="edad"][value="${urlParams.get('edad')}"]`) as HTMLInputElement;
-      if (el) el.checked = true;
+    // --- Filtrado en cliente ---
+    function getActiveFilters(): Record<string, string[]> {
+      const filters: Record<string, string[]> = {};
+      document.querySelectorAll('.filter-check:checked').forEach((cb: any) => {
+        const key = cb.getAttribute('data-filter')!;
+        if (!filters[key]) filters[key] = [];
+        filters[key].push(cb.value);
+      });
+      return filters;
     }
 
-    applyButton?.addEventListener('click', () => {
-      const formData = new FormData(form as HTMLFormElement);
-      const params = new URLSearchParams();
+    function filterProducts(products: any[]): any[] {
+      const filters = getActiveFilters();
+      
+      // Mostrar/ocultar botón limpiar
+      const clearBtn = document.getElementById('clear-filters')!;
+      const hasFilters = Object.keys(filters).length > 0;
+      clearBtn.classList.toggle('hidden', !hasFilters);
 
-      if (formData.get('tipo')) params.set('tipo', formData.get('tipo') as string);
-      if (formData.get('tamano')) params.set('tamano', formData.get('tamano') as string);
-      if (formData.get('categoria')) params.set('categoria', formData.get('categoria') as string);
-      if (formData.get('edad')) params.set('edad', formData.get('edad') as string);
+      return products.filter(p => {
+        for (const [key, values] of Object.entries(filters)) {
+          if (key === 'on_sale') {
+            const isOnSale = p.on_sale === true || p.on_sale === 'true';
+            if (!isOnSale) return false;
+          } else if (key === 'price_range') {
+            const price = p.sale_price && (p.on_sale === true || p.on_sale === 'true') ? Number(p.sale_price) : Number(p.price);
+            const inRange = values.some(range => {
+              const [min, max] = range.split('-').map(Number);
+              return price >= min && price <= max;
+            });
+            if (!inRange) return false;
+          } else {
+            if (!values.includes(p[key])) return false;
+          }
+        }
+        return true;
+      });
+    }
 
-      window.location.href = `/productos?${params.toString()}`;
+    function sortProducts(products: any[]): any[] {
+      const sorted = [...products];
+      switch (currentSort) {
+        case 'price-asc':
+          sorted.sort((a, b) => {
+            const pa = (a.on_sale === true || a.on_sale === 'true') && a.sale_price ? Number(a.sale_price) : Number(a.price);
+            const pb = (b.on_sale === true || b.on_sale === 'true') && b.sale_price ? Number(b.sale_price) : Number(b.price);
+            return pa - pb;
+          });
+          break;
+        case 'price-desc':
+          sorted.sort((a, b) => {
+            const pa = (a.on_sale === true || a.on_sale === 'true') && a.sale_price ? Number(a.sale_price) : Number(a.price);
+            const pb = (b.on_sale === true || b.on_sale === 'true') && b.sale_price ? Number(b.sale_price) : Number(b.price);
+            return pb - pa;
+          });
+          break;
+        case 'name-asc':
+          sorted.sort((a, b) => a.name.localeCompare(b.name));
+          break;
+        case 'name-desc':
+          sorted.sort((a, b) => b.name.localeCompare(a.name));
+          break;
+      }
+      return sorted;
+    }
+
+    function renderProducts() {
+      const filtered = filterProducts(allProducts);
+      const sorted = sortProducts(filtered);
+      
+      const grid = document.getElementById('products-grid')!;
+      const noResults = document.getElementById('no-results')!;
+      const countEl = document.getElementById('result-count')!;
+
+      countEl.textContent = String(sorted.length);
+
+      if (sorted.length === 0) {
+        grid.innerHTML = '';
+        noResults.classList.remove('hidden');
+        return;
+      }
+
+      noResults.classList.add('hidden');
+
+      // Limpiar grid
+      grid.innerHTML = '';
+
+      // Renderizar cada producto
+      sorted.forEach(product => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'product-card';
+        grid.appendChild(wrapper);
+        const root = createRoot(wrapper);
+        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+      });
+    }
+
+    // --- Event Listeners ---
+
+    // Checkboxes: filtrar al instante
+    document.querySelectorAll('.filter-check').forEach(cb => {
+      cb.addEventListener('change', () => renderProducts());
     });
+
+    // Ordenar
+    document.getElementById('sort-select')?.addEventListener('change', (e) => {
+      currentSort = (e.target as HTMLSelectElement).value;
+      renderProducts();
+    });
+
+    // Limpiar filtros
+    document.getElementById('clear-filters')?.addEventListener('click', () => {
+      document.querySelectorAll('.filter-check').forEach((cb: any) => cb.checked = false);
+      renderProducts();
+    });
+
+    // Render inicial
+    renderProducts();
   </script>
 </Layout>
