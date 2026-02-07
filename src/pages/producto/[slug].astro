@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../lib/supabase';
+import ProductReviews from '../../components/ProductReviews';
 
 // Obtener el slug o id del producto
 const { slug } = Astro.params;
@@ -50,6 +51,28 @@ const hasDiscount = product.on_sale && product.sale_price && product.sale_price 
 const discountPercent = hasDiscount 
   ? Math.round((1 - product.sale_price / product.price) * 100) 
   : 0;
+
+// Obtener estadísticas de reseñas reales
+const { data: reviewStats } = await supabase.rpc('get_product_review_stats', {
+  p_product_id: product.id,
+});
+const avgRating = reviewStats?.avg_rating || 0;
+const totalReviews = reviewStats?.total_reviews || 0;
+const fullStars = Math.floor(avgRating);
+const hasHalf = avgRating - fullStars >= 0.3;
+const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+
+// Generar HTML de estrellas para evitar problemas con key en SVGs de Astro
+const starFull = '<svg class="w-5 h-5 text-yellow-400 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+const starHalf = '<svg class="w-5 h-5" viewBox="0 0 20 20"><defs><linearGradient id="half-star"><stop offset="50%" stop-color="#facc15"/><stop offset="50%" stop-color="#d1d5db"/></linearGradient></defs><path fill="url(#half-star)" d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+const starEmpty = '<svg class="w-5 h-5 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>';
+
+let starsHtml = '';
+if (avgRating > 0) {
+  starsHtml = starFull.repeat(fullStars) + (hasHalf ? starHalf : '') + starEmpty.repeat(emptyStars);
+} else {
+  starsHtml = starEmpty.repeat(5);
+}
 ---
 
 <Layout title={`${product.name} - Venice`}>
@@ -106,36 +129,16 @@ const discountPercent = hasDiscount
 
         <!-- Información del Producto -->
         <div class="space-y-6">
-          <!-- Badges -->
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm font-medium rounded-full">
-              {product.animal_type === 'perro' ? 'Perro' : product.animal_type === 'gato' ? 'Gato' : 'Otros'}
-            </span>
-            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              {product.category}
-            </span>
-            <span class="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
-              {product.size}
-            </span>
-            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-              {product.age_range}
-            </span>
-          </div>
-
           <!-- Nombre -->
           <h1 class="text-3xl font-bold text-gray-900">{product.name}</h1>
 
-          <!-- Valoración (placeholder) -->
-          <div class="flex items-center gap-2">
-            <div class="flex text-yellow-400">
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-              <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-              <svg class="w-5 h-5 fill-current text-gray-300" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
-            </div>
-            <span class="text-gray-600">(4.5) • 127 valoraciones</span>
-          </div>
+          <!-- Valoración -->
+          <a href="#valoraciones" class="flex items-center gap-2 group">
+            <div class="flex" set:html={starsHtml} />
+            <span class="text-gray-600 group-hover:text-purple-700 transition-colors">
+              {avgRating > 0 ? `(${avgRating}) • ${totalReviews} valoraciones` : 'Sin valoraciones aún'}
+            </span>
+          </a>
 
           <!-- Precio -->
           <div class="space-y-1">
@@ -255,6 +258,9 @@ const discountPercent = hasDiscount
           </div>
         </div>
       </div>
+
+      <!-- Sección de Valoraciones (componente React interactivo) -->
+      <ProductReviews client:load productId={product.id} productName={product.name} />
 
       <!-- Productos Relacionados -->
       {relatedProducts && relatedProducts.length > 0 && (

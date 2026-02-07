@@ -59,6 +59,26 @@ export interface PromoCode {
   created_at: string;
 }
 
+export interface ProductReview {
+  id: string;
+  product_id: string;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  verified_purchase: boolean;
+  helpful_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReviewHelpfulVote {
+  id: string;
+  review_id: string;
+  user_id: string;
+  created_at: string;
+}
+
 export interface CartItem {
   product: Product;
   quantity: number;
