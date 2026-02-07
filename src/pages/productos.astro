@@ -196,7 +196,7 @@ const { data: allProducts } = await supabase.from('products').select('*');
   </div>
 
   <!-- Datos de productos para JS -->
-  <script type="application/json" id="products-data" set:html={JSON.stringify(allProducts || [])}></script>
+  <div id="products-data" data-products={JSON.stringify(allProducts || [])} style="display:none;"></div>
 
   <script>
     import { createElement } from 'react';
@@ -204,14 +204,20 @@ const { data: allProducts } = await supabase.from('products').select('*');
     import ProductCard from '../components/ProductCard.tsx';
 
     let allProducts: any[] = [];
-    try {
-      const dataEl = document.getElementById('products-data');
-      if (dataEl) allProducts = JSON.parse(dataEl.textContent || '[]');
-    } catch (e) {
-      console.error('Error parsing products:', e);
-    }
-
     let currentSort = 'default';
+    const roots: Map<HTMLElement, any> = new Map();
+
+    function loadProducts() {
+      try {
+        const el = document.getElementById('products-data');
+        if (el) {
+          const raw = el.getAttribute('data-products');
+          if (raw) allProducts = JSON.parse(raw);
+        }
+      } catch (e) {
+        console.error('Error loading products:', e);
+      }
+    }
 
     // --- Filtrado en cliente ---
     function getActiveFilters(): Record<string, string[]> {
@@ -283,13 +289,18 @@ const { data: allProducts } = await supabase.from('products').select('*');
       const filtered = filterProducts(allProducts);
       const sorted = sortProducts(filtered);
       
-      const grid = document.getElementById('products-grid')!;
-      const noResults = document.getElementById('no-results')!;
-      const countEl = document.getElementById('result-count')!;
+      const grid = document.getElementById('products-grid');
+      const noResults = document.getElementById('no-results');
+      const countEl = document.getElementById('result-count');
+
+      if (!grid || !noResults || !countEl) return;
 
       countEl.textContent = String(sorted.length);
 
       if (sorted.length === 0) {
+        // Limpiar roots de React
+        roots.forEach((root) => root.unmount());
+        roots.clear();
         grid.innerHTML = '';
         noResults.classList.remove('hidden');
         return;
@@ -297,7 +308,9 @@ const { data: allProducts } = await supabase.from('products').select('*');
 
       noResults.classList.add('hidden');
 
-      // Limpiar grid
+      // Limpiar roots anteriores
+      roots.forEach((root) => root.unmount());
+      roots.clear();
       grid.innerHTML = '';
 
       // Renderizar cada producto
@@ -306,6 +319,7 @@ const { data: allProducts } = await supabase.from('products').select('*');
         wrapper.className = 'product-card';
         grid.appendChild(wrapper);
         const root = createRoot(wrapper);
+        roots.set(wrapper, root);
         root.render(createElement(ProductCard, { product }));
       });
     }
@@ -313,6 +327,10 @@ const { data: allProducts } = await supabase.from('products').select('*');
     // --- Event Listeners ---
 
     function init() {
+      // Cargar productos desde el DOM
+      loadProducts();
+      console.log('Productos cargados:', allProducts.length);
+
       // Secciones colapsables
       document.querySelectorAll('.filter-toggle').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -335,7 +353,10 @@ const { data: allProducts } = await supabase.from('products').select('*');
 
       // Checkboxes: filtrar al instante
       document.querySelectorAll('.filter-check').forEach(cb => {
-        cb.addEventListener('change', () => renderProducts());
+        cb.addEventListener('change', () => {
+          console.log('Filtro cambiado, aplicando...');
+          renderProducts();
+        });
       });
 
       // Ordenar
@@ -358,7 +379,8 @@ const { data: allProducts } = await supabase.from('products').select('*');
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
     } else {
-      init();
+      // Pequeño delay para asegurar que el HTML está parseado
+      setTimeout(init, 0);
     }
   </script>
 </Layout>
