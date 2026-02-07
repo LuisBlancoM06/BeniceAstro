@@ -213,26 +213,6 @@ const { data: allProducts } = await supabase.from('products').select('*');
 
     let currentSort = 'default';
 
-    // --- Secciones colapsables ---
-    document.querySelectorAll('.filter-toggle').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const section = btn.closest('.filter-section')!;
-        const content = section.querySelector('.filter-content')!;
-        const arrow = section.querySelector('.filter-arrow')!;
-        const isOpen = section.getAttribute('data-open') === 'true';
-        
-        if (isOpen) {
-          content.classList.add('hidden');
-          arrow.classList.add('-rotate-90');
-          section.setAttribute('data-open', 'false');
-        } else {
-          content.classList.remove('hidden');
-          arrow.classList.remove('-rotate-90');
-          section.setAttribute('data-open', 'true');
-        }
-      });
-    });
-
     // --- Filtrado en cliente ---
     function getActiveFilters(): Record<string, string[]> {
       const filters: Record<string, string[]> = {};
