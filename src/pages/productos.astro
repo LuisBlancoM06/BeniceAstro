@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 
 // Obtener TODOS los productos (filtrado se hace en cliente)
 const { data: allProducts } = await supabase.from('products').select('*');
+const productsJson = JSON.stringify(allProducts || []);
 ---
 
 <Layout title="Productos">
@@ -195,29 +196,19 @@ const { data: allProducts } = await supabase.from('products').select('*');
     </div>
   </div>
 
-  <!-- Datos de productos para JS -->
-  <div id="products-data" data-products={JSON.stringify(allProducts || [])} style="display:none;"></div>
+  <!-- Pasar datos al cliente -->
+  <script is:inline define:vars={{ productsJson }}>
+    window.__PRODUCTS_DATA = productsJson;
+  </script>
 
   <script>
     import { createElement } from 'react';
     import { createRoot } from 'react-dom/client';
     import ProductCard from '../components/ProductCard.tsx';
 
-    let allProducts: any[] = [];
+    const allProducts: any[] = JSON.parse((window as any).__PRODUCTS_DATA || '[]');
     let currentSort = 'default';
     const roots: Map<HTMLElement, any> = new Map();
-
-    function loadProducts() {
-      try {
-        const el = document.getElementById('products-data');
-        if (el) {
-          const raw = el.getAttribute('data-products');
-          if (raw) allProducts = JSON.parse(raw);
-        }
-      } catch (e) {
-        console.error('Error loading products:', e);
-      }
-    }
 
     // --- Filtrado en cliente ---
     function getActiveFilters(): Record<string, string[]> {
@@ -327,9 +318,7 @@ const { data: allProducts } = await supabase.from('products').select('*');
     // --- Event Listeners ---
 
     function init() {
-      // Cargar productos desde el DOM
-      loadProducts();
-      console.log('Productos cargados:', allProducts.length);
+      console.log('Init - Productos:', allProducts.length);
 
       // Secciones colapsables
       document.querySelectorAll('.filter-toggle').forEach(btn => {
