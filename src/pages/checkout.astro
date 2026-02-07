@@ -3,101 +3,134 @@ import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Checkout" hideNewsletterPopup={true}>
-  <div class="min-h-screen bg-gray-50 py-12">
-    <div class="max-w-4xl mx-auto px-4">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-orange-50/20 py-8 sm:py-12">
+    <div class="max-w-5xl mx-auto px-4">
       
-      <!-- Header -->
-      <div class="text-center mb-10">
-        <h1 class="text-3xl font-bold text-gray-800">Finalizar Compra</h1>
-        <p class="text-gray-600 mt-2">Revisa tu pedido antes de proceder al pago</p>
+      <!-- Header con pasos -->
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-center gap-3 mb-4">
+          <div class="flex items-center gap-2 text-purple-600">
+            <span class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">1</span>
+            <span class="text-sm font-medium hidden sm:inline">Carrito</span>
+          </div>
+          <div class="w-12 h-0.5 bg-purple-600"></div>
+          <div class="flex items-center gap-2 text-purple-600">
+            <span class="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">2</span>
+            <span class="text-sm font-medium hidden sm:inline">Revisión</span>
+          </div>
+          <div class="w-12 h-0.5 bg-gray-300"></div>
+          <div class="flex items-center gap-2 text-gray-400">
+            <span class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-bold">3</span>
+            <span class="text-sm font-medium hidden sm:inline">Pago</span>
+          </div>
+        </div>
+        <h1 class="text-3xl font-extrabold text-gray-900">Finalizar Compra</h1>
+        <p class="text-gray-500 mt-1 text-sm">Revisa tu pedido y ajusta las cantidades si lo necesitas</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         <!-- Resumen del pedido -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-          <h2 class="text-xl font-bold text-gray-800 mb-6">Resumen del Pedido</h2>
+        <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              Tu Pedido
+            </h2>
+            <span id="item-count" class="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-medium">0 productos</span>
+          </div>
           
-          <div id="checkout-items" class="space-y-4">
+          <div id="checkout-items" class="space-y-3">
             <div class="text-center py-8 text-gray-500">
               <div class="animate-pulse">Cargando productos...</div>
             </div>
           </div>
+
+          <div class="mt-5 pt-4 border-t border-gray-100">
+            <a href="/productos" class="inline-flex items-center gap-1.5 text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+              Seguir comprando
+            </a>
+          </div>
         </div>
 
         <!-- Panel de pago -->
-        <div class="lg:col-span-1">
-          <div class="bg-white rounded-xl shadow-sm p-6 sticky top-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Total</h2>
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 sticky top-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"></path></svg>
+              Resumen
+            </h2>
 
             <!-- Código promocional -->
-            <div class="mb-6">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Código promocional</label>
+            <div class="mb-5">
+              <label class="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Código descuento</label>
               <div class="flex gap-2">
                 <input 
                   type="text"
                   id="promo-code"
                   placeholder="Ej: WELCOME10"
-                  class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
                 />
                 <button 
                   id="apply-promo"
-                  class="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                  class="px-4 py-2 text-sm bg-purple-100 text-purple-700 font-semibold rounded-lg hover:bg-purple-200 transition-colors"
                 >
                   Aplicar
                 </button>
               </div>
-              <p id="promo-message" class="text-sm mt-2 hidden"></p>
+              <p id="promo-message" class="text-xs mt-1.5 hidden"></p>
             </div>
 
             <!-- Desglose -->
-            <div class="space-y-3 border-t border-gray-100 pt-4">
-              <div class="flex justify-between text-gray-600">
+            <div class="space-y-2.5 border-t border-dashed border-gray-200 pt-4">
+              <div class="flex justify-between text-sm text-gray-600">
                 <span>Subtotal</span>
-                <span id="subtotal">0.00€</span>
+                <span id="subtotal" class="font-medium">0.00€</span>
               </div>
-              <div class="flex justify-between text-gray-600" id="discount-row" style="display: none;">
+              <div class="flex justify-between text-sm text-gray-600" id="discount-row" style="display: none;">
                 <span>Descuento</span>
-                <span id="discount" class="text-green-600">-0.00€</span>
+                <span id="discount" class="text-green-600 font-medium">-0.00€</span>
               </div>
-              <div class="flex justify-between text-gray-600">
+              <div class="flex justify-between text-sm text-gray-600">
                 <span>Envío</span>
-                <span id="shipping">4.99€</span>
+                <span id="shipping" class="font-medium">4.99€</span>
               </div>
-              <div class="flex justify-between text-lg font-bold text-gray-800 border-t border-gray-100 pt-3">
+              <div class="flex justify-between text-xl font-extrabold text-gray-900 border-t border-gray-200 pt-3 mt-1">
                 <span>Total</span>
                 <span id="total" class="text-purple-700">0.00€</span>
               </div>
             </div>
 
             <!-- Info envío gratis -->
-            <div id="free-shipping-info" class="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm hidden">
-              <p class="text-purple-800">
-                ¡Añade <strong id="remaining-for-free">0€</strong> más para envío GRATIS!
+            <div id="free-shipping-info" class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-orange-50 border border-purple-200/50 rounded-xl text-xs hidden">
+              <p class="text-purple-800 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-purple-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Añade <strong id="remaining-for-free" class="text-purple-700">0€</strong> más para envío GRATIS
               </p>
             </div>
 
             <!-- Botón de pago -->
             <button 
               id="checkout-btn"
-              class="w-full mt-6 py-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-orange-500 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="group w-full mt-5 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-orange-500 hover:to-orange-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base"
             >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              Pagar con Stripe
+              Pagar
             </button>
 
             <!-- Seguridad -->
-            <div class="mt-4 text-center">
-              <p class="text-xs text-gray-500 flex items-center justify-center gap-1">
-                Pago 100% seguro con Stripe
-              </p>
-            </div>
-
-            <!-- Métodos aceptados -->
-            <div class="mt-4 flex justify-center gap-2">
-              <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+            <div class="mt-4 flex items-center justify-center gap-4">
+              <div class="flex items-center gap-1 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <span class="text-[10px] font-medium">Pago seguro</span>
+              </div>
+              <div class="flex items-center gap-1 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                <span class="text-[10px] font-medium">Visa / Mastercard</span>
+              </div>
             </div>
           </div>
         </div>
@@ -106,7 +139,7 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <script>
-    import { $cartItems, $cartSubtotal, clearCart } from '../stores/cart';
+    import { $cartItems, $cartSubtotal, updateQuantity, removeFromCart, clearCart } from '../stores/cart';
     import { supabase } from '../lib/supabase';
 
     let appliedPromoCode = '';
@@ -116,33 +149,74 @@ import Layout from '../layouts/Layout.astro';
     function renderItems() {
       const items = $cartItems.get();
       const container = document.getElementById('checkout-items');
+      const countEl = document.getElementById('item-count');
       
+      const totalItems = items.reduce((s, i) => s + i.quantity, 0);
+      if (countEl) countEl.textContent = `${totalItems} producto${totalItems !== 1 ? 's' : ''}`;
+
       if (items.length === 0) {
         container!.innerHTML = `
-          <div class="text-center py-12">
-            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Tu carrito está vacío</h3>
-            <a href="/productos" class="text-purple-700 hover:underline">Ir a productos</a>
+          <div class="text-center py-10">
+            <svg class="w-14 h-14 mx-auto mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            <h3 class="text-lg font-bold text-gray-700 mb-1">Tu carrito está vacío</h3>
+            <p class="text-sm text-gray-400 mb-4">¡Descubre nuestros productos!</p>
+            <a href="/productos" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 transition-colors">
+              Ver productos
+            </a>
           </div>
         `;
         return;
       }
 
-      container!.innerHTML = items.map(item => `
-        <div class="flex gap-4 p-4 bg-gray-50 rounded-xl">
-          <div class="w-20 h-20 bg-white rounded-lg overflow-hidden flex-shrink-0">
-            <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-full h-full object-contain" />
+      container!.innerHTML = items.map(item => {
+        const unitPrice = item.salePrice || item.price;
+        const lineTotal = (unitPrice * item.quantity).toFixed(2);
+        return `
+        <div class="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100 hover:border-purple-200 transition-colors">
+          <div class="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
+            <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-full h-full object-contain p-1" />
           </div>
-          <div class="flex-1">
-            <h3 class="font-medium text-gray-800">${item.name}</h3>
-            <p class="text-sm text-gray-500">Cantidad: ${item.quantity}</p>
-            <p class="font-bold text-gray-800 mt-1">
-              ${((item.salePrice || item.price) * item.quantity).toFixed(2)}€
-            </p>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-semibold text-sm text-gray-800 truncate">${item.name}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">${unitPrice.toFixed(2)}€/ud</p>
           </div>
-        </div>
-      `).join('');
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button 
+              onclick="window.__changeQty('${item.id}', ${item.quantity - 1})"
+              class="w-7 h-7 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 flex items-center justify-center transition-colors text-sm font-bold"
+              ${item.quantity <= 1 ? 'disabled style="opacity:0.35;cursor:not-allowed;"' : ''}
+            >−</button>
+            <span class="w-7 text-center text-sm font-bold text-gray-800">${item.quantity}</span>
+            <button 
+              onclick="window.__changeQty('${item.id}', ${item.quantity + 1})"
+              class="w-7 h-7 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 flex items-center justify-center transition-colors text-sm font-bold"
+            >+</button>
+          </div>
+          <span class="text-sm font-bold text-purple-700 w-16 text-right shrink-0">${lineTotal}€</span>
+          <button 
+            onclick="window.__removeItem('${item.id}')"
+            class="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0" 
+            title="Eliminar"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+        </div>`;
+      }).join('');
     }
+
+    // Funciones globales para los botones inline
+    (window as any).__changeQty = (id: string, qty: number) => {
+      if (qty < 1) return;
+      updateQuantity(id, qty);
+      renderItems();
+      updateTotals();
+    };
+
+    (window as any).__removeItem = (id: string) => {
+      removeFromCart(id);
+      renderItems();
+      updateTotals();
+    };
 
     // Actualizar totales
     function updateTotals() {
@@ -162,11 +236,11 @@ import Layout from '../layouts/Layout.astro';
         discountRow.style.display = 'none';
       }
 
-      document.getElementById('shipping')!.textContent = shipping === 0 ? '¡Gratis!' : `${shipping.toFixed(2)}€`;
+      document.getElementById('shipping')!.textContent = shipping === 0 ? '¡GRATIS!' : `${shipping.toFixed(2)}€`;
       document.getElementById('total')!.textContent = `${total.toFixed(2)}€`;
 
       const freeShippingInfo = document.getElementById('free-shipping-info') as HTMLElement;
-      if (afterDiscount < 49) {
+      if (afterDiscount < 49 && afterDiscount > 0) {
         freeShippingInfo.classList.remove('hidden');
         document.getElementById('remaining-for-free')!.textContent = `${(49 - afterDiscount).toFixed(2)}€`;
       } else {
@@ -192,7 +266,7 @@ import Layout from '../layouts/Layout.astro';
 
         if (error || !promo) {
           message!.textContent = 'Código no válido';
-          message!.className = 'text-sm mt-2 text-red-600';
+          message!.className = 'text-xs mt-1.5 text-red-600';
           message!.classList.remove('hidden');
           return;
         }
@@ -201,7 +275,7 @@ import Layout from '../layouts/Layout.astro';
         discountPercent = promo.discount_percentage;
         
         message!.textContent = `¡${discountPercent}% de descuento aplicado!`;
-        message!.className = 'text-sm mt-2 text-green-600';
+        message!.className = 'text-xs mt-1.5 text-green-600 font-medium';
         message!.classList.remove('hidden');
 
         updateTotals();
@@ -221,10 +295,9 @@ import Layout from '../layouts/Layout.astro';
 
       const btn = document.getElementById('checkout-btn') as HTMLButtonElement;
       btn.disabled = true;
-      btn.innerHTML = '<span class="animate-pulse">Procesando...</span>';
+      btn.innerHTML = '<svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Procesando...';
 
       try {
-        // Obtener usuario actual
         const { data: { session } } = await supabase.auth.getSession();
 
         const response = await fetch('/api/stripe/create-checkout-session', {
@@ -243,7 +316,6 @@ import Layout from '../layouts/Layout.astro';
           throw new Error(result.error || 'Error al crear sesión de pago');
         }
 
-        // Redirigir a Stripe Checkout
         window.location.href = result.url;
 
       } catch (err: any) {
@@ -254,7 +326,7 @@ import Layout from '../layouts/Layout.astro';
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          Pagar con Stripe
+          Pagar
         `;
       }
     }
