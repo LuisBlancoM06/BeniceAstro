@@ -1,16 +1,16 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { supabase } from '../lib/supabase';
+import ProductCard from '../components/ProductCard.tsx';
 
-// Obtener TODOS los productos (filtrado se hace en cliente)
 const { data: allProducts } = await supabase.from('products').select('*');
-const productsJson = JSON.stringify(allProducts || []);
+const products = allProducts || [];
 ---
 
 <Layout title="Productos">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
       <!-- Filtros -->
       <div class="lg:col-span-1">
         <div class="sticky top-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -18,7 +18,7 @@ const productsJson = JSON.stringify(allProducts || []);
             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
             Filtros
           </h2>
-          
+
           <!-- Especie -->
           <div class="filter-section border-t border-gray-100 pt-4" data-open="true">
             <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-purple-600 transition-colors">
@@ -28,15 +28,15 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="animal_type" value="perro" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Perro</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Perro</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="animal_type" value="gato" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Gato</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Gato</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="animal_type" value="otros" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Otros animales</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Otros animales</span>
               </label>
             </div>
           </div>
@@ -50,23 +50,23 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2 hidden">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="category" value="alimentacion" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Alimentación</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Alimentación</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="category" value="higiene" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Higiene</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Higiene</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="category" value="salud" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Salud</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Salud</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="category" value="accesorios" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Accesorios</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Accesorios</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="category" value="juguetes" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Juguetes</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Juguetes</span>
               </label>
             </div>
           </div>
@@ -80,7 +80,7 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2 hidden">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="on_sale" value="true" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Solo ofertas</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Solo ofertas</span>
               </label>
             </div>
           </div>
@@ -94,19 +94,19 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2 hidden">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="price_range" value="0-10" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Menos de 10€</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Menos de 10€</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="price_range" value="10-25" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">10€ - 25€</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">10€ - 25€</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="price_range" value="25-50" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">25€ - 50€</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">25€ - 50€</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="price_range" value="50-999" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Más de 50€</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Más de 50€</span>
               </label>
             </div>
           </div>
@@ -120,15 +120,15 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2 hidden">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="age_range" value="cachorro" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Cachorro / Joven</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Cachorro / Joven</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="age_range" value="adulto" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Adulto</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Adulto</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="age_range" value="senior" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Senior</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Senior</span>
               </label>
             </div>
           </div>
@@ -142,15 +142,15 @@ const productsJson = JSON.stringify(allProducts || []);
             <div class="filter-content space-y-2 hidden">
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="size" value="mini" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Mini</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Mini</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="size" value="mediano" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Mediano</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Mediano</span>
               </label>
               <label class="flex items-center gap-2.5 cursor-pointer group">
                 <input type="checkbox" data-filter="size" value="grande" class="filter-check w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500">
-                <span class="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Grande</span>
+                <span class="text-sm text-gray-600 group-hover:text-gray-900">Grande</span>
               </label>
             </div>
           </div>
@@ -164,10 +164,9 @@ const productsJson = JSON.stringify(allProducts || []);
 
       <!-- Grid de Productos -->
       <div class="lg:col-span-3">
-        <!-- Barra superior -->
         <div class="flex items-center justify-between mb-5">
           <p class="text-sm text-gray-500">
-            <span id="result-count" class="text-purple-700 font-bold">{allProducts?.length || 0}</span> Resultados
+            <span id="result-count" class="text-purple-700 font-bold">{products.length}</span> Resultados
           </p>
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500 hidden sm:inline">Ordenar por</span>
@@ -182,7 +181,25 @@ const productsJson = JSON.stringify(allProducts || []);
         </div>
 
         <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <!-- Renderizado por JS -->
+          {products.map((product: any) => {
+            const price = product.sale_price && (product.on_sale === true || product.on_sale === 'true') 
+              ? Number(product.sale_price) : Number(product.price);
+            const isOnSale = product.on_sale === true || product.on_sale === 'true';
+            return (
+              <div 
+                class="product-card"
+                data-animal={product.animal_type}
+                data-category={product.category}
+                data-size={product.size}
+                data-age={product.age_range}
+                data-onsale={String(isOnSale)}
+                data-price={String(price)}
+                data-name={product.name}
+              >
+                <ProductCard product={product} client:load />
+              </div>
+            );
+          })}
         </div>
 
         <div id="no-results" class="text-center py-16 hidden">
@@ -196,180 +213,108 @@ const productsJson = JSON.stringify(allProducts || []);
     </div>
   </div>
 
-  <!-- Pasar datos al cliente -->
-  <script is:inline define:vars={{ productsJson }}>
-    window.__PRODUCTS_DATA = productsJson;
-  </script>
-
   <script>
-    import { createElement } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import ProductCard from '../components/ProductCard.tsx';
+    // Secciones colapsables
+    document.querySelectorAll('.filter-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.closest('.filter-section')!;
+        const content = section.querySelector('.filter-content')!;
+        const arrow = section.querySelector('.filter-arrow')!;
+        const isOpen = section.getAttribute('data-open') === 'true';
+        if (isOpen) {
+          content.classList.add('hidden');
+          arrow.classList.add('-rotate-90');
+          section.setAttribute('data-open', 'false');
+        } else {
+          content.classList.remove('hidden');
+          arrow.classList.remove('-rotate-90');
+          section.setAttribute('data-open', 'true');
+        }
+      });
+    });
 
-    const allProducts: any[] = JSON.parse((window as any).__PRODUCTS_DATA || '[]');
-    let currentSort = 'default';
-    const roots: Map<HTMLElement, any> = new Map();
-
-    // --- Filtrado en cliente ---
-    function getActiveFilters(): Record<string, string[]> {
+    function applyFilters() {
       const filters: Record<string, string[]> = {};
-      document.querySelectorAll('.filter-check:checked').forEach((cb: any) => {
+      document.querySelectorAll<HTMLInputElement>('.filter-check:checked').forEach(cb => {
         const key = cb.getAttribute('data-filter')!;
         if (!filters[key]) filters[key] = [];
         filters[key].push(cb.value);
       });
-      return filters;
-    }
 
-    function filterProducts(products: any[]): any[] {
-      const filters = getActiveFilters();
-      
-      // Mostrar/ocultar botón limpiar
-      const clearBtn = document.getElementById('clear-filters')!;
       const hasFilters = Object.keys(filters).length > 0;
-      clearBtn.classList.toggle('hidden', !hasFilters);
+      document.getElementById('clear-filters')?.classList.toggle('hidden', !hasFilters);
 
-      return products.filter(p => {
+      const cards = document.querySelectorAll<HTMLElement>('#products-grid .product-card');
+      let visible = 0;
+
+      cards.forEach(card => {
+        let show = true;
+
         for (const [key, values] of Object.entries(filters)) {
-          if (key === 'on_sale') {
-            const isOnSale = p.on_sale === true || p.on_sale === 'true';
-            if (!isOnSale) return false;
+          if (key === 'animal_type') {
+            if (!values.includes(card.dataset.animal || '')) show = false;
+          } else if (key === 'category') {
+            if (!values.includes(card.dataset.category || '')) show = false;
+          } else if (key === 'size') {
+            if (!values.includes(card.dataset.size || '')) show = false;
+          } else if (key === 'age_range') {
+            if (!values.includes(card.dataset.age || '')) show = false;
+          } else if (key === 'on_sale') {
+            if (card.dataset.onsale !== 'true') show = false;
           } else if (key === 'price_range') {
-            const price = p.sale_price && (p.on_sale === true || p.on_sale === 'true') ? Number(p.sale_price) : Number(p.price);
+            const price = parseFloat(card.dataset.price || '0');
             const inRange = values.some(range => {
               const [min, max] = range.split('-').map(Number);
               return price >= min && price <= max;
             });
-            if (!inRange) return false;
-          } else {
-            if (!values.includes(p[key])) return false;
+            if (!inRange) show = false;
           }
         }
-        return true;
+
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
       });
+
+      document.getElementById('result-count')!.textContent = String(visible);
+      document.getElementById('no-results')!.classList.toggle('hidden', visible > 0);
     }
 
-    function sortProducts(products: any[]): any[] {
-      const sorted = [...products];
-      switch (currentSort) {
-        case 'price-asc':
-          sorted.sort((a, b) => {
-            const pa = (a.on_sale === true || a.on_sale === 'true') && a.sale_price ? Number(a.sale_price) : Number(a.price);
-            const pb = (b.on_sale === true || b.on_sale === 'true') && b.sale_price ? Number(b.sale_price) : Number(b.price);
-            return pa - pb;
-          });
-          break;
-        case 'price-desc':
-          sorted.sort((a, b) => {
-            const pa = (a.on_sale === true || a.on_sale === 'true') && a.sale_price ? Number(a.sale_price) : Number(a.price);
-            const pb = (b.on_sale === true || b.on_sale === 'true') && b.sale_price ? Number(b.sale_price) : Number(b.price);
-            return pb - pa;
-          });
-          break;
-        case 'name-asc':
-          sorted.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case 'name-desc':
-          sorted.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-      }
-      return sorted;
+    function applySorting() {
+      const grid = document.getElementById('products-grid')!;
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>('.product-card'));
+      const sortVal = (document.getElementById('sort-select') as HTMLSelectElement).value;
+
+      cards.sort((a, b) => {
+        switch (sortVal) {
+          case 'price-asc':
+            return parseFloat(a.dataset.price || '0') - parseFloat(b.dataset.price || '0');
+          case 'price-desc':
+            return parseFloat(b.dataset.price || '0') - parseFloat(a.dataset.price || '0');
+          case 'name-asc':
+            return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+          case 'name-desc':
+            return (b.dataset.name || '').localeCompare(a.dataset.name || '');
+          default:
+            return 0;
+        }
+      });
+
+      cards.forEach(card => grid.appendChild(card));
+      applyFilters();
     }
 
-    function renderProducts() {
-      const filtered = filterProducts(allProducts);
-      const sorted = sortProducts(filtered);
-      
-      const grid = document.getElementById('products-grid');
-      const noResults = document.getElementById('no-results');
-      const countEl = document.getElementById('result-count');
+    // Filtrar al instante al cambiar checkbox
+    document.querySelectorAll('.filter-check').forEach(cb => {
+      cb.addEventListener('change', applyFilters);
+    });
 
-      if (!grid || !noResults || !countEl) return;
+    // Ordenar
+    document.getElementById('sort-select')?.addEventListener('change', applySorting);
 
-      countEl.textContent = String(sorted.length);
-
-      if (sorted.length === 0) {
-        // Limpiar roots de React
-        roots.forEach((root) => root.unmount());
-        roots.clear();
-        grid.innerHTML = '';
-        noResults.classList.remove('hidden');
-        return;
-      }
-
-      noResults.classList.add('hidden');
-
-      // Limpiar roots anteriores
-      roots.forEach((root) => root.unmount());
-      roots.clear();
-      grid.innerHTML = '';
-
-      // Renderizar cada producto
-      sorted.forEach(product => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'product-card';
-        grid.appendChild(wrapper);
-        const root = createRoot(wrapper);
-        roots.set(wrapper, root);
-        root.render(createElement(ProductCard, { product }));
-      });
-    }
-
-    // --- Event Listeners ---
-
-    function init() {
-      console.log('Init - Productos:', allProducts.length);
-
-      // Secciones colapsables
-      document.querySelectorAll('.filter-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const section = btn.closest('.filter-section')!;
-          const content = section.querySelector('.filter-content')!;
-          const arrow = section.querySelector('.filter-arrow')!;
-          const isOpen = section.getAttribute('data-open') === 'true';
-          
-          if (isOpen) {
-            content.classList.add('hidden');
-            arrow.classList.add('-rotate-90');
-            section.setAttribute('data-open', 'false');
-          } else {
-            content.classList.remove('hidden');
-            arrow.classList.remove('-rotate-90');
-            section.setAttribute('data-open', 'true');
-          }
-        });
-      });
-
-      // Checkboxes: filtrar al instante
-      document.querySelectorAll('.filter-check').forEach(cb => {
-        cb.addEventListener('change', () => {
-          console.log('Filtro cambiado, aplicando...');
-          renderProducts();
-        });
-      });
-
-      // Ordenar
-      document.getElementById('sort-select')?.addEventListener('change', (e) => {
-        currentSort = (e.target as HTMLSelectElement).value;
-        renderProducts();
-      });
-
-      // Limpiar filtros
-      document.getElementById('clear-filters')?.addEventListener('click', () => {
-        document.querySelectorAll('.filter-check').forEach((cb: any) => cb.checked = false);
-        renderProducts();
-      });
-
-      // Render inicial
-      renderProducts();
-    }
-
-    // Ejecutar cuando el DOM esté listo
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      // Pequeño delay para asegurar que el HTML está parseado
-      setTimeout(init, 0);
-    }
+    // Limpiar filtros
+    document.getElementById('clear-filters')?.addEventListener('click', () => {
+      document.querySelectorAll<HTMLInputElement>('.filter-check').forEach(cb => cb.checked = false);
+      applyFilters();
+    });
   </script>
 </Layout>
