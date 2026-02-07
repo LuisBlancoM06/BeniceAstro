@@ -321,7 +321,7 @@ const { data: allProducts } = await supabase.from('products').select('*');
         wrapper.className = 'product-card';
         grid.appendChild(wrapper);
         const root = createRoot(wrapper);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        root.render(createElement(ProductCard, { product }));
       });
     }
 
