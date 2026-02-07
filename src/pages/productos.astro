@@ -196,16 +196,21 @@ const { data: allProducts } = await supabase.from('products').select('*');
   </div>
 
   <!-- Datos de productos para JS -->
-  <script define:vars={{ allProducts }}>
-    window.__ALL_PRODUCTS = allProducts || [];
-  </script>
+  <script type="application/json" id="products-data" set:html={JSON.stringify(allProducts || [])}></script>
 
   <script>
     import { createElement } from 'react';
     import { createRoot } from 'react-dom/client';
     import ProductCard from '../components/ProductCard.tsx';
 
-    const allProducts: any[] = (window as any).__ALL_PRODUCTS || [];
+    let allProducts: any[] = [];
+    try {
+      const dataEl = document.getElementById('products-data');
+      if (dataEl) allProducts = JSON.parse(dataEl.textContent || '[]');
+    } catch (e) {
+      console.error('Error parsing products:', e);
+    }
+
     let currentSort = 'default';
 
     // --- Secciones colapsables ---
@@ -327,24 +332,53 @@ const { data: allProducts } = await supabase.from('products').select('*');
 
     // --- Event Listeners ---
 
-    // Checkboxes: filtrar al instante
-    document.querySelectorAll('.filter-check').forEach(cb => {
-      cb.addEventListener('change', () => renderProducts());
-    });
+    function init() {
+      // Secciones colapsables
+      document.querySelectorAll('.filter-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const section = btn.closest('.filter-section')!;
+          const content = section.querySelector('.filter-content')!;
+          const arrow = section.querySelector('.filter-arrow')!;
+          const isOpen = section.getAttribute('data-open') === 'true';
+          
+          if (isOpen) {
+            content.classList.add('hidden');
+            arrow.classList.add('-rotate-90');
+            section.setAttribute('data-open', 'false');
+          } else {
+            content.classList.remove('hidden');
+            arrow.classList.remove('-rotate-90');
+            section.setAttribute('data-open', 'true');
+          }
+        });
+      });
 
-    // Ordenar
-    document.getElementById('sort-select')?.addEventListener('change', (e) => {
-      currentSort = (e.target as HTMLSelectElement).value;
+      // Checkboxes: filtrar al instante
+      document.querySelectorAll('.filter-check').forEach(cb => {
+        cb.addEventListener('change', () => renderProducts());
+      });
+
+      // Ordenar
+      document.getElementById('sort-select')?.addEventListener('change', (e) => {
+        currentSort = (e.target as HTMLSelectElement).value;
+        renderProducts();
+      });
+
+      // Limpiar filtros
+      document.getElementById('clear-filters')?.addEventListener('click', () => {
+        document.querySelectorAll('.filter-check').forEach((cb: any) => cb.checked = false);
+        renderProducts();
+      });
+
+      // Render inicial
       renderProducts();
-    });
+    }
 
-    // Limpiar filtros
-    document.getElementById('clear-filters')?.addEventListener('click', () => {
-      document.querySelectorAll('.filter-check').forEach((cb: any) => cb.checked = false);
-      renderProducts();
-    });
-
-    // Render inicial
-    renderProducts();
+    // Ejecutar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </Layout>
