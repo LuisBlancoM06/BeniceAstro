@@ -73,7 +73,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <a 
       href={productUrl}
-      className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 block"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 block"
     >
       {/* Imagen */}
       <div className="relative aspect-square overflow-hidden bg-gray-100">
@@ -86,19 +86,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         />
         
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
           {discount > 0 && (
-            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-pulse">
+            <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-lg animate-pulse">
               -{discount}%
             </span>
           )}
           {product.stock <= 5 && product.stock > 0 && (
-            <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-              ¡Últimas unidades!
+            <span className="bg-yellow-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
+              ¡Últimas!
             </span>
           )}
           {product.stock === 0 && (
-            <span className="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-bold">
+            <span className="bg-gray-800 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
               Agotado
             </span>
           )}
@@ -108,7 +108,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <button
           onClick={toggleFavorite}
           className={`
-            absolute top-3 right-3 p-2 rounded-full shadow-lg transition-all duration-300
+            absolute top-2 right-2 p-1.5 rounded-full shadow-lg transition-all duration-300
             ${isFavorite 
               ? 'bg-red-500 text-white scale-110' 
               : 'bg-white text-gray-400 hover:text-red-500 hover:scale-110'
@@ -116,7 +116,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           `}
         >
           <svg 
-            className="w-5 h-5" 
+            className="w-4 h-4" 
             fill={isFavorite ? 'currentColor' : 'none'} 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -127,27 +127,27 @@ export default function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Info del producto */}
-      <div className="p-4">
+      <div className="p-3">
         {/* Tipo de animal */}
-        <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
+        <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">
           {animalLabel}
         </span>
         
         {/* Nombre */}
-        <h3 className="font-semibold text-gray-900 mt-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+        <h3 className="font-semibold text-sm text-gray-900 mt-1.5 line-clamp-2 group-hover:text-purple-600 transition-colors">
           {product.name}
         </h3>
 
         {/* Categoría */}
-        <p className="text-sm text-gray-500 capitalize mt-1">{product.category}</p>
+        <p className="text-xs text-gray-500 capitalize mt-0.5">{product.category}</p>
 
         {/* Precio */}
-        <div className="flex items-center gap-2 mt-3">
-          <span className="text-xl font-bold text-purple-600">
+        <div className="flex items-center gap-1.5 mt-2">
+          <span className="text-base font-bold text-purple-600">
             {finalPrice.toFixed(2)}€
           </span>
           {isOnSale && salePrice && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-xs text-gray-400 line-through">
               {regularPrice.toFixed(2)}€
             </span>
           )}
