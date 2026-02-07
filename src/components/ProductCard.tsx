@@ -73,36 +73,24 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <a 
       href={productUrl}
-      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 block"
+      className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-gray-100 block relative"
     >
-      {/* Imagen */}
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
+      {/* Imagen más compacta */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
         <img
           src={imgError ? 'https://via.placeholder.com/400x400?text=Sin+imagen' : imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
           onError={() => setImgError(true)}
         />
         
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {discount > 0 && (
-            <span className="bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-lg animate-pulse">
-              -{discount}%
-            </span>
-          )}
-          {product.stock <= 5 && product.stock > 0 && (
-            <span className="bg-yellow-500 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-              ¡Últimas!
-            </span>
-          )}
-          {product.stock === 0 && (
-            <span className="bg-gray-800 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">
-              Agotado
-            </span>
-          )}
-        </div>
+        {/* Badge descuento */}
+        {discount > 0 && (
+          <span className="absolute top-2 left-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-xs font-bold shadow-lg">
+            -{discount}%
+          </span>
+        )}
 
         {/* Botón favorito */}
         <button
@@ -126,48 +114,21 @@ export default function ProductCard({ product }: ProductCardProps) {
         </button>
       </div>
 
-      {/* Info del producto */}
-      <div className="p-3">
-        {/* Tipo de animal */}
-        <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">
-          {animalLabel}
-        </span>
-        
-        {/* Nombre */}
-        <h3 className="font-semibold text-sm text-gray-900 mt-1.5 line-clamp-2 group-hover:text-purple-600 transition-colors">
+      {/* Solo nombre y precio */}
+      <div className="p-2 flex items-start justify-between gap-1">
+        <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors">
           {product.name}
         </h3>
-
-        {/* Categoría */}
-        <p className="text-xs text-gray-500 capitalize mt-0.5">{product.category}</p>
-
-        {/* Precio */}
-        <div className="flex items-center gap-1.5 mt-2">
-          <span className="text-base font-bold text-purple-600">
+        <div className="flex flex-col items-end shrink-0">
+          <span className="text-sm font-bold text-purple-600 whitespace-nowrap">
             {finalPrice.toFixed(2)}€
           </span>
           {isOnSale && salePrice && (
-            <span className="text-xs text-gray-400 line-through">
+            <span className="text-[10px] text-gray-400 line-through whitespace-nowrap">
               {regularPrice.toFixed(2)}€
             </span>
           )}
         </div>
-
-        {/* Barra de stock bajo */}
-        {product.stock <= 10 && product.stock > 0 && (
-          <div className="mt-3">
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-orange-600 font-medium">¡Date prisa!</span>
-              <span className="text-gray-500">Quedan {product.stock}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div 
-                className="bg-orange-500 h-1.5 rounded-full transition-all"
-                style={{ width: `${(product.stock / 10) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
       </div>
     </a>
   );
