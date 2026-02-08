@@ -423,12 +423,18 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
     // Actualizar contador del carrito
     function updateCartCount() {
       const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-      const count = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
+      const count = cart.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
       const cartCount = document.getElementById('cart-count');
       if (cartCount) {
         cartCount.textContent = count.toString();
+        if (count > 0) {
+          cartCount.classList.remove('hidden');
+        }
       }
     }
+
+    // Escuchar cambios del carrito (disparados por el store de nanostores)
+    window.addEventListener('cart-updated', updateCartCount);
 
     // Actualizar contador de wishlist
     function updateWishlistCount() {

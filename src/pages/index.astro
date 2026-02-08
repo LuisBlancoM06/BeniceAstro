@@ -361,6 +361,8 @@ const hasProducts = products && products.length > 0;
   </style>
 
   <script>
+    import { addToCart } from '../stores/cart';
+
     // Toggle de filtros
     document.querySelectorAll('.filter-toggle').forEach((button) => {
       button.addEventListener('click', () => {
@@ -373,30 +375,19 @@ const hasProducts = products && products.length > 0;
     document.querySelectorAll('.add-to-cart').forEach(button => {
       button.addEventListener('click', (e) => {
         const btn = e.currentTarget as HTMLButtonElement;
-        const product = {
-          id: btn.dataset.productId,
-          name: btn.dataset.productName,
-          price: parseFloat(btn.dataset.productPrice || '0'),
-          image: btn.dataset.productImage,
-          quantity: 1
-        };
+        const productId = btn.dataset.productId;
+        const productName = btn.dataset.productName;
+        const productPrice = parseFloat(btn.dataset.productPrice || '0');
+        const productImage = btn.dataset.productImage;
 
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-        const existingIndex = cart.findIndex((p: any) => p.id === product.id);
-        
-        if (existingIndex > -1) {
-          cart[existingIndex].quantity += 1;
-        } else {
-          cart.push(product);
-        }
+        if (!productId || !productName) return;
 
-        localStorage.setItem('cart', JSON.stringify(cart));
-        
-        const cartCount = document.getElementById('cart-count');
-        if (cartCount) {
-          const totalItems = cart.reduce((sum: number, p: any) => sum + p.quantity, 0);
-          cartCount.textContent = totalItems.toString();
-        }
+        addToCart({
+          id: productId,
+          name: productName,
+          price: productPrice,
+          image: productImage || '',
+        }, 1);
 
         btn.innerHTML = `
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

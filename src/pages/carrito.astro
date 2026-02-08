@@ -64,17 +64,13 @@ import Layout from '../layouts/Layout.astro';
 
   <script>
     import { supabase } from '../lib/supabase';
-
-    interface CartItem {
-      product: any;
-      quantity: number;
-    }
+    import { $cartItems, $cartSubtotal, $cartCount, updateQuantity, removeFromCart, clearCart } from '../stores/cart';
 
     let appliedPromo: any = null;
 
     function renderCart() {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      const cartItems = document.getElementById('cart-items');
+      const cart = $cartItems.get();
+      const cartItemsEl = document.getElementById('cart-items');
       const emptyCart = document.getElementById('empty-cart');
       const cartContent = document.getElementById('cart-content');
 
@@ -87,26 +83,26 @@ import Layout from '../layouts/Layout.astro';
       emptyCart?.classList.add('hidden');
       cartContent?.classList.remove('hidden');
 
-      cartItems!.innerHTML = cart.map((item, index) => `
+      cartItemsEl!.innerHTML = cart.map((item) => `
         <div class="card flex items-center gap-4">
-          <img src="${item.product.image_url}" alt="${item.product.name}" class="w-24 h-24 object-cover rounded">
+          <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-24 h-24 object-cover rounded">
           <div class="flex-1">
-            <h3 class="font-bold">${item.product.name}</h3>
-            <p class="text-gray-600">${item.product.price}€</p>
+            <h3 class="font-bold">${item.name}</h3>
+            <p class="text-gray-600">${(item.salePrice || item.price).toFixed(2)}€</p>
           </div>
           <div class="flex items-center gap-2">
-            <button class="btn bg-gray-200 text-gray-800 px-3 py-1" data-index="${index}" data-action="decrease">
+            <button class="btn bg-gray-200 text-gray-800 px-3 py-1" data-id="${item.id}" data-action="decrease">
               -
             </button>
             <span class="w-12 text-center">${item.quantity}</span>
-            <button class="btn bg-gray-200 text-gray-800 px-3 py-1" data-index="${index}" data-action="increase">
+            <button class="btn bg-gray-200 text-gray-800 px-3 py-1" data-id="${item.id}" data-action="increase">
               +
             </button>
           </div>
           <div class="font-bold">
-            ${(item.product.price * item.quantity).toFixed(2)}€
+            ${((item.salePrice || item.price) * item.quantity).toFixed(2)}€
           </div>
-          <button class="btn btn-danger px-3 py-1" data-index="${index}" data-action="remove">
+          <button class="btn btn-danger px-3 py-1" data-id="${item.id}" data-action="remove">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
           </button>
         </div>
@@ -117,49 +113,40 @@ import Layout from '../layouts/Layout.astro';
       // Event listeners para botones
       document.querySelectorAll('[data-action]').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const target = e.target as HTMLElement;
-          const index = parseInt(target.dataset.index || '0');
+          const target = e.currentTarget as HTMLElement;
+          const id = target.dataset.id;
           const action = target.dataset.action;
+          if (!id || !action) return;
           
-          handleCartAction(action!, index);
+          handleCartAction(action, id);
         });
       });
     }
 
-    function handleCartAction(action: string, index: number) {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+    function handleCartAction(action: string, id: string) {
+      const cart = $cartItems.get();
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
       
       switch (action) {
         case 'increase':
-          if (cart[index].quantity < cart[index].product.stock) {
-            cart[index].quantity++;
-          } else {
-            alert('No hay suficiente stock disponible');
-          }
+          updateQuantity(id, item.quantity + 1);
           break;
         case 'decrease':
-          if (cart[index].quantity > 1) {
-            cart[index].quantity--;
+          if (item.quantity > 1) {
+            updateQuantity(id, item.quantity - 1);
           }
           break;
         case 'remove':
-          cart.splice(index, 1);
+          removeFromCart(id);
           break;
       }
-      
-      localStorage.setItem('cart', JSON.stringify(cart));
-      
-      // Actualizar contador del header
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-      const cartCount = document.getElementById('cart-count');
-      if (cartCount) cartCount.textContent = count.toString();
       
       renderCart();
     }
 
     function updateSummary() {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      const subtotal = $cartSubtotal.get();
       
       document.getElementById('subtotal')!.textContent = subtotal.toFixed(2) + '€';
       
@@ -229,20 +216,25 @@ import Layout from '../layouts/Layout.astro';
       
       if (!session) {
         alert('Debes iniciar sesión para continuar');
-        window.location.href = '/login';
+        window.location.href = '/auth/login';
         return;
       }
 
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      const subtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      const cart = $cartItems.get();
+      if (cart.length === 0) {
+        alert('El carrito está vacío');
+        return;
+      }
+
+      const subtotal = $cartSubtotal.get();
       const discountAmount = appliedPromo ? (subtotal * appliedPromo.discount_percentage) / 100 : 0;
       const total = subtotal - discountAmount;
 
       try {
         const items = cart.map(item => ({
-          product_id: item.product.id,
+          product_id: item.id,
           quantity: item.quantity,
-          price: item.product.price
+          price: item.salePrice || item.price
         }));
 
         const response = await fetch('/api/create-order', {
@@ -261,9 +253,9 @@ import Layout from '../layouts/Layout.astro';
 
         if (response.ok) {
           // Limpiar carrito
-          localStorage.removeItem('cart');
+          clearCart();
           alert('¡Pedido realizado con éxito!');
-          window.location.href = '/mis-pedidos';
+          window.location.href = '/cuenta/mis-pedidos';
         } else {
           alert(result.error || 'Error al procesar el pedido');
         }

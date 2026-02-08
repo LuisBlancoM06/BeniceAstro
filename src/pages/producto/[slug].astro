@@ -332,7 +332,9 @@ if (avgRating > 0) {
       }
     });
 
-    // Añadir al carrito
+    // Añadir al carrito usando el store de nanostores
+    import { addToCart } from '../../stores/cart';
+
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const toast = document.getElementById('toast');
 
@@ -344,35 +346,15 @@ if (avgRating > 0) {
       const productImage = btn.dataset.productImage;
       const quantity = parseInt(quantityInput.value);
 
-      // Obtener carrito actual
-      const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (!productId || !productName) return;
 
-      // Buscar si ya existe el producto
-      const existingIndex = cart.findIndex((item: any) => item.product.id === productId);
-
-      if (existingIndex > -1) {
-        cart[existingIndex].quantity += quantity;
-      } else {
-        cart.push({
-          product: {
-            id: productId,
-            name: productName,
-            price: productPrice,
-            image_url: productImage
-          },
-          quantity: quantity
-        });
-      }
-
-      // Guardar carrito
-      localStorage.setItem('cart', JSON.stringify(cart));
-
-      // Actualizar contador del header
-      const cartCount = document.getElementById('cart-count');
-      if (cartCount) {
-        const total = cart.reduce((sum: number, item: any) => sum + item.quantity, 0);
-        cartCount.textContent = total.toString();
-      }
+      // Usar la función addToCart del store (guarda en localStorage con formato correcto y abre el carrito)
+      addToCart({
+        id: productId,
+        name: productName,
+        price: productPrice,
+        image: productImage || '',
+      }, quantity);
 
       // Mostrar toast
       toast?.classList.remove('hidden');
