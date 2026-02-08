@@ -109,7 +109,27 @@ export function loadCart() {
     const saved = localStorage.getItem('cart');
     if (saved) {
       try {
-        $cartItems.set(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        // Migrar datos del formato viejo { product: { id, name, price, image_url }, quantity }
+        // al formato nuevo { id, name, price, image, quantity }
+        const migrated = parsed.map((item: any) => {
+          if (item.product && typeof item.product === 'object') {
+            // Formato viejo — convertir
+            return {
+              id: item.product.id,
+              name: item.product.name,
+              price: item.product.price || 0,
+              salePrice: item.product.salePrice || item.product.sale_price || undefined,
+              image: item.product.image_url || item.product.image || '',
+              quantity: item.quantity || 1,
+            };
+          }
+          // Formato nuevo — mantener
+          return item;
+        });
+        $cartItems.set(migrated);
+        // Guardar en formato nuevo para futuras cargas
+        localStorage.setItem('cart', JSON.stringify(migrated));
       } catch (e) {
         console.error('Error loading cart:', e);
         $cartItems.set([]);
