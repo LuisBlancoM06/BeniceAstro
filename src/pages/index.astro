@@ -97,15 +97,15 @@ const hasProducts = products && products.length > 0;
               </button>
               <div class="filter-content mt-2 space-y-1">
                 <label class="flex items-center py-1 cursor-pointer hover:text-purple-600 transition-colors">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="animal_type" data-value="perro">
                   <span class="ml-2 text-sm text-gray-600">Perro</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer hover:text-purple-600 transition-colors">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="animal_type" data-value="gato">
                   <span class="ml-2 text-sm text-gray-600">Gato</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer hover:text-purple-600 transition-colors">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="animal_type" data-value="otro">
                   <span class="ml-2 text-sm text-gray-600">Otros animales</span>
                 </label>
               </div>
@@ -121,19 +121,19 @@ const hasProducts = products && products.length > 0;
               </button>
               <div class="filter-content mt-2 space-y-1">
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="category" data-value="alimento">
                   <span class="ml-2 text-sm text-gray-600">Alimento</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="category" data-value="juguetes">
                   <span class="ml-2 text-sm text-gray-600">Juguetes</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="category" data-value="accesorios">
                   <span class="ml-2 text-sm text-gray-600">Accesorios</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="category" data-value="salud">
                   <span class="ml-2 text-sm text-gray-600">Salud</span>
                 </label>
               </div>
@@ -149,7 +149,7 @@ const hasProducts = products && products.length > 0;
               </button>
               <div class="filter-content mt-2">
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="on_sale" data-value="true">
                   <span class="ml-2 text-sm text-gray-600">Solo ofertas</span>
                 </label>
               </div>
@@ -198,15 +198,15 @@ const hasProducts = products && products.length > 0;
               </button>
               <div class="filter-content mt-2 space-y-1">
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="age_range" data-value="cachorro">
                   <span class="ml-2 text-sm text-gray-600">Cachorro</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="age_range" data-value="adulto">
                   <span class="ml-2 text-sm text-gray-600">Adulto</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="age_range" data-value="senior">
                   <span class="ml-2 text-sm text-gray-600">Senior</span>
                 </label>
               </div>
@@ -222,15 +222,15 @@ const hasProducts = products && products.length > 0;
               </button>
               <div class="filter-content mt-2 space-y-1">
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="size" data-value="mini">
                   <span class="ml-2 text-sm text-gray-600">Pequeño</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="size" data-value="mediano">
                   <span class="ml-2 text-sm text-gray-600">Mediano</span>
                 </label>
                 <label class="flex items-center py-1 cursor-pointer">
-                  <input type="checkbox" class="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400">
+                  <input type="checkbox" class="filter-checkbox w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-400" data-filter-group="size" data-value="grande">
                   <span class="ml-2 text-sm text-gray-600">Grande</span>
                 </label>
               </div>
@@ -244,15 +244,15 @@ const hasProducts = products && products.length > 0;
           <!-- Barra superior: Resultados + Ordenar -->
           <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
             <p class="text-gray-700 font-medium">
-              <span class="text-purple-600 font-bold text-xl">{totalProducts || 0}</span> Resultados
+              <span id="results-count" class="text-purple-600 font-bold text-xl">{totalProducts || 0}</span> Resultados
             </p>
             <div class="flex items-center gap-3">
               <span class="text-sm text-gray-500">Ordenar por</span>
-              <select class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer bg-white">
+              <select id="sort-select" class="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 cursor-pointer bg-white">
                 <option value="precio-asc">Precio: menor a mayor</option>
                 <option value="precio-desc">Precio: mayor a menor</option>
                 <option value="nombre">Nombre A-Z</option>
-                <option value="valoracion">Mejor valorados</option>
+                <option value="reciente">Más recientes</option>
               </select>
             </div>
           </div>
@@ -552,6 +552,118 @@ const hasProducts = products && products.length > 0;
       updateTrack();
     }
     
+    // === FILTRADO DE PRODUCTOS ===
+    function getActiveFilters(): Record<string, string[]> {
+      const filters: Record<string, string[]> = {};
+      document.querySelectorAll('.filter-checkbox:checked').forEach((cb) => {
+        const input = cb as HTMLInputElement;
+        const group = input.dataset.filterGroup;
+        const value = input.dataset.value;
+        if (group && value) {
+          if (!filters[group]) filters[group] = [];
+          filters[group].push(value.toLowerCase());
+        }
+      });
+      return filters;
+    }
+
+    function getProductPrice(product: any): number {
+      return (product.on_sale && product.sale_price) ? product.sale_price : product.price;
+    }
+
+    function applyFiltersAndSort() {
+      const filters = getActiveFilters();
+      const priceMin = parseInt((document.getElementById('price-min') as HTMLInputElement)?.value || '0');
+      const priceMax = parseInt((document.getElementById('price-max') as HTMLInputElement)?.value || '200');
+      const sortValue = (document.getElementById('sort-select') as HTMLSelectElement)?.value || 'precio-asc';
+
+      const cards = document.querySelectorAll('.product-card') as NodeListOf<HTMLElement>;
+      const grid = cards[0]?.parentElement;
+      if (!grid) return;
+
+      // Recoger datos de cards y filtrar
+      const cardEntries: { el: HTMLElement; product: any }[] = [];
+      cards.forEach((card) => {
+        const raw = card.getAttribute('data-product');
+        if (!raw) return;
+        const product = JSON.parse(raw);
+        cardEntries.push({ el: card, product });
+      });
+
+      let visible = 0;
+      cardEntries.forEach(({ el, product }) => {
+        let show = true;
+
+        // Filtros de checkbox (animal_type, category, age_range, size)
+        for (const [group, values] of Object.entries(filters)) {
+          if (group === 'on_sale') {
+            // Filtro especial: solo ofertas
+            if (values.includes('true') && !product.on_sale) {
+              show = false;
+            }
+          } else {
+            const productValue = (product[group] || '').toLowerCase();
+            if (!values.includes(productValue)) {
+              show = false;
+            }
+          }
+        }
+
+        // Filtro de precio
+        const price = getProductPrice(product);
+        if (price < priceMin || price > priceMax) {
+          show = false;
+        }
+
+        el.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      // Ordenar las cards visibles
+      const sorted = cardEntries
+        .filter(({ el }) => el.style.display !== 'none')
+        .sort((a, b) => {
+          const priceA = getProductPrice(a.product);
+          const priceB = getProductPrice(b.product);
+          switch (sortValue) {
+            case 'precio-asc': return priceA - priceB;
+            case 'precio-desc': return priceB - priceA;
+            case 'nombre': return (a.product.name || '').localeCompare(b.product.name || '');
+            case 'reciente': return new Date(b.product.created_at).getTime() - new Date(a.product.created_at).getTime();
+            default: return 0;
+          }
+        });
+
+      // Reordenar en el DOM
+      sorted.forEach(({ el }) => grid.appendChild(el));
+      // Mover las ocultas al final
+      cardEntries.filter(({ el }) => el.style.display === 'none').forEach(({ el }) => grid.appendChild(el));
+
+      // Actualizar contador
+      const countEl = document.getElementById('results-count');
+      if (countEl) countEl.textContent = String(visible);
+    }
+
+    // Escuchar cambios en filtros
+    document.querySelectorAll('.filter-checkbox').forEach((cb) => {
+      cb.addEventListener('change', applyFiltersAndSort);
+    });
+
+    // Escuchar cambios en ordenar
+    document.getElementById('sort-select')?.addEventListener('change', applyFiltersAndSort);
+
+    // Escuchar cambios en precio (con debounce)
+    let priceFilterTimeout: number;
+    ['price-min', 'price-max'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        clearTimeout(priceFilterTimeout);
+        priceFilterTimeout = window.setTimeout(applyFiltersAndSort, 300);
+      });
+    });
+    ['price-min-input', 'price-max-input'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', applyFiltersAndSort);
+    });
+
     // Inicializar todo
     initHeroCarousel();
     initPriceSlider();
