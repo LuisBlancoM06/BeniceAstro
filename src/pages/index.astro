@@ -543,6 +543,7 @@ const hasProducts = products && products.length > 0;
         if (val < 0) val = 0;
         minSlider.value = String(val);
         updateTrack();
+        applyFiltersAndSort();
       });
       
       maxInput?.addEventListener('change', () => {
@@ -551,6 +552,7 @@ const hasProducts = products && products.length > 0;
         if (val > 200) val = 200;
         maxSlider.value = String(val);
         updateTrack();
+        applyFiltersAndSort();
       });
       
       updateTrack();
