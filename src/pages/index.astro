@@ -570,7 +570,7 @@ const hasProducts = products && products.length > 0;
         if (productData) {
           const product = JSON.parse(productData);
           const root = createRoot(container);
-          root.render(createElement(ProductCard, { product, showQuickActions: true }));
+          root.render(createElement(ProductCard, { product }));
         }
       });
     });
