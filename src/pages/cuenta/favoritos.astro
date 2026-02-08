@@ -33,7 +33,7 @@ if (accessToken) {
           </div>
           <button 
             id="clear-all"
-            class="hidden text-red-600 hover:text-red-700 font-medium hover:underline"
+            class="hidden px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
           >
             Eliminar todos
           </button>
@@ -107,7 +107,7 @@ if (accessToken) {
         grid.appendChild(container);
         
         const root = createRoot(container);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        root.render(createElement(ProductCard, { product }));
       });
     }
   }
