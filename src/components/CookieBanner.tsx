@@ -6,7 +6,14 @@ interface CookiePreferences {
   marketing: boolean;
 }
 
-export default function CookieBanner() {
+interface Props {
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
+}
+
+export default function CookieBanner(_props: Props) {
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({

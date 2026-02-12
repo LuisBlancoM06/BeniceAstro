@@ -26,12 +26,19 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
   <meta property="og:title" content={`${title} - Venice Pet Shop`}>
   <meta property="og:description" content={description}>
   <meta property="og:type" content="website">
+  <meta property="og:image" content="/images/og-default.jpg">
+  <meta property="og:url" content={Astro.url.href}>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={`${title} - Venice Pet Shop`}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content="/images/og-default.jpg">
+  <link rel="canonical" href={Astro.url.href}>
   <title>{title} - Venice Pet Shop</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body class="antialiased">
   <!-- Banner superior con notificaciones rotativas -->
-  <div class="bg-purple-700 text-white py-2 text-sm overflow-hidden">
+  <div class="bg-gradient-to-r from-purple-700 via-purple-700 to-orange-500 text-white py-2 text-sm overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-center items-center">
         <div class="notification-slider relative w-full flex justify-center">
@@ -73,7 +80,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
               <path d="M26 42c0 0 6 8 6 12s-2 6-6 6c-2 0-4-1-4-3s2-3 4-3" stroke="currentColor" stroke-width="2" fill="none"/>
               <path d="M38 42c0 0-6 8-6 12s2 6 6 6c2 0 4-1 4-3s-2-3-4-3" stroke="currentColor" stroke-width="2" fill="none"/>
             </svg>
-            <span class="text-2xl font-bold text-purple-700">
+            <span class="text-2xl font-bold bg-gradient-to-r from-purple-700 to-orange-500 bg-clip-text text-transparent">
               Venice
             </span>
           </a>
@@ -95,7 +102,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           </div>
 
           <!-- Favoritos -->
-          <a href="/cuenta/favoritos" class="relative p-2 text-gray-600 hover:text-purple-600 transition-colors" title="Favoritos">
+          <a href="/cuenta/favoritos" class="relative p-2 text-gray-600 hover:text-orange-500 transition-colors" title="Favoritos">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
@@ -107,7 +114,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           
           <!-- Auth -->
           <div id="auth-buttons">
-            <a href="/auth/login" class="bg-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-purple-700 transition-colors">
+            <a href="/auth/login" class="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-orange-600 transition-colors shadow-sm">
               Entrar
             </a>
           </div>
@@ -209,24 +216,36 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+            </div>
             <div>
               <h4 class="font-bold">Envío Gratis</h4>
               <p class="text-sm text-gray-400">En pedidos +49€</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </div>
             <div>
               <h4 class="font-bold">30 días</h4>
               <p class="text-sm text-gray-400">Para devoluciones</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
             <div>
               <h4 class="font-bold">Pago Seguro</h4>
               <p class="text-sm text-gray-400">SSL + Stripe</p>
             </div>
           </div>
           <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </div>
             <div>
               <h4 class="font-bold">Atención 24/7</h4>
               <p class="text-sm text-gray-400">Siempre disponibles</p>
@@ -245,13 +264,13 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           </a>
           <p class="text-gray-400 text-sm mb-4">Tu tienda de confianza para el cuidado de tus mascotas</p>
           <div class="flex gap-3">
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
               <span>FB</span>
             </a>
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
               <span>IG</span>
             </a>
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
+            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
               <span>TW</span>
             </a>
           </div>
@@ -320,9 +339,9 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
             <input 
               type="email" 
               placeholder="tu@email.com" 
-              class="flex-1 md:w-64 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+              class="flex-1 md:w-64 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             />
-            <button type="submit" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors whitespace-nowrap">
+            <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors whitespace-nowrap">
               Suscribirse
             </button>
           </form>
@@ -340,10 +359,10 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           <div class="flex items-center gap-4">
             <span class="text-gray-400 text-sm">Métodos de pago:</span>
             <div class="flex gap-2">
-              <span class="bg-gray-800 px-2 py-1 rounded text-sm">Visa</span>
-              <span class="bg-gray-800 px-2 py-1 rounded text-sm">MC</span>
-              <span class="bg-gray-800 px-2 py-1 rounded text-sm">PayPal</span>
-              <span class="bg-gray-800 px-2 py-1 rounded text-sm">Apple Pay</span>
+              <span class="bg-gray-800 px-2 py-1 rounded text-sm border border-gray-700">Visa</span>
+              <span class="bg-gray-800 px-2 py-1 rounded text-sm border border-gray-700">MC</span>
+              <span class="bg-gray-800 px-2 py-1 rounded text-sm border border-gray-700">PayPal</span>
+              <span class="bg-gray-800 px-2 py-1 rounded text-sm border border-gray-700">Apple Pay</span>
             </div>
           </div>
         </div>
@@ -475,7 +494,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
               <div class="p-6 text-center">
                 <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 <p class="text-gray-500">No se encontraron productos</p>
-                <a href="/productos" class="text-purple-600 hover:underline text-sm mt-2 inline-block">Ver todos los productos</a>
+                <a href="/productos" class="text-orange-500 hover:underline text-sm mt-2 inline-block">Ver todos los productos</a>
               </div>
             `;
           } else {
@@ -488,17 +507,17 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
                       <div class="font-medium text-gray-900 truncate">${p.name}</div>
                       <div class="flex items-center gap-2">
                         ${p.on_sale ? `
-                          <span class="text-purple-600 font-bold">${p.sale_price}€</span>
+                          <span class="text-orange-500 font-bold">${p.sale_price}€</span>
                           <span class="text-gray-400 line-through text-sm">${p.price}€</span>
                         ` : `
-                          <span class="text-purple-600 font-bold">${p.price}€</span>
+                          <span class="text-orange-500 font-bold">${p.price}€</span>
                         `}
                       </div>
                     </div>
                   </a>
                 `).join('')}
                 ${products.length > 5 ? `
-                  <a href="/productos?q=${encodeURIComponent(query)}" class="block p-3 text-center text-purple-600 hover:bg-purple-50 rounded-lg font-medium">
+                  <a href="/productos?q=${encodeURIComponent(query)}" class="block p-3 text-center text-orange-500 hover:bg-orange-50 rounded-lg font-medium">
                     Ver todos (${products.length} resultados) →
                   </a>
                 ` : ''}

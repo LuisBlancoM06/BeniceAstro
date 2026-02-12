@@ -6,9 +6,9 @@ const supabase = createServerClient(Astro.cookies);
 
 // Obtener estado actual de ofertas
 const { data: settings } = await supabase
-  .from('settings')
+  .from('site_settings')
   .select('*')
-  .eq('key', 'ofertas_flash_enabled')
+  .eq('key', 'ofertas_flash_active')
   .single();
 
 const ofertasEnabled = settings?.value === 'true';
@@ -162,11 +162,7 @@ const { data: allProducts } = await supabase
   </div>
 
   <script>
-    import { createClient } from '@supabase/supabase-js';
-
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    import { supabase } from '../../lib/supabase';
 
     // Toggle ofertas
     const toggle = document.getElementById('ofertas-toggle') as HTMLInputElement;

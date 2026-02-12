@@ -53,7 +53,7 @@ import Layout from '../../layouts/Layout.astro';
 
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/actualizar-contrasena`,
+          redirectTo: `${window.location.origin}/auth/actualizar-contrasena`,
         });
 
         if (error) throw error;

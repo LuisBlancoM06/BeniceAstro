@@ -18,7 +18,7 @@ if (!userData || userData.role !== 'admin') return Astro.redirect('/');
 
 // Parámetros de filtro
 const filtroFecha = Astro.url.searchParams.get('fecha') || '';
-const filtroIP = Astro.url.searchParams.get('ip') || '';
+const filtroUsuario = Astro.url.searchParams.get('usuario') || '';
 const page = parseInt(Astro.url.searchParams.get('page') || '1');
 const perPage = 50;
 
@@ -29,8 +29,8 @@ let query = supabase
   .order('created_at', { ascending: false })
   .range((page - 1) * perPage, page * perPage - 1);
 
-if (filtroIP) {
-  query = query.ilike('ip_address', `%${filtroIP}%`);
+if (filtroUsuario) {
+  query = query.eq('user_id', filtroUsuario);
 }
 
 if (filtroFecha) {
@@ -51,39 +51,67 @@ const { count: visitasHoy } = await supabase
   .gte('created_at', `${hoy}T00:00:00`)
   .lte('created_at', `${hoy}T23:59:59`);
 
-// IPs únicas hoy - obtener datos y contar en JS
-const { data: ipsHoyData } = await supabase
+// Usuarios registrados activos hoy
+const { data: usersHoyData } = await supabase
   .from('visits')
-  .select('ip_address')
+  .select('user_id')
+  .not('user_id', 'is', null)
   .gte('created_at', `${hoy}T00:00:00`)
   .lte('created_at', `${hoy}T23:59:59`);
 
-const ipsUnicasHoy = new Set(ipsHoyData?.map(v => v.ip_address)).size;
+const usuariosActivosHoy = new Set(usersHoyData?.map((v: any) => v.user_id)).size;
 
-// Top IPs (últimos 7 días)
+// Top usuarios registrados (últimos 7 días)
 const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 const { data: visitasSemana } = await supabase
   .from('visits')
-  .select('ip_address, page')
+  .select('user_id, page')
+  .not('user_id', 'is', null)
   .gte('created_at', hace7dias);
 
-// Agrupar por IP
-const ipCounts: Record<string, { count: number; pages: Set<string>; lastSeen?: string }> = {};
-visitasSemana?.forEach(v => {
-  if (!ipCounts[v.ip_address]) {
-    ipCounts[v.ip_address] = { count: 0, pages: new Set() };
+// Agrupar por usuario
+const userCounts: Record<string, { count: number; pages: Set<string> }> = {};
+visitasSemana?.forEach((v: any) => {
+  if (!v.user_id) return;
+  if (!userCounts[v.user_id]) {
+    userCounts[v.user_id] = { count: 0, pages: new Set() };
   }
-  ipCounts[v.ip_address].count++;
-  ipCounts[v.ip_address].pages.add(v.page);
+  userCounts[v.user_id].count++;
+  userCounts[v.user_id].pages.add(v.page);
 });
 
-const topIPs = Object.entries(ipCounts)
+const topUserIds = Object.entries(userCounts)
   .sort((a, b) => b[1].count - a[1].count)
   .slice(0, 10);
 
+// Obtener emails de los top usuarios
+const topUserIdsArray = topUserIds.map(([id]) => id);
+const { data: topUsersData } = topUserIdsArray.length > 0
+  ? await supabase.from('users').select('id, email, full_name').in('id', topUserIdsArray)
+  : { data: [] };
+
+const usersMap: Record<string, { email: string; full_name?: string }> = {};
+topUsersData?.forEach((u: any) => {
+  usersMap[u.id] = { email: u.email, full_name: u.full_name };
+});
+
+// También obtener info de los usuarios de las visitas en la tabla actual
+const visitaUserIds = [...new Set(visitas?.filter((v: any) => v.user_id).map((v: any) => v.user_id) || [])];
+if (visitaUserIds.length > 0) {
+  const { data: visitaUsersData } = await supabase.from('users').select('id, email, full_name').in('id', visitaUserIds);
+  visitaUsersData?.forEach((u: any) => {
+    usersMap[u.id] = { email: u.email, full_name: u.full_name };
+  });
+}
+
 // Páginas más visitadas (últimos 7 días)
+const { data: allVisitasSemana } = await supabase
+  .from('visits')
+  .select('page')
+  .gte('created_at', hace7dias);
+
 const pageCounts: Record<string, number> = {};
-visitasSemana?.forEach(v => {
+allVisitasSemana?.forEach((v: any) => {
   pageCounts[v.page] = (pageCounts[v.page] || 0) + 1;
 });
 
@@ -131,8 +159,8 @@ const topPages = Object.entries(pageCounts)
             </svg>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-800">{ipsUnicasHoy}</p>
-            <p class="text-sm text-gray-500">Visitantes únicos hoy</p>
+            <p class="text-2xl font-bold text-gray-800">{usuariosActivosHoy}</p>
+            <p class="text-sm text-gray-500">Usuarios registrados hoy</p>
           </div>
         </div>
       </div>
@@ -155,32 +183,36 @@ const topPages = Object.entries(pageCounts)
     <!-- Top IPs y Top Páginas -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
-      <!-- Top IPs -->
+      <!-- Top Usuarios Registrados -->
       <div class="bg-white rounded-xl shadow-sm border">
         <div class="p-5 border-b">
-          <h2 class="font-semibold text-gray-800">🔝 Top IPs (7 días)</h2>
+          <h2 class="font-semibold text-gray-800">👤 Usuarios más activos (7 días)</h2>
         </div>
         <div class="p-4">
-          {topIPs.length === 0 ? (
-            <p class="text-gray-400 text-center py-4">Sin datos aún</p>
+          {topUserIds.length === 0 ? (
+            <p class="text-gray-400 text-center py-4">Ningún usuario registrado ha visitado aún</p>
           ) : (
             <div class="space-y-3">
-              {topIPs.map(([ip, data], i) => (
-                <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
-                  <div class="flex items-center gap-3">
-                    <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-orange-500' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-amber-600' : 'bg-gray-300'}`}>
-                      {i + 1}
-                    </span>
-                    <div>
-                      <a href={`?ip=${ip}`} class="font-mono text-sm font-medium text-purple-700 hover:underline">{ip}</a>
-                      <p class="text-xs text-gray-400">{data.pages.size} páginas visitadas</p>
+              {topUserIds.map(([userId, data], i) => {
+                const user = usersMap[userId];
+                const displayName = user?.full_name || user?.email || userId.slice(0, 8) + '...';
+                return (
+                  <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center gap-3">
+                      <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-orange-500' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-amber-600' : 'bg-gray-300'}`}>
+                        {i + 1}
+                      </span>
+                      <div>
+                        <a href={`?usuario=${userId}`} class="text-sm font-medium text-purple-700 hover:underline">{displayName}</a>
+                        <p class="text-xs text-gray-400">{data.pages.size} páginas visitadas</p>
+                      </div>
                     </div>
+                    <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
+                      {data.count} visitas
+                    </span>
                   </div>
-                  <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
-                    {data.count} visitas
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -219,11 +251,6 @@ const topPages = Object.entries(pageCounts)
     <div class="bg-white rounded-xl shadow-sm border p-5">
       <form method="get" class="flex flex-wrap items-end gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">Filtrar por IP</label>
-          <input type="text" name="ip" value={filtroIP} placeholder="Ej: 213.195..."
-            class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
-        </div>
-        <div>
           <label class="block text-sm font-medium text-gray-600 mb-1">Filtrar por fecha</label>
           <input type="date" name="fecha" value={filtroFecha}
             class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500" />
@@ -243,7 +270,7 @@ const topPages = Object.entries(pageCounts)
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-gray-600 text-left">
             <tr>
-              <th class="px-4 py-3 font-medium">IP</th>
+              <th class="px-4 py-3 font-medium">Usuario</th>
               <th class="px-4 py-3 font-medium">Página</th>
               <th class="px-4 py-3 font-medium">Navegador</th>
               <th class="px-4 py-3 font-medium">Referencia</th>
@@ -258,7 +285,7 @@ const topPages = Object.entries(pageCounts)
                 </td>
               </tr>
             ) : (
-              visitas.map((v) => {
+              visitas.map((v: any) => {
                 // Parsear user agent para mostrar algo legible
                 const ua = v.user_agent || '';
                 let browser = 'Desconocido';
@@ -275,9 +302,13 @@ const topPages = Object.entries(pageCounts)
                 return (
                   <tr class="hover:bg-gray-50 transition">
                     <td class="px-4 py-3">
-                      <a href={`?ip=${v.ip_address}`} class="font-mono text-purple-700 hover:underline font-medium">
-                        {v.ip_address}
-                      </a>
+                      {v.user_id ? (
+                        <a href={`?usuario=${v.user_id}`} class="text-sm font-medium text-purple-700 hover:underline">
+                          {usersMap[v.user_id]?.full_name || usersMap[v.user_id]?.email || 'Usuario'}
+                        </a>
+                      ) : (
+                        <span class="text-xs text-gray-400 italic">Anónimo</span>
+                      )}
                     </td>
                     <td class="px-4 py-3 text-gray-700 max-w-[200px] truncate" title={v.page}>
                       {v.page}
@@ -305,13 +336,13 @@ const topPages = Object.entries(pageCounts)
           </span>
           <div class="flex gap-2">
             {page > 1 && (
-              <a href={`?page=${page - 1}${filtroIP ? `&ip=${filtroIP}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
+              <a href={`?page=${page - 1}${filtroUsuario ? `&usuario=${filtroUsuario}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
                 class="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-100">
                 ← Anterior
               </a>
             )}
             {page < totalPages && (
-              <a href={`?page=${page + 1}${filtroIP ? `&ip=${filtroIP}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
+              <a href={`?page=${page + 1}${filtroUsuario ? `&usuario=${filtroUsuario}` : ''}${filtroFecha ? `&fecha=${filtroFecha}` : ''}`}
                 class="px-3 py-1 text-sm bg-white border rounded hover:bg-gray-100">
                 Siguiente →
               </a>

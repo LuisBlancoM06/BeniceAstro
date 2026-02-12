@@ -10,7 +10,14 @@ import {
   clearCart
 } from '../stores/cart';
 
-export default function CartSlideOver() {
+interface Props {
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
+}
+
+export default function CartSlideOver(_props: Props) {
   const isOpen = useStore($isCartOpen);
   const items = useStore($cartItems);
   const count = useStore($cartCount);
@@ -35,7 +42,7 @@ export default function CartSlideOver() {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
             Tu Carrito
             {count > 0 && (
-              <span className="bg-purple-700 text-white text-sm px-2 py-0.5 rounded-full">
+              <span className="bg-orange-500 text-white text-sm px-2 py-0.5 rounded-full">
                 {count}
               </span>
             )}
@@ -181,7 +188,7 @@ export default function CartSlideOver() {
             {/* Total */}
             <div className="flex justify-between items-center text-lg font-bold mb-4">
               <span>Total</span>
-              <span className="text-purple-700">
+              <span className="text-orange-500">
                 {(subtotal + (subtotal >= 49 ? 0 : 4.99)).toFixed(2)}€
               </span>
             </div>
@@ -189,7 +196,7 @@ export default function CartSlideOver() {
             {/* Botón de checkout */}
             <button 
               onClick={() => window.location.href = '/checkout'}
-              className="w-full py-4 bg-purple-700 text-white font-bold rounded-xl hover:bg-orange-500 transition-all shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-purple-700 transition-all shadow-lg flex items-center justify-center gap-2"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />

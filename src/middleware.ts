@@ -19,6 +19,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return next();
   }
 
+  // En páginas prerendered (build time), clientAddress y request.headers no están disponibles.
+  // Detectamos esto antes de acceder a cualquier header para evitar warnings.
+  let clientAddr: string;
+  try {
+    clientAddr = context.clientAddress || 'desconocida';
+  } catch {
+    // Prerender — omitir tracking
+    return next();
+  }
+
   // Obtener IP real del visitante (orden de prioridad por fiabilidad)
   const headers = context.request.headers;
   const ip =
@@ -27,11 +37,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||   // Proxy genérico (primera IP = cliente real)
     headers.get('x-client-ip') ||                               // Apache
     headers.get('true-client-ip') ||                            // Akamai / Cloudflare Enterprise
-    context.clientAddress ||                                    // Astro Node adapter
-    'desconocida';
+    clientAddr;
 
-  const userAgent = context.request.headers.get('user-agent') || '';
-  const referer = context.request.headers.get('referer') || '';
+  const userAgent = headers.get('user-agent') || '';
+  const referer = headers.get('referer') || '';
 
   // Registrar visita antes de continuar
   try {

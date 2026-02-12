@@ -81,7 +81,7 @@ const hasProducts = products && products.length > 0;
         <aside class="w-64 flex-shrink-0 hidden lg:block">
           <div class="sticky top-4">
             <div class="flex items-center gap-2 mb-6 pb-4 border-b border-gray-200">
-              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
               </svg>
               <span class="font-bold text-gray-800 text-lg">Filtros</span>
@@ -175,7 +175,7 @@ const hasProducts = products && products.length > 0;
                   </div>
                   <div class="relative h-2 mb-4">
                     <div class="absolute inset-0 bg-gray-200 rounded-full"></div>
-                    <div id="price-range-track" class="absolute h-full bg-purple-500 rounded-full" style="left: 0%; right: 0%;"></div>
+                    <div id="price-range-track" class="absolute h-full bg-orange-500 rounded-full" style="left: 0%; right: 0%;"></div>
                     <input type="range" id="price-min" min="0" max="200" value="0" step="5" 
                       class="price-slider absolute w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer">
                     <input type="range" id="price-max" min="0" max="200" value="200" step="5" 
@@ -248,7 +248,7 @@ const hasProducts = products && products.length > 0;
           <!-- Barra superior: Resultados + Ordenar -->
           <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
             <p class="text-gray-700 font-medium">
-              <span id="results-count" class="text-purple-600 font-bold text-xl">{totalProducts || 0}</span> Resultados
+              <span id="results-count" class="text-orange-500 font-bold text-xl">{totalProducts || 0}</span> Resultados
             </p>
             <div class="flex items-center gap-3">
               <span class="text-sm text-gray-500">Ordenar por</span>
@@ -274,8 +274,8 @@ const hasProducts = products && products.length > 0;
             <!-- Estado vacío -->
             <div class="flex flex-col items-center justify-center py-20">
               <div class="relative mb-8">
-                <div class="w-40 h-40 bg-purple-100 rounded-full flex items-center justify-center">
-                  <svg class="w-20 h-20 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-40 h-40 bg-orange-100 rounded-full flex items-center justify-center">
+                  <svg class="w-20 h-20 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                   </svg>
                 </div>
@@ -293,13 +293,13 @@ const hasProducts = products && products.length > 0;
               </p>
               
               <div class="flex flex-col sm:flex-row gap-4">
-                <a href="/productos" class="px-8 py-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 text-lg">
+                <a href="/productos" class="px-8 py-4 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center gap-2 text-lg">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
                   Ver catálogo
                 </a>
-                <button onclick="window.location.reload()" class="px-8 py-4 border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:border-purple-400 hover:text-purple-600 transition-all flex items-center gap-2 text-lg">
+                <button onclick="window.location.reload()" class="px-8 py-4 border-2 border-gray-300 text-gray-700 font-bold rounded-xl hover:border-orange-400 hover:text-orange-600 transition-all flex items-center gap-2 text-lg">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
@@ -346,7 +346,7 @@ const hasProducts = products && products.length > 0;
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: #7e22ce;
+      background: #f97316;
       cursor: pointer;
       border: 3px solid white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
@@ -357,7 +357,7 @@ const hasProducts = products && products.length > 0;
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      background: #7e22ce;
+      background: #f97316;
       cursor: pointer;
       border: 3px solid white;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);

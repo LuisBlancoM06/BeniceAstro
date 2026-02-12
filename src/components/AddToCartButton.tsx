@@ -56,7 +56,7 @@ export default function AddToCartButton({
           transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5
           ${isAdded 
             ? 'bg-green-500 text-white' 
-            : 'bg-purple-600 text-white hover:bg-orange-500'
+            : 'bg-orange-500 text-white hover:bg-orange-600'
           }
         `}
       >

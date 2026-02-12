@@ -212,57 +212,14 @@ import Layout from '../layouts/Layout.astro';
 
     // Proceder al pago
     document.getElementById('checkout-btn')?.addEventListener('click', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        alert('Debes iniciar sesión para continuar');
-        window.location.href = '/auth/login';
-        return;
-      }
-
       const cart = $cartItems.get();
       if (cart.length === 0) {
         alert('El carrito está vacío');
         return;
       }
 
-      const subtotal = $cartSubtotal.get();
-      const discountAmount = appliedPromo ? (subtotal * appliedPromo.discount_percentage) / 100 : 0;
-      const total = subtotal - discountAmount;
-
-      try {
-        const items = cart.map(item => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.salePrice || item.price
-        }));
-
-        const response = await fetch('/api/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            user_id: session.user.id,
-            items: items,
-            total: total,
-            promo_code: appliedPromo?.code || null,
-            discount_amount: discountAmount
-          })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          // Limpiar carrito
-          clearCart();
-          alert('¡Pedido realizado con éxito!');
-          window.location.href = '/cuenta/mis-pedidos';
-        } else {
-          alert(result.error || 'Error al procesar el pedido');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error al procesar el pedido');
-      }
+      // Redirigir al checkout con Stripe
+      window.location.href = '/checkout';
     });
 
     // Inicializar

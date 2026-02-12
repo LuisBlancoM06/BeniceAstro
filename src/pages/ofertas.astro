@@ -84,7 +84,7 @@ endDate.setDate(endDate.getDate() + 7);
   <section class="py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-wrap gap-4 justify-center">
-        <button class="px-6 py-3 bg-purple-600 text-white rounded-full font-medium hover:bg-purple-700 transition-colors">
+        <button class="px-6 py-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors">
           Todas las ofertas
         </button>
         <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
@@ -115,12 +115,12 @@ endDate.setDate(endDate.getDate() + 7);
           <h2 class="text-2xl font-bold">Ofertas Flash</h2>
           <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">EN VIVO</span>
         </div>
-        <a href="#all-offers" class="text-purple-600 hover:underline font-medium">Ver todas →</a>
+        <a href="#all-offers" class="text-orange-500 hover:underline font-medium">Ver todas →</a>
       </div>
 
       {products && products.length > 0 ? (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((product) => (
+          {products.slice(0, 4).map((product: any) => (
             <div class="product-card" data-product={JSON.stringify(product)}></div>
           ))}
         </div>
@@ -133,14 +133,14 @@ endDate.setDate(endDate.getDate() + 7);
   </section>
 
   <!-- Banner cupón -->
-  <section class="py-8 bg-purple-600">
+  <section class="py-8 bg-orange-500">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-white">
         <div>
           <h3 class="text-2xl font-bold">¿Primera compra?</h3>
           <p class="opacity-90">Usa el código <span class="font-mono bg-white/20 px-2 py-1 rounded">BIENVENIDO10</span> y obtén un 10% extra</p>
         </div>
-        <button class="bg-white text-purple-600 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+        <button class="bg-white text-orange-500 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
           Copiar código
         </button>
       </div>
@@ -154,7 +154,7 @@ endDate.setDate(endDate.getDate() + 7);
       
       {products && products.length > 0 ? (
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {products.map((product: any) => (
             <div class="product-card" data-product={JSON.stringify(product)}></div>
           ))}
         </div>
@@ -163,7 +163,7 @@ endDate.setDate(endDate.getDate() + 7);
           <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
           <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay ofertas activas</h3>
           <p class="text-gray-500 mb-6">Vuelve pronto para descubrir nuevas promociones</p>
-          <a href="/productos" class="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors">
+          <a href="/productos" class="inline-block bg-orange-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-orange-600 transition-colors">
             Ver todos los productos
           </a>
         </div>
@@ -258,7 +258,7 @@ endDate.setDate(endDate.getDate() + 7);
       if (productData) {
         const product = JSON.parse(productData);
         const root = createRoot(container);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        root.render(createElement(ProductCard));
       }
     });
   });

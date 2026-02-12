@@ -26,6 +26,22 @@ export const POST: APIRoute = async ({ request }) => {
 
     const orderId = data;
 
+    // Incrementar current_uses del código promocional si se usó
+    if (promo_code) {
+      const { data: promoData } = await supabase
+        .from('promo_codes')
+        .select('current_uses')
+        .eq('code', promo_code)
+        .single();
+
+      if (promoData) {
+        await supabase
+          .from('promo_codes')
+          .update({ current_uses: (promoData.current_uses || 0) + 1 })
+          .eq('code', promo_code);
+      }
+    }
+
     // Enviar email de confirmación
     if (user_email) {
       try {

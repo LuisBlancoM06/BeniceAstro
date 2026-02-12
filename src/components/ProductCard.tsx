@@ -116,11 +116,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Solo nombre y precio */}
       <div className="p-2 flex items-start justify-between gap-1">
-        <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 group-hover:text-purple-600 transition-colors">
+        <h3 className="font-semibold text-xs text-gray-900 line-clamp-2 group-hover:text-orange-500 transition-colors">
           {product.name}
         </h3>
         <div className="flex flex-col items-end shrink-0">
-          <span className="text-sm font-bold text-purple-600 whitespace-nowrap">
+          <span className="text-sm font-bold text-orange-500 whitespace-nowrap">
             {finalPrice.toFixed(2)}€
           </span>
           {isOnSale && salePrice && (

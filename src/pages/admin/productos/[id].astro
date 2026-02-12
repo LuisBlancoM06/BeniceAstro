@@ -1,6 +1,7 @@
 ---
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../../lib/supabase';
+import RichTextEditor from '../../../components/RichTextEditor';
 
 const supabase = createServerClient(Astro.cookies);
 
@@ -43,8 +44,12 @@ if (error || !product) {
             <label class="block text-sm font-medium text-gray-700 mb-1">
               Descripción
             </label>
-            <textarea name="description" rows="4"
-              class="input w-full" placeholder="Describe el producto...">{product.description}</textarea>
+            <RichTextEditor
+              client:load
+              name="description"
+              initialContent={product.description || ''}
+              placeholder="Describe el producto, sus beneficios, ingredientes..."
+            />
           </div>
 
           <div>

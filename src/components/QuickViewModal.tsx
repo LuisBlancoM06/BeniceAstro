@@ -34,7 +34,14 @@ export function closeQuickView() {
   quickViewStore.set(null);
 }
 
-export default function QuickViewModal() {
+interface QuickViewModalProps {
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
+}
+
+export default function QuickViewModal(_props: QuickViewModalProps) {
   const product = useStore(quickViewStore);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);

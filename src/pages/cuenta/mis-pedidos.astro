@@ -42,7 +42,7 @@ const { data: orders } = await supabase
       </div>
     ) : (
       <div class="space-y-6">
-        {orders.map((order) => (
+        {orders.map((order: any) => (
           <div class="card">
             <div class="flex justify-between items-start mb-4">
               <div>
@@ -189,10 +189,12 @@ const { data: orders } = await supabase
           
           const response = await fetch('/api/cancel-order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session!.access_token}`
+            },
             body: JSON.stringify({
-              order_id: orderId,
-              user_id: session!.user.id
+              order_id: orderId
             })
           });
 
@@ -226,11 +228,48 @@ const { data: orders } = await supabase
       currentReturnOrderId = null;
     });
 
-    document.getElementById('confirm-return')?.addEventListener('click', () => {
-      // En producción, aquí se enviaría una solicitud real
-      alert(`Solicitud de devolución enviada para el pedido ${currentReturnOrderId?.slice(0, 8)}. Recibirás un email con más información.`);
-      returnModal?.classList.add('hidden');
-      currentReturnOrderId = null;
+    document.getElementById('confirm-return')?.addEventListener('click', async () => {
+      if (!currentReturnOrderId) return;
+
+      const reason = prompt('Por favor, indica el motivo de la devolución:');
+      if (!reason || reason.trim() === '') {
+        alert('Debes indicar un motivo para la devolución.');
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          alert('Debes iniciar sesión');
+          return;
+        }
+
+        const response = await fetch('/api/returns', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            orderId: currentReturnOrderId,
+            reason: reason.trim()
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert('Solicitud de devolución enviada correctamente. Recibirás un email con más información.');
+          returnModal?.classList.add('hidden');
+          currentReturnOrderId = null;
+          window.location.reload();
+        } else {
+          alert(result.error || 'Error al solicitar la devolución');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al solicitar la devolución');
+      }
     });
   </script>
 </Layout>

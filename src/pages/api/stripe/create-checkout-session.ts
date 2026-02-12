@@ -81,7 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
       line_items: lineItems,
       mode: 'payment',
       success_url: `${request.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get('origin')}/carrito`,
+      cancel_url: `${request.headers.get('origin')}/checkout/cancel`,
       customer_email: userId ? undefined : undefined, // Si hay usuario logueado, usar su email
       metadata: {
         user_id: userId || '',

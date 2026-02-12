@@ -2,7 +2,14 @@ import { useStore } from '@nanostores/react';
 import { $cartCount, toggleCart, loadCart } from '../stores/cart';
 import { useEffect } from 'react';
 
-export default function CartButton() {
+interface Props {
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
+}
+
+export default function CartButton(_props: Props) {
   const count = useStore($cartCount);
 
   useEffect(() => {
@@ -19,7 +26,7 @@ export default function CartButton() {
   return (
     <button 
       onClick={toggleCart}
-      className="relative text-gray-700 hover:text-yellow-600 transition-colors p-2"
+      className="relative text-gray-700 hover:text-orange-500 transition-colors p-2"
       aria-label="Abrir carrito"
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,7 +39,7 @@ export default function CartButton() {
       </svg>
       
       {count > 0 && (
-        <span className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce-once">
+        <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce-once">
           {count > 99 ? '99+' : count}
         </span>
       )}

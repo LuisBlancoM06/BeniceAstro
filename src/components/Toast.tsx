@@ -117,8 +117,15 @@ function ToastItem({ toast: t, onClose }: { toast: ToastMessage; onClose: () => 
   );
 }
 
+interface ToastContainerProps {
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
+}
+
 // Contenedor de Toasts
-export default function ToastContainer() {
+export default function ToastContainer(_props: ToastContainerProps) {
   const toasts = useStore(toastStore);
 
   if (toasts.length === 0) return null;

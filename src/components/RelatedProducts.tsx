@@ -81,7 +81,7 @@ export default function RelatedProducts({ currentProductId, animalType, category
         <h2 className="text-2xl font-bold text-gray-900">También te puede interesar</h2>
         <a 
           href={`/productos?animal=${animalType}&category=${category}`}
-          className="text-purple-600 hover:underline font-medium"
+          className="text-orange-500 hover:underline font-medium"
         >
           Ver más →
         </a>
@@ -120,17 +120,17 @@ export default function RelatedProducts({ currentProductId, animalType, category
               <div className="flex items-center gap-2 mt-2 mb-3">
                 {product.on_sale ? (
                   <>
-                    <span className="text-lg font-bold text-purple-600">{product.sale_price}€</span>
+                    <span className="text-lg font-bold text-orange-500">{product.sale_price}€</span>
                     <span className="text-sm text-gray-400 line-through">{product.price}€</span>
                   </>
                 ) : (
-                  <span className="text-lg font-bold text-purple-600">{product.price}€</span>
+                  <span className="text-lg font-bold text-orange-500">{product.price}€</span>
                 )}
               </div>
 
               <button
                 onClick={() => handleAddToCart(product)}
-                className="w-full bg-purple-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-orange-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />

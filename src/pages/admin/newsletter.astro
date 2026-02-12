@@ -6,7 +6,7 @@ const supabase = createServerClient(Astro.cookies);
 
 // Obtener suscriptores
 const { data: subscribers, count } = await supabase
-  .from('newsletter_subscribers')
+  .from('newsletters')
   .select('*', { count: 'exact' })
   .order('created_at', { ascending: false })
   .limit(50);
@@ -101,22 +101,18 @@ const { data: subscribers, count } = await supabase
   </div>
 
   <script>
-    import { createClient } from '@supabase/supabase-js';
-
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    import { supabase } from '../../lib/supabase';
 
     // Exportar CSV
     document.getElementById('export-btn')?.addEventListener('click', async () => {
       try {
         const { data } = await supabase
-          .from('newsletter_subscribers')
+          .from('newsletters')
           .select('email, created_at')
           .order('created_at', { ascending: false });
 
         if (data && data.length > 0) {
-          const csv = 'Email,Fecha\n' + data.map(s => `${s.email},${s.created_at}`).join('\n');
+          const csv = 'Email,Fecha\n' + data.map((s: any) => `${s.email},${s.created_at}`).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -145,7 +141,7 @@ const { data: subscribers, count } = await supabase
 
         try {
           const { error } = await supabase
-            .from('newsletter_subscribers')
+            .from('newsletters')
             .delete()
             .eq('email', email);
 
