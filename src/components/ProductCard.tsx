@@ -21,6 +21,10 @@ interface Product {
 
 interface ProductCardProps {
   product: Product;
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {

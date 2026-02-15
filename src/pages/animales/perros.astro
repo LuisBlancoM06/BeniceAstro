@@ -11,10 +11,10 @@ const { data: products } = await supabase
 
 // Categorías específicas para perros
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Piensos, húmedos y snacks' },
-  { id: 'salud', name: 'Salud', icon: 'health', description: 'Antiparasitarios y vitaminas' },
-  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Collares, correas y camas' },
-  { id: 'juguetes', name: 'Juguetes', icon: 'toys', description: 'Pelotas, mordedores y más' },
+  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos, húmedos y snacks' },
+  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios y vitaminas' },
+  { id: 'accesorios', name: 'Accesorios', icon: '🎀', description: 'Collares, correas y camas' },
+  { id: 'juguetes', name: 'Juguetes', icon: '🎾', description: 'Pelotas, mordedores y más' },
 ];
 
 const sizes = [
@@ -71,7 +71,7 @@ const ages = [
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         {categories.map((cat) => (
           <a 
-            href={`/perros?categoria=${cat.id}`}
+            href={`/animales/perros?categoria=${cat.id}`}
             class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
           >
             <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
@@ -176,7 +176,7 @@ const ages = [
           </div>
 
           <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products?.map((product) => (
+            {products?.map((product: any) => (
               <div class="product-card" data-product={JSON.stringify(product)}>
                 <!-- Renderizado por React -->
               </div>
@@ -206,7 +206,7 @@ const ages = [
             <span class="text-purple-600 text-sm font-medium">Alimentación</span>
             <h3 class="font-bold text-lg mt-2">¿Cómo elegir el mejor pienso?</h3>
             <p class="text-gray-600 mt-2 text-sm">Descubre los factores clave para elegir la alimentación perfecta...</p>
-            <a href="/blog/elegir-pienso-perro" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
+            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
               Leer más →
             </a>
           </div>
@@ -217,7 +217,7 @@ const ages = [
             <span class="text-orange-500 text-sm font-medium">Higiene</span>
             <h3 class="font-bold text-lg mt-2">Baño perfecto en casa</h3>
             <p class="text-gray-600 mt-2 text-sm">Guía completa para bañar a tu perro como un profesional...</p>
-            <a href="/blog/baniar-perro-casa" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
+            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
               Leer más →
             </a>
           </div>
@@ -228,7 +228,7 @@ const ages = [
             <span class="text-green-600 text-sm font-medium">Salud</span>
             <h3 class="font-bold text-lg mt-2">Calendario de vacunas</h3>
             <p class="text-gray-600 mt-2 text-sm">Todo lo que necesitas saber sobre las vacunas de tu perro...</p>
-            <a href="/blog/vacunas-perro" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
+            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
               Leer más →
             </a>
           </div>
@@ -246,14 +246,87 @@ const ages = [
   // Renderizar las tarjetas de producto con React
   document.addEventListener('DOMContentLoaded', () => {
     const productCards = document.querySelectorAll('.product-card');
+    const allProducts: any[] = [];
+    const roots = new Map();
+
     productCards.forEach((container) => {
       const productData = container.getAttribute('data-product');
       if (productData) {
         const product = JSON.parse(productData);
+        allProducts.push({ product, container });
         const root = createRoot(container);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        roots.set(container, root);
+        root.render(createElement(ProductCard, { product }));
       }
     });
+
+    // Filter logic
+    const grid = document.getElementById('products-grid');
+    const applyBtn = document.querySelector('button.bg-purple-600') as HTMLButtonElement;
+    const clearBtn = applyBtn?.nextElementSibling as HTMLButtonElement;
+    const sortSelect = document.querySelector('select') as HTMLSelectElement;
+    const countText = document.querySelector('.flex-1 .text-gray-600') as HTMLElement;
+
+    function getFilteredProducts() {
+      const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map((el) => (el as HTMLInputElement).value);
+      const selectedAges = Array.from(document.querySelectorAll('input[name="age"]:checked')).map((el) => (el as HTMLInputElement).value);
+      const selectedPrice = (document.querySelector('input[name="price"]:checked') as HTMLInputElement)?.value;
+      const onSaleOnly = (document.querySelector('input[name="on_sale"]') as HTMLInputElement)?.checked;
+
+      return allProducts.filter(({ product }) => {
+        if (selectedSizes.length > 0 && !selectedSizes.includes(product.size)) return false;
+        if (selectedAges.length > 0 && !selectedAges.includes(product.age_range)) return false;
+        if (onSaleOnly && !product.on_sale) return false;
+        if (selectedPrice) {
+          const price = product.on_sale && product.sale_price ? product.sale_price : product.price;
+          if (selectedPrice === '0-20' && price > 20) return false;
+          if (selectedPrice === '20-50' && (price < 20 || price > 50)) return false;
+          if (selectedPrice === '50+' && price < 50) return false;
+        }
+        return true;
+      });
+    }
+
+    function renderFiltered() {
+      const filtered = getFilteredProducts();
+      
+      // Sort
+      const sortValue = sortSelect?.value || '';
+      if (sortValue.includes('menor a mayor')) {
+        filtered.sort((a, b) => (a.product.price) - (b.product.price));
+      } else if (sortValue.includes('mayor a menor')) {
+        filtered.sort((a, b) => (b.product.price) - (a.product.price));
+      }
+
+      // Hide all, show filtered
+      allProducts.forEach(({ container }) => (container as HTMLElement).style.display = 'none');
+      filtered.forEach(({ container }) => (container as HTMLElement).style.display = '');
+      
+      if (countText) countText.textContent = `${filtered.length} productos encontrados`;
+    }
+
+    applyBtn?.addEventListener('click', renderFiltered);
+    sortSelect?.addEventListener('change', renderFiltered);
+    
+    clearBtn?.addEventListener('click', () => {
+      document.querySelectorAll('input[name="size"]:checked, input[name="age"]:checked, input[name="price"]:checked, input[name="on_sale"]:checked').forEach((el) => {
+        (el as HTMLInputElement).checked = false;
+      });
+      renderFiltered();
+    });
+
+    // Apply URL-based category filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('categoria');
+    if (categoryParam) {
+      allProducts.forEach(({ product, container }) => {
+        if (product.category !== categoryParam) {
+          (container as HTMLElement).style.display = 'none';
+        }
+      });
+      const visible = allProducts.filter(({ product }) => product.category === categoryParam);
+      if (countText) countText.textContent = `${visible.length} productos encontrados`;
+    }
   });
 </script>
 

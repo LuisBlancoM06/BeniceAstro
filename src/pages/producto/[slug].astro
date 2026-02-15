@@ -134,7 +134,7 @@ if (avgRating > 0) {
 
           <!-- Valoración -->
           <a href="#valoraciones" class="flex items-center gap-2 group">
-            <div class="flex" set:html={starsHtml} />
+            <div class="flex"><Fragment set:html={starsHtml} /></div>
             <span class="text-gray-600 group-hover:text-purple-700 transition-colors">
               {avgRating > 0 ? `(${avgRating}) • ${totalReviews} valoraciones` : 'Sin valoraciones aún'}
             </span>
@@ -214,7 +214,8 @@ if (avgRating > 0) {
               disabled={product.stock === 0}
               data-product-id={product.id}
               data-product-name={product.name}
-              data-product-price={displayPrice}
+              data-product-price={product.price}
+              data-product-sale-price={hasDiscount ? product.sale_price : ''}
               data-product-image={product.image_url}
               data-product-stock={product.stock}
             >
@@ -343,6 +344,7 @@ if (avgRating > 0) {
       const productId = btn.dataset.productId;
       const productName = btn.dataset.productName;
       const productPrice = parseFloat(btn.dataset.productPrice || '0');
+      const productSalePrice = btn.dataset.productSalePrice ? parseFloat(btn.dataset.productSalePrice) : undefined;
       const productImage = btn.dataset.productImage;
       const quantity = parseInt(quantityInput.value);
 
@@ -353,6 +355,7 @@ if (avgRating > 0) {
         id: productId,
         name: productName,
         price: productPrice,
+        salePrice: productSalePrice,
         image: productImage || '',
       }, quantity);
 

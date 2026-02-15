@@ -1,4 +1,5 @@
 import { useStore } from '@nanostores/react';
+import { useState } from 'react';
 import { 
   $cartItems, 
   $isCartOpen, 
@@ -22,6 +23,32 @@ export default function CartSlideOver(_props: Props) {
   const items = useStore($cartItems);
   const count = useStore($cartCount);
   const subtotal = useStore($cartSubtotal);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoMessage, setPromoMessage] = useState('');
+  const [promoApplied, setPromoApplied] = useState(false);
+  const [applyingPromo, setApplyingPromo] = useState(false);
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    setApplyingPromo(true);
+    setPromoMessage('');
+    
+    // Save promo code for checkout validation
+    const code = promoCode.trim().toUpperCase();
+    localStorage.setItem('promoCode', code);
+    setPromoApplied(true);
+    setPromoMessage(`Código "${code}" aplicado. Se validará en el checkout.`);
+    setApplyingPromo(false);
+  };
+
+  const removePromo = () => {
+    setPromoCode('');
+    setPromoDiscount(0);
+    setPromoMessage('');
+    setPromoApplied(false);
+    localStorage.removeItem('promoCode');
+  };
 
   if (!isOpen) return null;
 
@@ -152,17 +179,41 @@ export default function CartSlideOver(_props: Props) {
           <div className="border-t border-gray-200 px-6 py-4 bg-gray-50">
             {/* Código promocional */}
             <div className="mb-4">
-              <div className="flex gap-2">
-                <input 
-                  type="text"
-                  placeholder="Código promocional"
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  id="promo-code-input"
-                />
-                <button className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors">
-                  Aplicar
-                </button>
-              </div>
+              {promoApplied ? (
+                <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                  <span className="text-green-700 text-sm font-medium">✓ {promoCode.toUpperCase()}</span>
+                  <button 
+                    onClick={removePromo}
+                    className="text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Quitar
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input 
+                    type="text"
+                    placeholder="Código promocional"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && applyPromoCode()}
+                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    id="promo-code-input"
+                  />
+                  <button 
+                    onClick={applyPromoCode}
+                    disabled={applyingPromo || !promoCode.trim()}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                  >
+                    {applyingPromo ? '...' : 'Aplicar'}
+                  </button>
+                </div>
+              )}
+              {promoMessage && (
+                <p className={`text-xs mt-1 ${promoApplied ? 'text-green-600' : 'text-red-500'}`}>
+                  {promoMessage}
+                </p>
+              )}
             </div>
 
             {/* Subtotal */}

@@ -120,11 +120,14 @@ const getCategoryColor = (color: string) => {
     <!-- Categorías -->
     <section class="pb-8">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-wrap gap-3 justify-center">
+        <div class="flex flex-wrap gap-3 justify-center" id="blog-category-filters">
           {categories.map((cat, idx) => (
-            <button class={`px-4 py-2 rounded-full font-medium transition-colors ${
-              idx === 0 ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}>
+            <button 
+              class={`blog-cat-btn px-4 py-2 rounded-full font-medium transition-colors ${
+                idx === 0 ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              data-category={cat.name}
+            >
               {cat.name} <span class="text-sm opacity-70">({cat.count})</span>
             </button>
           ))}
@@ -142,7 +145,8 @@ const getCategoryColor = (color: string) => {
           {featuredArticles.map((article) => (
             <a 
               href={`/blog/${article.slug}`}
-              class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all blog-article"
+              data-article-category={article.category}
             >
               <div class="relative h-64 overflow-hidden">
                 <img 
@@ -182,7 +186,8 @@ const getCategoryColor = (color: string) => {
           {regularArticles.map((article) => (
             <a 
               href={`/blog/${article.slug}`}
-              class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all"
+              class="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all blog-article"
+              data-article-category={article.category}
             >
               <div class="relative h-48 overflow-hidden">
                 <img 
@@ -229,16 +234,19 @@ const getCategoryColor = (color: string) => {
           <p class="text-lg opacity-90 mb-8 max-w-xl mx-auto">
             Suscríbete a nuestra newsletter y recibe artículos exclusivos, ofertas especiales y novedades
           </p>
-          <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+          <form id="blog-newsletter-form" class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
             <input 
-              type="email" 
-              placeholder="tu@email.com" 
+              type="email"
+              id="blog-newsletter-email"
+              placeholder="tu@email.com"
+              required
               class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-4 focus:ring-white/30"
             />
             <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors whitespace-nowrap">
               Suscribirme
             </button>
           </form>
+          <p id="blog-newsletter-msg" class="mt-3 text-sm hidden"></p>
         </div>
       </div>
     </section>
@@ -253,3 +261,59 @@ const getCategoryColor = (color: string) => {
     overflow: hidden;
   }
 </style>
+
+<script>
+  // Blog category filter
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterBtns = document.querySelectorAll('.blog-cat-btn');
+    const articles = document.querySelectorAll('.blog-article');
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const category = (btn as HTMLElement).dataset.category;
+        
+        // Update button styles
+        filterBtns.forEach((b) => {
+          b.className = b.className.replace('bg-purple-600 text-white', 'bg-white text-gray-700 hover:bg-gray-100');
+        });
+        btn.className = btn.className.replace('bg-white text-gray-700 hover:bg-gray-100', 'bg-purple-600 text-white');
+
+        // Filter articles
+        articles.forEach((article) => {
+          const el = article as HTMLElement;
+          if (category === 'Todos') {
+            el.style.display = '';
+          } else {
+            el.style.display = el.dataset.articleCategory === category ? '' : 'none';
+          }
+        });
+      });
+    });
+
+    // Newsletter form
+    const nlForm = document.getElementById('blog-newsletter-form');
+    nlForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('blog-newsletter-email') as HTMLInputElement;
+      const msg = document.getElementById('blog-newsletter-msg');
+      const email = emailInput.value.trim();
+      if (!email) return;
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          if (msg) { msg.textContent = '¡Suscrito correctamente!'; msg.className = 'mt-3 text-sm text-green-300'; }
+          emailInput.value = '';
+        } else {
+          if (msg) { msg.textContent = result.error || 'Error al suscribirse'; msg.className = 'mt-3 text-sm text-red-300'; }
+        }
+      } catch {
+        if (msg) { msg.textContent = 'Error de conexión'; msg.className = 'mt-3 text-sm text-red-300'; }
+      }
+    });
+  });
+</script>

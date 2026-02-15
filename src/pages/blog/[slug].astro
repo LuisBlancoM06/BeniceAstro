@@ -1,0 +1,241 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+// Artículos del blog (mismos datos que en index.astro)
+const articles: Record<string, any> = {
+  'elegir-pienso-perro': {
+    title: 'Cómo elegir el mejor pienso para tu perro',
+    excerpt: 'Guía completa para seleccionar la alimentación perfecta según la edad, tamaño y necesidades de tu perro.',
+    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    category: 'Alimentación',
+    categoryColor: 'purple',
+    author: 'Dra. María García',
+    date: '2024-01-15',
+    readTime: '8 min',
+    content: `
+      <h2>¿Por qué es tan importante elegir bien el pienso?</h2>
+      <p>La alimentación es la base de la salud de tu perro. Un pienso de calidad puede marcar la diferencia en su energía, pelaje, digestión y longevidad.</p>
+      
+      <h2>Factores a considerar</h2>
+      <h3>1. Edad del perro</h3>
+      <p>Los cachorros necesitan un pienso con más proteínas y nutrientes para su crecimiento. Los perros adultos requieren un equilibrio diferente, y los seniors necesitan fórmulas especiales para articulaciones y digestión.</p>
+      
+      <h3>2. Tamaño y raza</h3>
+      <p>Las razas pequeñas tienen un metabolismo más rápido y necesitan croquetas más pequeñas. Las razas grandes requieren fórmulas que apoyen sus articulaciones y huesos.</p>
+      
+      <h3>3. Ingredientes clave</h3>
+      <p>Busca piensos donde la proteína animal sea el primer ingrediente. Evita aquellos con exceso de cereales, colorantes artificiales o conservantes químicos.</p>
+      
+      <h3>4. Necesidades especiales</h3>
+      <p>Si tu perro tiene alergias, problemas digestivos o necesidades médicas específicas, consulta con tu veterinario para elegir una fórmula especializada.</p>
+      
+      <h2>Nuestra recomendación</h2>
+      <p>En Venice Pet Shop ofrecemos una amplia selección de piensos premium para todas las edades y tamaños. ¡Consulta nuestro catálogo!</p>
+    `,
+  },
+  'cuidados-gato-verano': {
+    title: '10 consejos para cuidar a tu gato en verano',
+    excerpt: 'El calor puede afectar a los felinos. Descubre cómo mantener a tu gato fresco y saludable.',
+    image: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=800',
+    category: 'Salud',
+    categoryColor: 'green',
+    author: 'Dr. Carlos Ruiz',
+    date: '2024-01-10',
+    readTime: '5 min',
+    content: `
+      <h2>El verano y tu gato</h2>
+      <p>Los gatos pueden sufrir golpes de calor igual que nosotros. Aquí te dejamos los mejores consejos para que tu felino pase un verano feliz.</p>
+      
+      <h3>1. Agua fresca siempre disponible</h3>
+      <p>Coloca varios recipientes de agua fresca por la casa. Las fuentes para gatos son una excelente opción ya que les encanta el agua en movimiento.</p>
+      
+      <h3>2. Zonas frescas</h3>
+      <p>Asegúrate de que tu gato tenga acceso a zonas frescas y sombreadas. Los suelos de baldosa son su lugar favorito en verano.</p>
+      
+      <h3>3. Cepillado regular</h3>
+      <p>Un buen cepillado ayuda a eliminar el pelo muerto y permite una mejor regulación de la temperatura corporal.</p>
+      
+      <h3>4. Horarios de juego</h3>
+      <p>Evita las horas de más calor para jugar. Las primeras horas de la mañana y la tarde-noche son las mejores.</p>
+      
+      <h3>5. Protección solar</h3>
+      <p>Los gatos de pelaje claro pueden quemarse. Consulta con tu veterinario sobre protectores solares especiales para mascotas.</p>
+    `,
+  },
+  'juguetes-estimulacion-mental': {
+    title: 'Los mejores juguetes para estimular la mente de tu mascota',
+    excerpt: 'Mantén a tu perro o gato mentalmente activo con estos juguetes interactivos.',
+    image: 'https://images.unsplash.com/photo-1535930891776-0c2dfb7fda1a?w=800',
+    category: 'Accesorios',
+    categoryColor: 'orange',
+    author: 'Laura Martínez',
+    date: '2024-01-05',
+    readTime: '6 min',
+    content: `
+      <h2>La importancia de la estimulación mental</h2>
+      <p>Las mascotas necesitan ejercitar tanto su cuerpo como su mente. Un perro o gato aburrido puede desarrollar comportamientos destructivos.</p>
+      
+      <h3>Juguetes interactivos para perros</h3>
+      <p>Los puzzles con premios, los Kong rellenos y los juguetes dispensadores de comida son excelentes opciones para mantener a tu perro ocupado.</p>
+      
+      <h3>Juguetes para gatos</h3>
+      <p>Los circuitos de bolas, los ratones con hierba gatera y los juguetes con plumas son perfectos para estimular el instinto cazador de tu gato.</p>
+      
+      <h3>Rotación de juguetes</h3>
+      <p>No dejes todos los juguetes disponibles a la vez. Rota los juguetes cada semana para mantener el interés de tu mascota.</p>
+    `,
+  },
+  'primeros-dias-cachorro': {
+    title: 'Guía: Los primeros días con tu cachorro en casa',
+    excerpt: 'Todo lo que necesitas saber para recibir a tu nuevo mejor amigo.',
+    image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800',
+    category: 'Consejos',
+    categoryColor: 'blue',
+    author: 'Ana López',
+    date: '2024-01-01',
+    readTime: '10 min',
+    content: `
+      <h2>¡Bienvenido a casa!</h2>
+      <p>Los primeros días con un cachorro son emocionantes pero también pueden ser abrumadores. Esta guía te ayudará paso a paso.</p>
+      
+      <h3>Preparar la casa</h3>
+      <p>Retira objetos peligrosos del alcance del cachorro, prepara su zona de descanso con una cama cómoda y coloca sus cuencos de agua y comida en un lugar tranquilo.</p>
+      
+      <h3>Primera noche</h3>
+      <p>Es normal que el cachorro llore la primera noche. Coloca una manta con el olor de su madre o un reloj envuelto en tela (el tic-tac simula el latido del corazón).</p>
+      
+      <h3>Visita al veterinario</h3>
+      <p>Programa una visita al veterinario en los primeros días para un chequeo general y establecer el calendario de vacunas.</p>
+      
+      <h3>Socialización</h3>
+      <p>Los primeros meses son cruciales para la socialización. Expón a tu cachorro a diferentes personas, sonidos y experiencias de forma positiva.</p>
+    `,
+  },
+  'antiparasitarios-importancia': {
+    title: 'Por qué los antiparasitarios son esenciales',
+    excerpt: 'Protege a tu mascota de parásitos internos y externos durante todo el año.',
+    image: 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=800',
+    category: 'Salud',
+    categoryColor: 'green',
+    author: 'Dr. Carlos Ruiz',
+    date: '2023-12-20',
+    readTime: '7 min',
+    content: `
+      <h2>¿Por qué desparasitar?</h2>
+      <p>Los parásitos pueden causar graves problemas de salud en tu mascota y también afectar a tu familia. La desparasitación regular es fundamental.</p>
+      
+      <h3>Parásitos externos</h3>
+      <p>Pulgas, garrapatas y mosquitos pueden transmitir enfermedades graves como la leishmaniosis o la enfermedad de Lyme.</p>
+      
+      <h3>Parásitos internos</h3>
+      <p>Lombrices intestinales, tenias y gusanos del corazón requieren prevención constante, especialmente en zonas de riesgo.</p>
+      
+      <h3>Calendario de desparasitación</h3>
+      <p>Tu veterinario te indicará la frecuencia adecuada, pero generalmente se recomienda desparasitación interna cada 3 meses y externa cada mes.</p>
+    `,
+  },
+  'arenero-perfecto-gato': {
+    title: 'Cómo elegir el arenero perfecto para tu gato',
+    excerpt: 'Tipos de areneros, arenas y ubicación ideal para la comodidad de tu felino.',
+    image: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=800',
+    category: 'Accesorios',
+    categoryColor: 'orange',
+    author: 'Laura Martínez',
+    date: '2023-12-15',
+    readTime: '5 min',
+    content: `
+      <h2>El arenero ideal</h2>
+      <p>El arenero es uno de los elementos más importantes para la convivencia con un gato. Un arenero inadecuado puede causar estrés y problemas de comportamiento.</p>
+      
+      <h3>Tipos de arenero</h3>
+      <p>Abiertos, cerrados, autolimpiantes... cada tipo tiene sus ventajas. Los cerrados ofrecen más intimidad pero necesitan más ventilación.</p>
+      
+      <h3>Tipos de arena</h3>
+      <p>Arena aglomerante, de sílice, biodegradable... Prueba diferentes tipos hasta encontrar la que prefiera tu gato.</p>
+      
+      <h3>Ubicación</h3>
+      <p>Coloca el arenero en un lugar tranquilo y accesible, alejado de la comida y el agua. La regla general es tener un arenero por gato más uno extra.</p>
+      
+      <h3>Limpieza</h3>
+      <p>Retira los residuos diariamente y cambia la arena por completo cada semana. Una buena higiene evita olores y mantiene a tu gato feliz.</p>
+    `,
+  },
+};
+
+const { slug } = Astro.params;
+const article = articles[slug!];
+
+if (!article) {
+  return Astro.redirect('/blog');
+}
+
+const getCategoryColor = (color: string) => {
+  const colors: Record<string, string> = {
+    purple: 'bg-purple-100 text-purple-700',
+    green: 'bg-green-100 text-green-700',
+    orange: 'bg-orange-100 text-orange-700',
+    blue: 'bg-blue-100 text-blue-700',
+  };
+  return colors[color] || colors.purple;
+};
+---
+
+<Layout title={`${article.title} - Blog Venice Pet Shop`}>
+  <article class="bg-white min-h-screen">
+    <!-- Hero imagen -->
+    <div class="relative h-[400px] overflow-hidden">
+      <img 
+        src={article.image} 
+        alt={article.title}
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+      <div class="absolute bottom-0 left-0 right-0 p-8 max-w-4xl mx-auto">
+        <span class={`inline-block px-3 py-1 rounded-full text-sm font-medium mb-4 ${getCategoryColor(article.categoryColor)}`}>
+          {article.category}
+        </span>
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">{article.title}</h1>
+        <div class="flex items-center gap-4 text-white/80 text-sm">
+          <span>{article.author}</span>
+          <span>·</span>
+          <span>{new Date(article.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span>·</span>
+          <span>⏱️ {article.readTime} de lectura</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="max-w-3xl mx-auto px-4 py-12">
+      <!-- Breadcrumb -->
+      <nav class="text-sm mb-8">
+        <ol class="flex items-center space-x-2 text-gray-500">
+          <li><a href="/" class="hover:text-purple-700">Inicio</a></li>
+          <li><span class="mx-2">›</span></li>
+          <li><a href="/blog" class="hover:text-purple-700">Blog</a></li>
+          <li><span class="mx-2">›</span></li>
+          <li class="text-gray-800 font-medium truncate max-w-xs">{article.title}</li>
+        </ol>
+      </nav>
+
+      <!-- Contenido del artículo -->
+      <div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-a:text-purple-600">
+        <Fragment set:html={article.content} />
+      </div>
+
+      <!-- CTA -->
+      <div class="mt-12 bg-purple-50 rounded-2xl p-8 text-center">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">¿Necesitas productos para tu mascota?</h3>
+        <p class="text-gray-600 mb-6">Explora nuestra tienda con los mejores productos al mejor precio.</p>
+        <a href="/productos" class="inline-block bg-purple-700 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-500 transition-colors">
+          Ver productos
+        </a>
+      </div>
+
+      <!-- Volver -->
+      <div class="mt-8 text-center">
+        <a href="/blog" class="text-purple-600 hover:underline font-medium">← Volver al blog</a>
+      </div>
+    </div>
+  </article>
+</Layout>

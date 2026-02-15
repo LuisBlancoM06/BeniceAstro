@@ -84,23 +84,23 @@ endDate.setDate(endDate.getDate() + 7);
   <section class="py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-wrap gap-4 justify-center">
-        <button class="px-6 py-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors">
+        <button class="filter-btn px-6 py-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors" data-filter="all">
           Todas las ofertas
         </button>
-        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
-          Perros
+        <button class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors" data-filter="perro">
+          🐕 Perros
         </button>
-        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
-          Gatos
+        <button class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors" data-filter="gato">
+          🐱 Gatos
         </button>
-        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
-          Alimentación
+        <button class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors" data-filter="alimentacion">
+          🍖 Alimentación
         </button>
-        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
-          Juguetes
+        <button class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors" data-filter="juguetes">
+          🎾 Juguetes
         </button>
-        <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">
-          Salud
+        <button class="filter-btn px-6 py-3 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors" data-filter="salud">
+          💊 Salud
         </button>
       </div>
     </div>
@@ -140,7 +140,7 @@ endDate.setDate(endDate.getDate() + 7);
           <h3 class="text-2xl font-bold">¿Primera compra?</h3>
           <p class="opacity-90">Usa el código <span class="font-mono bg-white/20 px-2 py-1 rounded">BIENVENIDO10</span> y obtén un 10% extra</p>
         </div>
-        <button class="bg-white text-orange-500 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+        <button id="copy-promo-btn" class="bg-white text-orange-500 px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
           Copiar código
         </button>
       </div>
@@ -176,16 +176,19 @@ endDate.setDate(endDate.getDate() + 7);
     <div class="max-w-3xl mx-auto px-4 text-center text-white">
       <h2 class="text-3xl font-bold mb-4">¿No quieres perderte ninguna oferta?</h2>
       <p class="text-xl text-purple-200 mb-8">Suscríbete y recibe las mejores ofertas directamente en tu email</p>
-      <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+      <form id="ofertas-newsletter-form" class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
         <input 
           type="email" 
+          id="ofertas-newsletter-email"
           placeholder="tu@email.com" 
+          required
           class="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-4 focus:ring-white/30"
         />
         <button type="submit" class="bg-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors">
           ¡Suscribirme!
         </button>
       </form>
+      <p id="ofertas-newsletter-msg" class="mt-3 text-sm hidden"></p>
     </div>
   </section>
 </Layout>
@@ -252,13 +255,83 @@ endDate.setDate(endDate.getDate() + 7);
   import ProductCard from '../components/ProductCard.tsx';
   
   document.addEventListener('DOMContentLoaded', () => {
+    // Render product cards
     const productCards = document.querySelectorAll('.product-card');
+    const allProducts: { product: any; container: HTMLElement }[] = [];
+
     productCards.forEach((container) => {
       const productData = container.getAttribute('data-product');
       if (productData) {
         const product = JSON.parse(productData);
+        allProducts.push({ product, container: container as HTMLElement });
         const root = createRoot(container);
-        root.render(createElement(ProductCard));
+        root.render(createElement(ProductCard, { product }));
+      }
+    });
+
+    // Filter buttons
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const filter = (btn as HTMLElement).dataset.filter;
+        
+        // Update button styles
+        filterBtns.forEach((b) => {
+          b.className = b.className.replace('bg-orange-500 text-white', 'bg-gray-100 text-gray-700');
+        });
+        btn.className = btn.className.replace('bg-gray-100 text-gray-700', 'bg-orange-500 text-white');
+
+        // Filter products
+        allProducts.forEach(({ product, container }) => {
+          if (filter === 'all') {
+            container.style.display = '';
+          } else if (filter === 'perro' || filter === 'gato') {
+            container.style.display = product.animal_type === filter ? '' : 'none';
+          } else {
+            container.style.display = product.category === filter ? '' : 'none';
+          }
+        });
+      });
+    });
+
+    // Copy promo code
+    const copyBtn = document.getElementById('copy-promo-btn');
+    copyBtn?.addEventListener('click', () => {
+      navigator.clipboard.writeText('BIENVENIDO10').then(() => {
+        const original = copyBtn.textContent;
+        copyBtn.textContent = '¡Copiado! ✓';
+        copyBtn.classList.add('bg-green-100', 'text-green-700');
+        setTimeout(() => {
+          copyBtn.textContent = original;
+          copyBtn.classList.remove('bg-green-100', 'text-green-700');
+        }, 2000);
+      });
+    });
+
+    // Newsletter form
+    const nlForm = document.getElementById('ofertas-newsletter-form');
+    nlForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('ofertas-newsletter-email') as HTMLInputElement;
+      const msg = document.getElementById('ofertas-newsletter-msg');
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+        if (response.ok) {
+          if (msg) { msg.textContent = '¡Suscrito correctamente!'; msg.className = 'mt-3 text-sm text-green-300'; }
+          emailInput.value = '';
+        } else {
+          if (msg) { msg.textContent = result.error || 'Error al suscribirse'; msg.className = 'mt-3 text-sm text-red-300'; }
+        }
+      } catch {
+        if (msg) { msg.textContent = 'Error de conexión'; msg.className = 'mt-3 text-sm text-red-300'; }
       }
     });
   });

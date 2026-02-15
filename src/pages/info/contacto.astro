@@ -122,7 +122,7 @@ export const prerender = true;
               <div class="flex items-start gap-3">
                 <input type="checkbox" id="privacy" required class="mt-1 rounded text-purple-600 focus:ring-purple-500" />
                 <label for="privacy" class="text-sm text-gray-600">
-                  Acepto la <a href="/privacidad" class="text-purple-600 hover:underline">política de privacidad</a> 
+                  Acepto la <a href="/legal/privacidad" class="text-purple-600 hover:underline">política de privacidad</a> 
                   y el tratamiento de mis datos personales
                 </label>
               </div>
@@ -179,7 +179,7 @@ export const prerender = true;
                   <p class="py-3 text-gray-600">Sí, el envío es gratis para pedidos superiores a 49€.</p>
                 </details>
               </div>
-              <a href="/faq" class="inline-block mt-4 text-purple-600 font-medium hover:underline">
+              <a href="/info/faq" class="inline-block mt-4 text-purple-600 font-medium hover:underline">
                 Ver todas las preguntas →
               </a>
             </div>
@@ -261,9 +261,7 @@ export const prerender = true;
         alert('Error al enviar el mensaje. Inténtalo de nuevo.');
       }
     } catch (error) {
-      // Si no hay API, simular éxito
-      form.classList.add('hidden');
-      successMessage?.classList.remove('hidden');
+      alert('Error al enviar el mensaje. Inténtalo de nuevo.');
     }
   });
 </script>

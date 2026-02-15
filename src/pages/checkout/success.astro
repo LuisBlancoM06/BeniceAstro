@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 const sessionId = Astro.url.searchParams.get('session_id');
 ---
 
-<Layout title="¡Pago Exitoso! - Benice" hideNewsletterPopup={true}>
+<Layout title="¡Pago Exitoso! - Venice Pet Shop" hideNewsletterPopup={true}>
   <div class="min-h-screen bg-gradient-to-b from-green-50 via-white to-purple-50/30 py-10 sm:py-16">
     <div class="max-w-3xl mx-auto px-4">
       
@@ -220,8 +220,15 @@ const sessionId = Astro.url.searchParams.get('session_id');
   <script>
     import { clearCart } from '../../stores/cart';
 
-    // Limpiar carrito después de pago exitoso
-    clearCart();
+    // Solo limpiar carrito si hay un session_id válido en la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    if (sessionId && sessionId.startsWith('cs_')) {
+      clearCart();
+    } else if (!sessionId) {
+      // Sin session_id = acceso directo, redirigir
+      window.location.href = '/';
+    }
 
     // Efecto de confetti
     function createConfetti() {

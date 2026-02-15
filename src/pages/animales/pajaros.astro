@@ -9,10 +9,10 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Semillas y mezclas' },
-  { id: 'jaulas', name: 'Jaulas', icon: 'cage', description: 'Jaulas y voladeros' },
-  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Nidos y perchas' },
-  { id: 'salud', name: 'Salud', icon: 'health', description: 'Vitaminas y cuidados' },
+  { id: 'alimentacion', name: 'Alimentación', icon: '🌾', description: 'Semillas y mezclas' },
+  { id: 'jaulas', name: 'Jaulas', icon: '🏠', description: 'Jaulas y voladeros' },
+  { id: 'accesorios', name: 'Accesorios', icon: '🪶', description: 'Nidos y perchas' },
+  { id: 'salud', name: 'Salud', icon: '💊', description: 'Vitaminas y cuidados' },
 ];
 ---
 
@@ -51,7 +51,7 @@ const categories = [
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((cat) => (
           <a 
-            href={`/pajaros?categoria=${cat.id}`}
+            href={`/animales/pajaros?categoria=${cat.id}`}
             class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
           >
             <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
@@ -75,7 +75,7 @@ const categories = [
       </div>
 
       <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {products?.map((product) => (
+        {products?.map((product: any) => (
           <div class="product-card" data-product={JSON.stringify(product)}></div>
         ))}
       </div>
@@ -101,14 +101,45 @@ const categories = [
   
   document.addEventListener('DOMContentLoaded', () => {
     const productCards = document.querySelectorAll('.product-card');
+    const allProducts: any[] = [];
+    const roots = new Map();
+
     productCards.forEach((container) => {
       const productData = container.getAttribute('data-product');
       if (productData) {
         const product = JSON.parse(productData);
+        allProducts.push({ product, container });
         const root = createRoot(container);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        roots.set(container, root);
+        root.render(createElement(ProductCard, { product }));
       }
     });
+
+    const grid = document.getElementById('products-grid');
+    const sortSelect = document.querySelector('select') as HTMLSelectElement;
+    const countText = document.querySelector('.text-gray-600') as HTMLElement;
+
+    function renderFiltered() {
+      const filtered = [...allProducts];
+      const sortValue = sortSelect?.value || '';
+      if (sortValue.includes('menor a mayor')) filtered.sort((a, b) => a.product.price - b.product.price);
+      else if (sortValue.includes('mayor a menor')) filtered.sort((a, b) => b.product.price - a.product.price);
+
+      allProducts.forEach(({ container }) => (container as HTMLElement).style.display = '');
+      if (countText) countText.textContent = `${filtered.length} productos encontrados`;
+    }
+
+    sortSelect?.addEventListener('change', renderFiltered);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('categoria');
+    if (categoryParam) {
+      allProducts.forEach(({ product, container }) => {
+        if (product.category !== categoryParam) (container as HTMLElement).style.display = 'none';
+      });
+      const visible = allProducts.filter(({ product }) => product.category === categoryParam);
+      if (countText) countText.textContent = `${visible.length} productos encontrados`;
+    }
   });
 </script>
 

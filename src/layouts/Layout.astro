@@ -85,14 +85,23 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
             </span>
           </a>
 
+          <!-- Navegación principal escritorio -->
+          <div class="hidden lg:flex items-center gap-1">
+            <a href="/productos" class="px-3 py-2 text-gray-700 hover:text-purple-700 font-medium rounded-lg hover:bg-purple-50 transition-colors">Productos</a>
+            <a href="/animales/perros" class="px-3 py-2 text-gray-700 hover:text-purple-700 font-medium rounded-lg hover:bg-purple-50 transition-colors">Perros</a>
+            <a href="/animales/gatos" class="px-3 py-2 text-gray-700 hover:text-purple-700 font-medium rounded-lg hover:bg-purple-50 transition-colors">Gatos</a>
+            <a href="/ofertas" class="px-3 py-2 text-red-600 hover:text-red-700 font-bold rounded-lg hover:bg-red-50 transition-colors">Ofertas</a>
+          </div>
+
           <!-- Buscador -->
-          <div class="relative hidden sm:block" id="search-container">
+          <div class="relative hidden sm:block flex-1 max-w-xs" id="search-container">
             <div class="relative">
               <input
                 type="text"
                 id="search-input"
                 placeholder="¿Qué buscas?"
-                class="w-48 lg:w-64 pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+                aria-label="Buscar productos"
+                class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
               />
               <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -183,8 +192,26 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
     <!-- Menú móvil -->
     <div id="mobile-menu" class="hidden lg:hidden bg-white border-t">
       <div class="px-4 py-4 space-y-3">
+        <!-- Buscador móvil -->
+        <div class="relative sm:hidden" id="mobile-search-container">
+          <input
+            type="text"
+            id="mobile-search-input"
+            placeholder="¿Qué buscas?"
+            aria-label="Buscar productos"
+            class="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200"
+          />
+          <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <div id="mobile-search-results" class="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-2xl hidden max-h-64 overflow-y-auto border border-gray-100"></div>
+        </div>
+        <a href="/productos" class="block py-2 text-gray-700 font-medium">Todos los Productos</a>
         <a href="/animales/perros" class="block py-2 text-gray-700 font-medium">Perros</a>
         <a href="/animales/gatos" class="block py-2 text-gray-700 font-medium">Gatos</a>
+        <a href="/animales/pajaros" class="block py-2 text-gray-700 font-medium">Pájaros</a>
+        <a href="/animales/peces" class="block py-2 text-gray-700 font-medium">Peces</a>
+        <a href="/animales/roedores" class="block py-2 text-gray-700 font-medium">Roedores</a>
         <a href="/ofertas" class="block py-2 text-red-600 font-bold">Ofertas</a>
         <a href="/info/contacto" class="block py-2 text-gray-700 font-medium">Contacto</a>
       </div>
@@ -264,14 +291,14 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           </a>
           <p class="text-gray-400 text-sm mb-4">Tu tienda de confianza para el cuidado de tus mascotas</p>
           <div class="flex gap-3">
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
-              <span>FB</span>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
             </a>
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
-              <span>IG</span>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" stroke-width="2"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" stroke-width="2"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke-width="2"/></svg>
             </a>
-            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
-              <span>TW</span>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter/X" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-orange-500 transition-colors">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
           </div>
         </div>
@@ -335,16 +362,19 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
             <h3 class="font-bold text-lg">Suscríbete a nuestra newsletter</h3>
             <p class="text-gray-400 text-sm">Recibe ofertas exclusivas y novedades</p>
           </div>
-          <form class="flex gap-2 w-full md:w-auto">
+          <form id="footer-newsletter-form" class="flex gap-2 w-full md:w-auto">
             <input 
               type="email" 
+              id="footer-newsletter-email"
               placeholder="tu@email.com" 
+              required
               class="flex-1 md:w-64 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20"
             />
             <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors whitespace-nowrap">
               Suscribirse
             </button>
           </form>
+          <p id="footer-newsletter-msg" class="hidden text-green-400 text-sm mt-2"></p>
         </div>
       </div>
     </div>
@@ -420,6 +450,13 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
     
     mobileMenuBtn?.addEventListener('click', () => {
       mobileMenu?.classList.toggle('hidden');
+    });
+
+    // Cerrar menú móvil al hacer click en un enlace
+    mobileMenu?.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileMenu?.classList.add('hidden');
+      });
     });
 
     // Cerrar menú al hacer click fuera
@@ -591,6 +628,82 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
     }
     
     initNotificationSlider();
+
+    // Newsletter del footer
+    const footerNewsletterForm = document.getElementById('footer-newsletter-form');
+    footerNewsletterForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('footer-newsletter-email') as HTMLInputElement;
+      const msg = document.getElementById('footer-newsletter-msg');
+      const email = emailInput.value.trim();
+      
+      if (!email) return;
+      
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          if (msg) {
+            msg.textContent = '¡Suscrito! Revisa tu email para tu código de descuento.';
+            msg.className = 'text-green-400 text-sm mt-2';
+          }
+          emailInput.value = '';
+        } else {
+          if (msg) {
+            msg.textContent = result.error || 'Error al suscribirse';
+            msg.className = 'text-red-400 text-sm mt-2';
+          }
+        }
+      } catch {
+        if (msg) {
+          msg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+          msg.className = 'text-red-400 text-sm mt-2';
+        }
+      }
+    });
+
+    // Buscador móvil (reutiliza la misma lógica)
+    const mobileSearchInput = document.getElementById('mobile-search-input') as HTMLInputElement;
+    const mobileSearchResults = document.getElementById('mobile-search-results');
+    let mobileSearchTimeout: number;
+
+    mobileSearchInput?.addEventListener('input', async (e) => {
+      const query = (e.target as HTMLInputElement).value.trim();
+      clearTimeout(mobileSearchTimeout);
+      
+      if (query.length < 2) {
+        mobileSearchResults?.classList.add('hidden');
+        return;
+      }
+
+      mobileSearchTimeout = window.setTimeout(async () => {
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+          const products = await response.json();
+          
+          if (products.length === 0) {
+            mobileSearchResults!.innerHTML = '<div class="p-4 text-center text-gray-500">No se encontraron productos</div>';
+          } else {
+            mobileSearchResults!.innerHTML = products.slice(0, 5).map((p: any) => `
+              <a href="/producto/${p.slug || p.id}" class="flex items-center gap-3 p-3 hover:bg-gray-50 border-b last:border-0">
+                <img src="${p.image_url}" alt="${p.name}" class="w-10 h-10 object-cover rounded">
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-sm truncate">${p.name}</div>
+                  <span class="text-orange-500 font-bold text-sm">${p.on_sale ? p.sale_price : p.price}€</span>
+                </div>
+              </a>
+            `).join('');
+          }
+          mobileSearchResults?.classList.remove('hidden');
+        } catch { /* ignore */ }
+      }, 300);
+    });
   </script>
 </body>
 </html>

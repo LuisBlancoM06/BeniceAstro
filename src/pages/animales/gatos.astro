@@ -10,10 +10,10 @@ const { data: products } = await supabase
   .order('created_at', { ascending: false });
 
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: 'food', description: 'Piensos y húmedos' },
-  { id: 'salud', name: 'Salud', icon: 'health', description: 'Antiparasitarios' },
-  { id: 'accesorios', name: 'Accesorios', icon: 'accessories', description: 'Camas y rascadores' },
-  { id: 'juguetes', name: 'Juguetes', icon: 'toys', description: 'Ratones y cañas' },
+  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos y húmedos' },
+  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios' },
+  { id: 'accesorios', name: 'Accesorios', icon: '🛏️', description: 'Camas y rascadores' },
+  { id: 'juguetes', name: 'Juguetes', icon: '🧶', description: 'Ratones y cañas' },
 ];
 
 const ages = [
@@ -64,7 +64,7 @@ const ages = [
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
         {categories.map((cat) => (
           <a 
-            href={`/gatos?categoria=${cat.id}`}
+            href={`/animales/gatos?categoria=${cat.id}`}
             class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
           >
             <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
@@ -132,7 +132,7 @@ const ages = [
           </div>
 
           <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products?.map((product) => (
+            {products?.map((product: any) => (
               <div class="product-card" data-product={JSON.stringify(product)}></div>
             ))}
           </div>
@@ -157,14 +157,61 @@ const ages = [
   
   document.addEventListener('DOMContentLoaded', () => {
     const productCards = document.querySelectorAll('.product-card');
+    const allProducts: any[] = [];
+    const roots = new Map();
+
     productCards.forEach((container) => {
       const productData = container.getAttribute('data-product');
       if (productData) {
         const product = JSON.parse(productData);
+        allProducts.push({ product, container });
         const root = createRoot(container);
-        root.render(createElement(ProductCard, { product, showQuickActions: true }));
+        roots.set(container, root);
+        root.render(createElement(ProductCard, { product }));
       }
     });
+
+    const grid = document.getElementById('products-grid');
+    const applyBtn = document.querySelector('button.bg-orange-500') as HTMLButtonElement;
+    const sortSelect = document.querySelector('select') as HTMLSelectElement;
+    const countText = document.querySelector('.text-gray-600') as HTMLElement;
+
+    function getFilteredProducts() {
+      const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map((el) => (el as HTMLInputElement).value);
+      const selectedAges = Array.from(document.querySelectorAll('input[name="age"]:checked')).map((el) => (el as HTMLInputElement).value);
+      const onSaleOnly = (document.querySelector('input[name="on_sale"]') as HTMLInputElement)?.checked;
+
+      return allProducts.filter(({ product }) => {
+        if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) return false;
+        if (selectedAges.length > 0 && !selectedAges.includes(product.age_range)) return false;
+        if (onSaleOnly && !product.on_sale) return false;
+        return true;
+      });
+    }
+
+    function renderFiltered() {
+      const filtered = getFilteredProducts();
+      const sortValue = sortSelect?.value || '';
+      if (sortValue.includes('menor a mayor')) filtered.sort((a, b) => a.product.price - b.product.price);
+      else if (sortValue.includes('mayor a menor')) filtered.sort((a, b) => b.product.price - a.product.price);
+
+      allProducts.forEach(({ container }) => (container as HTMLElement).style.display = 'none');
+      filtered.forEach(({ container }) => (container as HTMLElement).style.display = '');
+      if (countText) countText.textContent = `${filtered.length} productos encontrados`;
+    }
+
+    applyBtn?.addEventListener('click', renderFiltered);
+    sortSelect?.addEventListener('change', renderFiltered);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('categoria');
+    if (categoryParam) {
+      allProducts.forEach(({ product, container }) => {
+        if (product.category !== categoryParam) (container as HTMLElement).style.display = 'none';
+      });
+      const visible = allProducts.filter(({ product }) => product.category === categoryParam);
+      if (countText) countText.textContent = `${visible.length} productos encontrados`;
+    }
   });
 </script>
 

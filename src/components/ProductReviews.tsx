@@ -26,6 +26,10 @@ interface ReviewStats {
 interface ProductReviewsProps {
   productId: string;
   productName: string;
+  'client:load'?: boolean;
+  'client:idle'?: boolean;
+  'client:visible'?: boolean;
+  'client:only'?: string;
 }
 
 export default function ProductReviews({ productId, productName }: ProductReviewsProps) {
