@@ -1,0 +1,598 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { createServerClient } from '../../../lib/supabase';
+
+const supabase = createServerClient(Astro.cookies);
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect('/admin/pedidos');
+}
+
+// Obtener pedido con items y usuario
+const { data: order, error } = await supabase
+  .from('orders')
+  .select(`
+    *,
+    users (id, email, full_name, phone),
+    order_items (
+      id, quantity, price,
+      products (id, name, image_url, slug)
+    )
+  `)
+  .eq('id', id)
+  .single();
+
+if (error || !order) {
+  return Astro.redirect('/admin/pedidos');
+}
+
+// Obtener solicitud de cancelacion si existe
+const { data: cancellationRequest } = await supabase
+  .from('cancellation_requests')
+  .select('*')
+  .eq('order_id', id)
+  .order('created_at', { ascending: false })
+  .limit(1);
+
+const cancellation = cancellationRequest?.[0] || null;
+
+// Obtener solicitud de devolucion si existe
+const { data: returnRequests } = await supabase
+  .from('returns')
+  .select('*')
+  .eq('order_id', id)
+  .limit(1);
+
+const returnRequest = returnRequests?.[0] || null;
+
+// Calcular subtotal de items
+const subtotal = order.order_items?.reduce((sum: number, item: any) => sum + (item.quantity * item.price), 0) || 0;
+
+// Parsear direccion de envio
+let shippingInfo = null;
+try {
+  if (order.shipping_address) {
+    shippingInfo = JSON.parse(order.shipping_address);
+  }
+} catch (e) {
+  shippingInfo = order.shipping_address;
+}
+
+const statusColors: Record<string, string> = {
+  pendiente: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  pagado: 'bg-green-100 text-green-800 border-green-300',
+  enviado: 'bg-blue-100 text-blue-800 border-blue-300',
+  entregado: 'bg-purple-100 text-purple-800 border-purple-300',
+  cancelado: 'bg-red-100 text-red-800 border-red-300'
+};
+
+const cancellationStatusColors: Record<string, string> = {
+  pendiente: 'bg-yellow-100 text-yellow-800',
+  aprobada: 'bg-green-100 text-green-800',
+  rechazada: 'bg-red-100 text-red-800'
+};
+---
+
+<AdminLayout title={`Pedido #${order.id.substring(0, 8)}`} currentPage="pedidos">
+
+  <!-- Header -->
+  <div class="mb-6">
+    <a href="/admin/pedidos" class="text-purple-600 hover:text-purple-800 text-sm font-medium mb-4 inline-block">
+      &larr; Volver a pedidos
+    </a>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <h1 class="text-2xl font-bold text-gray-800">
+          Pedido <span class="font-mono">#{order.id.substring(0, 8)}</span>
+        </h1>
+        <span class={`px-4 py-1.5 rounded-full text-sm font-semibold border ${statusColors[order.status]}`}>
+          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+        </span>
+      </div>
+      <div class="text-sm text-gray-500">
+        {new Date(order.created_at).toLocaleDateString('es-ES', {
+          day: '2-digit', month: 'long', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        })}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Columna principal -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Items del pedido -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Productos</h2>
+        <div class="divide-y divide-gray-100">
+          {order.order_items?.map((item: any) => (
+            <div class="flex items-center gap-4 py-3">
+              <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                <img
+                  src={item.products?.image_url || '/images/placeholder.jpg'}
+                  alt={item.products?.name || 'Producto'}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 truncate">{item.products?.name || 'Producto eliminado'}</p>
+                <p class="text-sm text-gray-500">Cantidad: {item.quantity} x {Number(item.price).toFixed(2)}&euro;</p>
+              </div>
+              <div class="text-right font-semibold text-gray-800">
+                {(item.quantity * item.price).toFixed(2)}&euro;
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Totales -->
+        <div class="border-t border-gray-200 mt-4 pt-4 space-y-2">
+          <div class="flex justify-between text-sm text-gray-600">
+            <span>Subtotal:</span>
+            <span>{subtotal.toFixed(2)}&euro;</span>
+          </div>
+          {order.discount_amount > 0 && (
+            <div class="flex justify-between text-sm text-green-600">
+              <span>Descuento ({order.promo_code}):</span>
+              <span>-{Number(order.discount_amount).toFixed(2)}&euro;</span>
+            </div>
+          )}
+          <div class="flex justify-between text-sm text-gray-600">
+            <span>Envio:</span>
+            <span>GRATIS</span>
+          </div>
+          <div class="flex justify-between text-lg font-bold text-gray-800 pt-2 border-t">
+            <span>Total:</span>
+            <span>{Number(order.total).toFixed(2)}&euro;</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Solicitud de cancelacion -->
+      {cancellation && (
+        <div class={`bg-white rounded-xl shadow-sm p-6 border-l-4 ${
+          cancellation.status === 'pendiente' ? 'border-yellow-400' :
+          cancellation.status === 'aprobada' ? 'border-green-400' : 'border-red-400'
+        }`}>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Solicitud de Cancelacion</h2>
+            <span class={`px-3 py-1 rounded-full text-xs font-medium ${cancellationStatusColors[cancellation.status]}`}>
+              {cancellation.status.charAt(0).toUpperCase() + cancellation.status.slice(1)}
+            </span>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Motivo del cliente:</p>
+              <p class="text-gray-800 bg-gray-50 p-3 rounded-lg mt-1">{cancellation.reason}</p>
+            </div>
+            <div class="text-sm text-gray-500">
+              Solicitado el: {new Date(cancellation.created_at).toLocaleDateString('es-ES', {
+                day: '2-digit', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+              })}
+            </div>
+
+            {cancellation.admin_notes && (
+              <div>
+                <p class="text-sm font-medium text-gray-500">Notas del admin:</p>
+                <p class="text-gray-800 bg-gray-50 p-3 rounded-lg mt-1">{cancellation.admin_notes}</p>
+              </div>
+            )}
+
+            {cancellation.stripe_refund_id && (
+              <div class="text-sm text-gray-500">
+                <span class="font-medium">ID Reembolso Stripe:</span> {cancellation.stripe_refund_id}
+              </div>
+            )}
+
+            {cancellation.status === 'pendiente' && (
+              <div class="mt-4 space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Notas (opcional):</label>
+                  <textarea
+                    id="admin-notes"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent text-sm"
+                    placeholder="Motivo del rechazo o notas internas..."
+                  ></textarea>
+                </div>
+                <div class="flex gap-3">
+                  <button
+                    id="approve-cancel-btn"
+                    data-cancellation-id={cancellation.id}
+                    class="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                  >
+                    Aprobar y Reembolsar
+                  </button>
+                  <button
+                    id="reject-cancel-btn"
+                    data-cancellation-id={cancellation.id}
+                    class="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <!-- Solicitud de devolucion -->
+      {returnRequest && (
+        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-400">
+          <h2 class="text-lg font-semibold text-gray-800 mb-3">Solicitud de Devolucion</h2>
+          <div class="space-y-2">
+            <div>
+              <p class="text-sm font-medium text-gray-500">Motivo:</p>
+              <p class="text-gray-800 bg-gray-50 p-3 rounded-lg mt-1">{returnRequest.reason}</p>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Estado: <span class="font-medium capitalize">{returnRequest.status}</span></span>
+              <span class="text-gray-500">Reembolso: {Number(returnRequest.refund_amount).toFixed(2)}&euro;</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Columna lateral -->
+    <div class="space-y-6">
+
+      <!-- Info del cliente -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Cliente</h2>
+        <div class="space-y-3">
+          <div>
+            <p class="text-sm text-gray-500">Nombre</p>
+            <p class="font-medium text-gray-800">{order.users?.full_name || 'Invitado'}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">Email</p>
+            <p class="font-medium text-gray-800">{order.users?.email || 'No disponible'}</p>
+          </div>
+          {order.users?.phone && (
+            <div>
+              <p class="text-sm text-gray-500">Telefono</p>
+              <p class="font-medium text-gray-800">{order.users.phone}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Direccion de envio -->
+      {shippingInfo && (
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Direccion de envio</h2>
+          {typeof shippingInfo === 'object' && shippingInfo !== null ? (
+            <div class="text-sm text-gray-700 space-y-1">
+              {shippingInfo.name && <p class="font-medium">{shippingInfo.name}</p>}
+              {shippingInfo.address?.line1 && <p>{shippingInfo.address.line1}</p>}
+              {shippingInfo.address?.line2 && <p>{shippingInfo.address.line2}</p>}
+              {(shippingInfo.address?.postal_code || shippingInfo.address?.city) && (
+                <p>{shippingInfo.address?.postal_code} {shippingInfo.address?.city}</p>
+              )}
+              {shippingInfo.address?.country && <p>{shippingInfo.address.country}</p>}
+            </div>
+          ) : (
+            <p class="text-sm text-gray-700">{String(shippingInfo)}</p>
+          )}
+        </div>
+      )}
+
+      <!-- Gestion de estado -->
+      {order.status !== 'cancelado' && (
+        <div class="bg-white rounded-xl shadow-sm p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Gestionar estado</h2>
+
+          <div class="space-y-4">
+            <!-- Timeline de estado -->
+            <div class="space-y-3">
+              {['pagado', 'enviado', 'entregado'].map((status, i) => {
+                const statusIndex = ['pagado', 'enviado', 'entregado'].indexOf(order.status);
+                const thisIndex = i;
+                const isActive = thisIndex <= statusIndex;
+                const isCurrent = status === order.status;
+                return (
+                  <div class="flex items-center gap-3">
+                    <div class={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      isActive ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-400'
+                    } ${isCurrent ? 'ring-2 ring-purple-300' : ''}`}>
+                      {thisIndex + 1}
+                    </div>
+                    <span class={`text-sm font-medium ${isActive ? 'text-gray-800' : 'text-gray-400'}`}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Cambiar estado */}
+            {order.status === 'pagado' && (
+              <div class="pt-4 border-t space-y-3">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">N&uacute;mero de seguimiento *</label>
+                  <input
+                    type="text"
+                    id="tracking-number"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm"
+                    placeholder="Ej: ES12345678901"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Transportista</label>
+                  <select id="carrier-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm">
+                    <option value="Correos Express">Correos Express</option>
+                    <option value="SEUR">SEUR</option>
+                    <option value="MRW">MRW</option>
+                    <option value="GLS">GLS</option>
+                    <option value="DHL">DHL</option>
+                    <option value="UPS">UPS</option>
+                  </select>
+                </div>
+                <button
+                  id="mark-shipped-btn"
+                  data-order-id={order.id}
+                  class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  Marcar como Enviado
+                </button>
+              </div>
+            )}
+
+            {order.status === 'enviado' && (
+              <div class="pt-4 border-t space-y-3">
+                {order.tracking_number && (
+                  <div class="text-sm">
+                    <span class="text-gray-500">Seguimiento:</span>
+                    <span class="font-mono font-medium ml-1">{order.tracking_number}</span>
+                  </div>
+                )}
+                <button
+                  id="mark-delivered-btn"
+                  data-order-id={order.id}
+                  class="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  Marcar como Entregado
+                </button>
+              </div>
+            )}
+
+            {order.status === 'entregado' && (
+              <div class="pt-4 border-t">
+                <p class="text-sm text-green-600 font-medium text-center">Pedido completado</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <!-- Info tecnica -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Info tecnica</h2>
+        <div class="space-y-2 text-xs font-mono text-gray-500">
+          <div><span class="text-gray-400">ID:</span> {order.id}</div>
+          {order.stripe_session_id && (
+            <div><span class="text-gray-400">Stripe Session:</span> {order.stripe_session_id.substring(0, 20)}...</div>
+          )}
+          {order.payment_intent_id && (
+            <div><span class="text-gray-400">Payment Intent:</span> {order.payment_intent_id.substring(0, 20)}...</div>
+          )}
+          <div><span class="text-gray-400">Actualizado:</span> {new Date(order.updated_at).toLocaleString('es-ES')}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="hidden fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium"></div>
+
+  <script>
+    import { supabase } from '../../../lib/supabase';
+
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      const toast = document.getElementById('toast')!;
+      toast.textContent = message;
+      toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      }`;
+      setTimeout(() => toast.classList.add('hidden'), 4000);
+    }
+
+    async function getAuthToken(): Promise<string | null> {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    }
+
+    // Marcar como enviado
+    document.getElementById('mark-shipped-btn')?.addEventListener('click', async (e) => {
+      const btn = e.target as HTMLButtonElement;
+      const orderId = btn.dataset.orderId;
+      const trackingNumber = (document.getElementById('tracking-number') as HTMLInputElement)?.value.trim();
+      const carrier = (document.getElementById('carrier-select') as HTMLSelectElement)?.value;
+
+      if (!trackingNumber) {
+        showToast('Introduce el numero de seguimiento', 'error');
+        return;
+      }
+
+      if (!confirm('¿Marcar este pedido como enviado? Se notificara al cliente por email.')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
+
+      try {
+        const token = await getAuthToken();
+        const res = await fetch('/api/admin/update-order-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            order_id: orderId,
+            new_status: 'enviado',
+            tracking_number: trackingNumber,
+            carrier: carrier
+          })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          showToast('Pedido marcado como enviado. Email enviado al cliente.');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showToast(result.error || 'Error al actualizar', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Marcar como Enviado';
+        }
+      } catch (err) {
+        showToast('Error de conexion', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Marcar como Enviado';
+      }
+    });
+
+    // Marcar como entregado
+    document.getElementById('mark-delivered-btn')?.addEventListener('click', async (e) => {
+      const btn = e.target as HTMLButtonElement;
+      const orderId = btn.dataset.orderId;
+
+      if (!confirm('¿Marcar este pedido como entregado? Se notificara al cliente por email.')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
+
+      try {
+        const token = await getAuthToken();
+        const res = await fetch('/api/admin/update-order-status', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            order_id: orderId,
+            new_status: 'entregado'
+          })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          showToast('Pedido marcado como entregado. Email enviado al cliente.');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showToast(result.error || 'Error al actualizar', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Marcar como Entregado';
+        }
+      } catch (err) {
+        showToast('Error de conexion', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Marcar como Entregado';
+      }
+    });
+
+    // Aprobar cancelacion
+    document.getElementById('approve-cancel-btn')?.addEventListener('click', async (e) => {
+      const btn = e.target as HTMLButtonElement;
+      const cancellationId = btn.dataset.cancellationId;
+      const adminNotes = (document.getElementById('admin-notes') as HTMLTextAreaElement)?.value.trim();
+
+      if (!confirm('¿Aprobar la cancelacion? Se procesara el reembolso inmediatamente via Stripe.')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Procesando reembolso...';
+      const rejectBtn = document.getElementById('reject-cancel-btn') as HTMLButtonElement;
+      if (rejectBtn) rejectBtn.disabled = true;
+
+      try {
+        const token = await getAuthToken();
+        const res = await fetch('/api/admin/approve-cancellation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            cancellation_id: cancellationId,
+            action: 'aprobar',
+            admin_notes: adminNotes || undefined
+          })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          showToast('Cancelacion aprobada. Reembolso procesado.');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showToast(result.error || 'Error al aprobar', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Aprobar y Reembolsar';
+          if (rejectBtn) rejectBtn.disabled = false;
+        }
+      } catch (err) {
+        showToast('Error de conexion', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Aprobar y Reembolsar';
+        if (rejectBtn) rejectBtn.disabled = false;
+      }
+    });
+
+    // Rechazar cancelacion
+    document.getElementById('reject-cancel-btn')?.addEventListener('click', async (e) => {
+      const btn = e.target as HTMLButtonElement;
+      const cancellationId = btn.dataset.cancellationId;
+      const adminNotes = (document.getElementById('admin-notes') as HTMLTextAreaElement)?.value.trim();
+
+      if (!confirm('¿Rechazar la solicitud de cancelacion?')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
+      const approveBtn = document.getElementById('approve-cancel-btn') as HTMLButtonElement;
+      if (approveBtn) approveBtn.disabled = true;
+
+      try {
+        const token = await getAuthToken();
+        const res = await fetch('/api/admin/approve-cancellation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            cancellation_id: cancellationId,
+            action: 'rechazar',
+            admin_notes: adminNotes
+          })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          showToast('Solicitud rechazada. Se ha notificado al cliente.');
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          showToast(result.error || 'Error al rechazar', 'error');
+          btn.disabled = false;
+          btn.textContent = 'Rechazar';
+          if (approveBtn) approveBtn.disabled = false;
+        }
+      } catch (err) {
+        showToast('Error de conexion', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Rechazar';
+        if (approveBtn) approveBtn.disabled = false;
+      }
+    });
+  </script>
+</AdminLayout>

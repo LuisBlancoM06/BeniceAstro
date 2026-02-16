@@ -1,10 +1,11 @@
 // Sistema de Emails Transaccionales con Resend
 import { Resend } from 'resend';
 
-const resend = new Resend(import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY);
+const resend = new Resend(import.meta.env.RESEND_API_KEY || '');
 
-const FROM_EMAIL = 'Venice Pet Shop <noreply@venice.com>';
-const SUPPORT_EMAIL = 'info@venice.com';
+const FROM_NAME = 'BeniceAstro';
+const FROM_EMAIL = 'onboarding@resend.dev';
+const SUPPORT_EMAIL = 'lblancom06@gmail.com';
 
 interface OrderEmailData {
   to: string;
@@ -32,6 +33,28 @@ interface ShippingEmailData {
   orderId: string;
   trackingNumber: string;
   carrier: string;
+}
+
+// Función helper para enviar emails con Resend
+async function sendEmail(to: string, subject: string, htmlContent: string, replyTo?: string) {
+  const options: any = {
+    from: `${FROM_NAME} <${FROM_EMAIL}>`,
+    to: [to],
+    subject,
+    html: htmlContent
+  };
+
+  if (replyTo) {
+    options.replyTo = replyTo;
+  }
+
+  const { data, error } = await resend.emails.send(options);
+
+  if (error) {
+    throw new Error(`Resend API error: ${JSON.stringify(error)}`);
+  }
+
+  return data;
 }
 
 // Template base HTML
@@ -64,17 +87,17 @@ const baseTemplate = (content: string, title: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>Venice Pet Shop</h1>
+      <h1>BeniceAstro</h1>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p>© ${new Date().getFullYear()} Venice Pet Shop. Todos los derechos reservados.</p>
-      <p>¿Tienes alguna pregunta? Contáctanos en ${SUPPORT_EMAIL}</p>
+      <p>&copy; ${new Date().getFullYear()} BeniceAstro. Todos los derechos reservados.</p>
+      <p>&iquest;Tienes alguna pregunta? Cont&aacute;ctanos en ${SUPPORT_EMAIL}</p>
       <p>
-        <a href="#" style="color: #9ca3af;">Política de Privacidad</a> | 
-        <a href="#" style="color: #9ca3af;">Términos y Condiciones</a>
+        <a href="#" style="color: #9ca3af;">Pol&iacute;tica de Privacidad</a> |
+        <a href="#" style="color: #9ca3af;">T&eacute;rminos y Condiciones</a>
       </p>
     </div>
   </div>
@@ -88,18 +111,18 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     <tr>
       <td>${item.name}</td>
       <td style="text-align: center;">${item.quantity}</td>
-      <td style="text-align: right;">${item.price.toFixed(2)}€</td>
-      <td style="text-align: right;">${(item.quantity * item.price).toFixed(2)}€</td>
+      <td style="text-align: right;">${item.price.toFixed(2)}&euro;</td>
+      <td style="text-align: right;">${(item.quantity * item.price).toFixed(2)}&euro;</td>
     </tr>
   `).join('');
 
   const content = `
     <div class="icon">Confirmado</div>
-    <h2>¡Gracias por tu pedido, ${data.customerName}!</h2>
-    <p>Tu pedido ha sido confirmado y está siendo procesado. Aquí tienes el resumen:</p>
-    
+    <h2>&iexcl;Gracias por tu pedido, ${data.customerName}!</h2>
+    <p>Tu pedido ha sido confirmado y est&aacute; siendo procesado. Aqu&iacute; tienes el resumen:</p>
+
     <div class="highlight success">
-      <strong>Número de pedido:</strong> #${data.orderId.slice(0, 8).toUpperCase()}
+      <strong>N&uacute;mero de pedido:</strong> #${data.orderId.slice(0, 8).toUpperCase()}
     </div>
 
     <table class="order-table">
@@ -117,54 +140,49 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
       <tfoot>
         <tr>
           <td colspan="3" style="text-align: right;">Subtotal:</td>
-          <td style="text-align: right;">${data.subtotal.toFixed(2)}€</td>
+          <td style="text-align: right;">${data.subtotal.toFixed(2)}&euro;</td>
         </tr>
         ${data.discount ? `
         <tr style="color: #10b981;">
           <td colspan="3" style="text-align: right;">Descuento:</td>
-          <td style="text-align: right;">-${data.discount.toFixed(2)}€</td>
+          <td style="text-align: right;">-${data.discount.toFixed(2)}&euro;</td>
         </tr>
         ` : ''}
         <tr>
-          <td colspan="3" style="text-align: right;">Envío:</td>
+          <td colspan="3" style="text-align: right;">Env&iacute;o:</td>
           <td style="text-align: right;">GRATIS</td>
         </tr>
         <tr class="total-row">
           <td colspan="3" style="text-align: right;">Total:</td>
-          <td style="text-align: right;">${data.total.toFixed(2)}€</td>
+          <td style="text-align: right;">${data.total.toFixed(2)}&euro;</td>
         </tr>
       </tfoot>
     </table>
 
     ${data.shippingAddress ? `
-    <h3>Dirección de envío</h3>
+    <h3>Direcci&oacute;n de env&iacute;o</h3>
     <p style="background: #f3f4f6; padding: 15px; border-radius: 8px;">${data.shippingAddress}</p>
     ` : ''}
 
-    <h3>¿Qué sigue?</h3>
+    <h3>&iquest;Qu&eacute; sigue?</h3>
     <ol>
-      <li>Estamos preparando tu pedido con mucho cariño</li>
-      <li>Te enviaremos un email cuando sea enviado con el número de seguimiento</li>
-      <li>Recibirás tu pedido en 24-48 horas laborables</li>
+      <li>Estamos preparando tu pedido con mucho cari&ntilde;o</li>
+      <li>Te enviaremos un email cuando sea enviado con el n&uacute;mero de seguimiento</li>
+      <li>Recibir&aacute;s tu pedido en 24-48 horas laborables</li>
     </ol>
 
-    <p style="text-align: center; margin-top: 30px;">
-      <a href="https://venice.com/mis-pedidos" class="btn">Ver mis pedidos</a>
-    </p>
-
     <p style="margin-top: 30px; color: #6b7280;">
-      ¡Gracias por confiar en Venice Pet Shop! Si tienes alguna pregunta sobre tu pedido, 
+      &iexcl;Gracias por confiar en BeniceAstro! Si tienes alguna pregunta sobre tu pedido,
       no dudes en contactarnos.
     </p>
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: data.to,
-      subject: `Pedido confirmado #${data.orderId.slice(0, 8).toUpperCase()}`,
-      html: baseTemplate(content, 'Confirmación de Pedido'),
-    });
+    const response = await sendEmail(
+      data.to,
+      `Pedido confirmado #${data.orderId.slice(0, 8).toUpperCase()}`,
+      baseTemplate(content, 'Confirmación de Pedido')
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de confirmación:', error);
@@ -176,66 +194,57 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 export async function sendWelcomeEmail(data: WelcomeEmailData) {
   const content = `
     <div class="icon">Bienvenido</div>
-    <h2>¡Bienvenido a Venice Pet Shop, ${data.name}!</h2>
-    
-    <p>Estamos encantados de tenerte en nuestra familia. En Venice encontrarás todo lo que 
+    <h2>&iexcl;Bienvenido a BeniceAstro, ${data.name}!</h2>
+
+    <p>Estamos encantados de tenerte en nuestra familia. En BeniceAstro encontrar&aacute;s todo lo que
     necesitas para cuidar de tus mascotas:</p>
 
-    <div style="display: grid; gap: 15px; margin: 25px 0;">
-      <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">Perros</span>
+    <div style="margin: 25px 0;">
+      <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
         <div>
           <strong>Perros</strong>
           <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Piensos, snacks, juguetes y accesorios</p>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">Gatos</span>
+      <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
         <div>
           <strong>Gatos</strong>
           <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Arena, rascadores, comida premium</p>
         </div>
       </div>
       <div style="display: flex; align-items: center; gap: 15px; background: #f9fafb; padding: 15px; border-radius: 8px;">
-        <span style="font-size: 32px;">Otros</span>
         <div>
-          <strong>Pequeñas Mascotas</strong>
-          <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Roedores, pájaros, peces y más</p>
+          <strong>Peque&ntilde;as Mascotas</strong>
+          <p style="margin: 5px 0 0; color: #6b7280; font-size: 14px;">Roedores, p&aacute;jaros, peces y m&aacute;s</p>
         </div>
       </div>
     </div>
 
     <div class="highlight">
       <strong>Regalo de bienvenida</strong><br>
-      Usa el código <strong style="color: #7e22ce; font-size: 18px;">BIENVENIDO10</strong> 
-      y obtén un 10% de descuento en tu primera compra.
+      Usa el c&oacute;digo <strong style="color: #7e22ce; font-size: 18px;">BIENVENIDO10</strong>
+      y obt&eacute;n un 10% de descuento en tu primera compra.
     </div>
 
-    <p style="text-align: center; margin: 30px 0;">
-      <a href="https://venice.com/productos" class="btn">Explorar productos</a>
-    </p>
-
-    <h3>Ventajas de ser parte de Venice:</h3>
+    <h3>Ventajas de ser parte de BeniceAstro:</h3>
     <ul>
-      <li>Envío gratis en pedidos superiores a 49€</li>
-      <li>Devoluciones gratuitas en 30 días</li>
-      <li>Atención al cliente personalizada</li>
+      <li>Env&iacute;o gratis en pedidos superiores a 49&euro;</li>
+      <li>Devoluciones gratuitas en 30 d&iacute;as</li>
+      <li>Atenci&oacute;n al cliente personalizada</li>
       <li>Ofertas exclusivas para miembros</li>
-      <li>Programa de puntos por cada compra</li>
     </ul>
 
     <p style="color: #6b7280; margin-top: 30px;">
-      ¿Tienes alguna pregunta? Estamos aquí para ayudarte. ¡Escríbenos cuando quieras!
+      &iquest;Tienes alguna pregunta? Estamos aqu&iacute; para ayudarte. &iexcl;Escr&iacute;benos cuando quieras!
     </p>
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: data.to,
-      subject: 'Bienvenido a Venice Pet Shop',
-      html: baseTemplate(content, 'Bienvenido'),
-    });
+    const response = await sendEmail(
+      data.to,
+      'Bienvenido a BeniceAstro',
+      baseTemplate(content, 'Bienvenido')
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de bienvenida:', error);
@@ -247,22 +256,14 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 export async function sendShippingNotification(data: ShippingEmailData) {
   const content = `
     <div class="icon">Enviado</div>
-    <h2>¡Tu pedido está en camino, ${data.customerName}!</h2>
-    
-    <p>¡Buenas noticias! Tu pedido ha sido enviado y está de camino a tu dirección.</p>
+    <h2>&iexcl;Tu pedido est&aacute; en camino, ${data.customerName}!</h2>
+
+    <p>&iexcl;Buenas noticias! Tu pedido ha sido enviado y est&aacute; de camino a tu direcci&oacute;n.</p>
 
     <div class="highlight success">
-      <strong>Número de seguimiento:</strong> ${data.trackingNumber}<br>
+      <strong>N&uacute;mero de seguimiento:</strong> ${data.trackingNumber}<br>
       <strong>Transportista:</strong> ${data.carrier}
     </div>
-
-    <p>Puedes rastrear tu envío haciendo clic en el siguiente botón:</p>
-
-    <p style="text-align: center; margin: 30px 0;">
-      <a href="https://www.${data.carrier.toLowerCase()}.es/seguimiento/${data.trackingNumber}" class="btn">
-        Rastrear pedido
-      </a>
-    </p>
 
     <h3>Fecha estimada de entrega</h3>
     <p style="background: #f3f4f6; padding: 15px; border-radius: 8px; font-size: 18px; text-align: center;">
@@ -271,23 +272,22 @@ export async function sendShippingNotification(data: ShippingEmailData) {
 
     <h3>Consejos para la entrega:</h3>
     <ul>
-      <li>Asegúrate de estar disponible en la dirección indicada</li>
-      <li>El repartidor te llamará antes de llegar</li>
-      <li>Si no estás, se dejará en un punto de recogida cercano</li>
+      <li>Aseg&uacute;rate de estar disponible en la direcci&oacute;n indicada</li>
+      <li>El repartidor te llamar&aacute; antes de llegar</li>
+      <li>Si no est&aacute;s, se dejar&aacute; en un punto de recogida cercano</li>
     </ul>
 
     <p style="color: #6b7280; margin-top: 30px;">
-      ¿Algún problema con tu envío? Contáctanos y te ayudamos.
+      &iquest;Alg&uacute;n problema con tu env&iacute;o? Cont&aacute;ctanos y te ayudamos.
     </p>
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: data.to,
-      subject: `Tu pedido #${data.orderId.slice(0, 8).toUpperCase()} está en camino`,
-      html: baseTemplate(content, 'Pedido Enviado'),
-    });
+    const response = await sendEmail(
+      data.to,
+      `Tu pedido #${data.orderId.slice(0, 8).toUpperCase()} está en camino`,
+      baseTemplate(content, 'Pedido Enviado')
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de envío:', error);
@@ -299,38 +299,33 @@ export async function sendShippingNotification(data: ShippingEmailData) {
 export async function sendNewsletterWelcome(email: string, promoCode: string) {
   const content = `
     <div class="icon">Newsletter</div>
-    <h2>¡Gracias por suscribirte!</h2>
-    
-    <p>Ya formas parte de la comunidad Venice Pet Shop. Recibirás las mejores ofertas, 
+    <h2>&iexcl;Gracias por suscribirte!</h2>
+
+    <p>Ya formas parte de la comunidad BeniceAstro. Recibir&aacute;s las mejores ofertas,
     novedades y consejos para el cuidado de tus mascotas directamente en tu bandeja de entrada.</p>
 
     <div class="highlight">
-      <strong>Aquí tienes tu código de descuento</strong><br><br>
+      <strong>Aqu&iacute; tienes tu c&oacute;digo de descuento</strong><br><br>
       <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
         <span style="font-size: 28px; font-weight: bold; color: #7e22ce; letter-spacing: 3px;">
           ${promoCode}
         </span>
-        <p style="margin: 10px 0 0; color: #6b7280; font-size: 14px;">15% de descuento en tu próxima compra</p>
+        <p style="margin: 10px 0 0; color: #6b7280; font-size: 14px;">15% de descuento en tu pr&oacute;xima compra</p>
       </div>
     </div>
 
-    <p style="text-align: center; margin: 30px 0;">
-      <a href="https://venice.com/productos" class="btn">Ir a comprar</a>
-    </p>
-
     <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
-      Si no quieres recibir más emails, puedes 
-      <a href="#" style="color: #7e22ce;">darte de baja aquí</a>.
+      Si no quieres recibir m&aacute;s emails, puedes
+      <a href="#" style="color: #7e22ce;">darte de baja aqu&iacute;</a>.
     </p>
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email,
-      subject: 'Tu código de descuento exclusivo',
-      html: baseTemplate(content, 'Newsletter'),
-    });
+    const response = await sendEmail(
+      email,
+      'Tu código de descuento exclusivo',
+      baseTemplate(content, 'Newsletter')
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de newsletter:', error);
@@ -343,21 +338,17 @@ export async function sendOrderCancellation(email: string, orderId: string, cust
   const content = `
     <div class="icon">Cancelado</div>
     <h2>Pedido cancelado</h2>
-    
+
     <p>Hola ${customerName},</p>
     <p>Tu pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido cancelado correctamente.</p>
 
     <div class="highlight">
       <strong>Reembolso</strong><br>
-      El importe de tu pedido será reembolsado en un plazo de 3-5 días laborables 
-      mediante el mismo método de pago utilizado.
+      El importe de tu pedido ser&aacute; reembolsado en un plazo de 3-5 d&iacute;as laborables
+      mediante el mismo m&eacute;todo de pago utilizado.
     </div>
 
-    <p>Si tienes alguna pregunta sobre la cancelación o el reembolso, no dudes en contactarnos.</p>
-
-    <p style="text-align: center; margin: 30px 0;">
-      <a href="https://venice.com/contacto" class="btn">Contactar soporte</a>
-    </p>
+    <p>Si tienes alguna pregunta sobre la cancelaci&oacute;n o el reembolso, no dudes en contactarnos.</p>
 
     <p style="color: #6b7280; margin-top: 30px;">
       Sentimos que hayas tenido que cancelar tu pedido. Esperamos verte pronto de nuevo.
@@ -365,15 +356,87 @@ export async function sendOrderCancellation(email: string, orderId: string, cust
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: email,
-      subject: `Pedido #${orderId.slice(0, 8).toUpperCase()} cancelado`,
-      html: baseTemplate(content, 'Pedido Cancelado'),
-    });
+    const response = await sendEmail(
+      email,
+      `Pedido #${orderId.slice(0, 8).toUpperCase()} cancelado`,
+      baseTemplate(content, 'Pedido Cancelado')
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de cancelación:', error);
+    return { success: false, error };
+  }
+}
+
+// Email de confirmacion de entrega
+export async function sendDeliveryConfirmation(email: string, orderId: string, customerName: string) {
+  const content = `
+    <div class="icon">Entregado</div>
+    <h2>&iexcl;Tu pedido ha sido entregado, ${customerName}!</h2>
+
+    <p>Tu pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido entregado correctamente.</p>
+
+    <div class="highlight success">
+      <strong>&iexcl;Gracias por tu compra!</strong><br>
+      Si tienes alg&uacute;n problema con tu pedido, puedes solicitar una devoluci&oacute;n desde tu cuenta
+      en un plazo de 30 d&iacute;as.
+    </div>
+
+    <p>&iquest;Te ha gustado tu experiencia? Nos encantar&iacute;a que dejaras una rese&ntilde;a
+    en los productos que compraste.</p>
+
+    <p style="color: #6b7280; margin-top: 30px;">
+      &iexcl;Gracias por confiar en BeniceAstro!
+    </p>
+  `;
+
+  try {
+    const response = await sendEmail(
+      email,
+      `Pedido #${orderId.slice(0, 8).toUpperCase()} entregado`,
+      baseTemplate(content, 'Pedido Entregado')
+    );
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('Error enviando email de entrega:', error);
+    return { success: false, error };
+  }
+}
+
+// Email de cancelacion rechazada
+export async function sendCancellationRejected(email: string, orderId: string, customerName: string, adminNotes?: string) {
+  const content = `
+    <div class="icon">Informaci&oacute;n</div>
+    <h2>Solicitud de cancelaci&oacute;n no aprobada</h2>
+
+    <p>Hola ${customerName},</p>
+    <p>Tu solicitud de cancelaci&oacute;n para el pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong>
+    no ha podido ser aprobada.</p>
+
+    ${adminNotes ? `
+    <div class="highlight">
+      <strong>Motivo:</strong><br>
+      ${adminNotes}
+    </div>
+    ` : ''}
+
+    <p>Tu pedido seguir&aacute; su curso normal. Si tienes alguna pregunta,
+    no dudes en contactarnos.</p>
+
+    <p style="color: #6b7280; margin-top: 30px;">
+      Estamos aqu&iacute; para ayudarte en lo que necesites.
+    </p>
+  `;
+
+  try {
+    const response = await sendEmail(
+      email,
+      `Solicitud de cancelacion - Pedido #${orderId.slice(0, 8).toUpperCase()}`,
+      baseTemplate(content, 'Cancelacion no aprobada')
+    );
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('Error enviando email de rechazo:', error);
     return { success: false, error };
   }
 }
@@ -388,7 +451,7 @@ export async function sendContactEmail(data: {
 }) {
   const content = `
     <h2>Nuevo mensaje de contacto</h2>
-    
+
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
         <td style="padding: 10px; background: #f9fafb; width: 120px;"><strong>Nombre:</strong></td>
@@ -400,7 +463,7 @@ export async function sendContactEmail(data: {
       </tr>
       ${data.phone ? `
       <tr>
-        <td style="padding: 10px; background: #f9fafb;"><strong>Teléfono:</strong></td>
+        <td style="padding: 10px; background: #f9fafb;"><strong>Tel&eacute;fono:</strong></td>
         <td style="padding: 10px;">${data.phone}</td>
       </tr>
       ` : ''}
@@ -423,13 +486,12 @@ ${data.message}
   `;
 
   try {
-    const response = await resend.emails.send({
-      from: FROM_EMAIL,
-      to: SUPPORT_EMAIL,
-      replyTo: data.email,
-      subject: `[Contacto] ${data.subject}`,
-      html: baseTemplate(content, 'Nuevo Contacto'),
-    });
+    const response = await sendEmail(
+      SUPPORT_EMAIL,
+      `[Contacto] ${data.subject}`,
+      baseTemplate(content, 'Nuevo Contacto'),
+      data.email
+    );
     return { success: true, data: response };
   } catch (error) {
     console.error('Error enviando email de contacto:', error);

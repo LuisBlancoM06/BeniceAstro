@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
+import { sendOrderConfirmation } from '../../../lib/email';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
@@ -55,19 +56,34 @@ export const POST: APIRoute = async ({ request }) => {
 
 async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
   try {
-    const userId = session.metadata?.user_id;
+    let userId = session.metadata?.user_id || null;
     const promoCode = session.metadata?.promo_code;
     const discountPercent = parseInt(session.metadata?.discount_percent || '0');
+    const customerEmail = session.customer_details?.email || null;
+    const customerName = session.customer_details?.name || 'Cliente';
+
+    // Si no hay user_id pero sí email, buscar si el email pertenece a un usuario registrado
+    if (!userId && customerEmail) {
+      const { data: existingUsers } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('email', customerEmail)
+        .limit(1);
+
+      if (existingUsers && existingUsers.length > 0) {
+        userId = existingUsers[0].id;
+      }
+    }
 
     // Obtener detalles de los line items
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-    
+
     // Calcular total
     const total = (session.amount_total || 0) / 100;
     const discountAmount = total * (discountPercent / 100);
 
     // Crear pedido en Supabase
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
         user_id: userId || null,
@@ -76,8 +92,8 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
         promo_code: promoCode || null,
         discount_amount: discountAmount,
         stripe_session_id: session.id,
-        shipping_address: JSON.stringify((session as any).shipping_details || null),
-        billing_address: JSON.stringify(session.customer_details || null)
+        payment_intent_id: (session.payment_intent as string) || null,
+        shipping_address: JSON.stringify((session as any).shipping_details || null)
       })
       .select()
       .single();
@@ -88,41 +104,49 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
     }
 
     // Crear items del pedido y actualizar stock
+    const orderItemsForEmail: Array<{ name: string; quantity: number; price: number }> = [];
+
     for (const item of lineItems.data) {
       if (item.description === 'Gastos de envío') continue;
 
-      const productId = item.price?.product as string;
-      
       // Buscar producto por nombre (ya que Stripe no guarda el ID original)
-      const { data: product } = await supabase
+      const { data: product } = await supabaseAdmin
         .from('products')
         .select('id, stock')
         .eq('name', item.description)
         .single();
 
       if (product) {
+        const unitPrice = (item.amount_total || 0) / 100 / (item.quantity || 1);
+
         // Crear order item
-        await supabase
+        await supabaseAdmin
           .from('order_items')
           .insert({
             order_id: order.id,
             product_id: product.id,
             quantity: item.quantity || 1,
-            price: (item.amount_total || 0) / 100 / (item.quantity || 1)
+            price: unitPrice
           });
 
         // Reducir stock
-        await supabase
+        await supabaseAdmin
           .from('products')
           .update({ stock: Math.max(0, product.stock - (item.quantity || 1)) })
           .eq('id', product.id);
+
+        orderItemsForEmail.push({
+          name: item.description || 'Producto',
+          quantity: item.quantity || 1,
+          price: unitPrice
+        });
       }
     }
 
     // Generar factura
     const invoiceNumber = await generateInvoiceNumber();
-    
-    await supabase
+
+    await supabaseAdmin
       .from('invoices')
       .insert({
         order_id: order.id,
@@ -136,6 +160,30 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
 
     console.log(`Order ${order.id} created successfully with invoice ${invoiceNumber}`);
 
+    // Enviar email de confirmación
+    if (customerEmail) {
+      try {
+        const shippingDetails = (session as any).shipping_details;
+        const shippingAddress = shippingDetails?.address
+          ? `${shippingDetails.name || ''}, ${shippingDetails.address.line1 || ''} ${shippingDetails.address.line2 || ''}, ${shippingDetails.address.postal_code || ''} ${shippingDetails.address.city || ''}, ${shippingDetails.address.country || ''}`
+          : undefined;
+
+        await sendOrderConfirmation({
+          to: customerEmail,
+          customerName: customerName,
+          orderId: order.id,
+          items: orderItemsForEmail,
+          subtotal: total + discountAmount,
+          discount: discountAmount > 0 ? discountAmount : undefined,
+          total: total,
+          shippingAddress: shippingAddress
+        });
+        console.log(`Confirmation email sent to ${customerEmail}`);
+      } catch (emailError) {
+        console.error('Error sending confirmation email:', emailError);
+      }
+    }
+
   } catch (error) {
     console.error('Error handling successful payment:', error);
   }
@@ -146,7 +194,7 @@ async function generateInvoiceNumber(): Promise<string> {
   const prefix = 'FAC';
   
   // Obtener último número
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('invoices')
     .select('invoice_number')
     .like('invoice_number', `${prefix}-${year}-%`)

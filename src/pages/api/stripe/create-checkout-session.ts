@@ -15,6 +15,17 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Obtener email del usuario si está logueado
+    let customerEmail: string | undefined;
+    if (userId) {
+      const { data: profile } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', userId)
+        .single();
+      customerEmail = profile?.email || undefined;
+    }
+
     // Calcular descuento si hay código promocional
     let discountPercent = 0;
     if (promoCode) {
@@ -82,7 +93,7 @@ export const POST: APIRoute = async ({ request }) => {
       mode: 'payment',
       success_url: `${request.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get('origin')}/checkout/cancel`,
-      customer_email: userId ? undefined : undefined, // Si hay usuario logueado, usar su email
+      customer_email: customerEmail, // Pre-rellenar email en Stripe si el usuario está logueado
       metadata: {
         user_id: userId || '',
         promo_code: promoCode || '',

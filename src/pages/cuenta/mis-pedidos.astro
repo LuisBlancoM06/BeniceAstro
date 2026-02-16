@@ -2,7 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import { createServerClient } from '../../lib/supabase';
 
-// Proteger la ruta - verificar autenticación
+// Proteger la ruta - verificar autenticacion
 const supabase = createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
@@ -22,6 +22,22 @@ const { data: orders } = await supabase
   `)
   .eq('user_id', session.user.id)
   .order('created_at', { ascending: false });
+
+// Obtener solicitudes de cancelacion del usuario
+const orderIds = orders?.map((o: any) => o.id) || [];
+let cancellationRequests: any[] = [];
+if (orderIds.length > 0) {
+  const { data } = await supabase
+    .from('cancellation_requests')
+    .select('*')
+    .in('order_id', orderIds);
+  cancellationRequests = data || [];
+}
+
+// Helpers
+const getCancellation = (orderId: string) => {
+  return cancellationRequests.find((c: any) => c.order_id === orderId);
+};
 ---
 
 <Layout title="Mis Pedidos">
@@ -35,14 +51,16 @@ const { data: orders } = await supabase
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
           </svg>
         </div>
-        <p class="text-xl text-gray-600 mb-4">No tienes pedidos aún</p>
+        <p class="text-xl text-gray-600 mb-4">No tienes pedidos aun</p>
         <a href="/productos" class="btn btn-primary">
           Empezar a Comprar
         </a>
       </div>
     ) : (
       <div class="space-y-6">
-        {orders.map((order: any) => (
+        {orders.map((order: any) => {
+          const cancellation = getCancellation(order.id);
+          return (
           <div class="card">
             <div class="flex justify-between items-start mb-4">
               <div>
@@ -66,19 +84,19 @@ const { data: orders } = await supabase
             <div class="space-y-2 mb-4">
               {order.order_items.map((item: any) => (
                 <div class="flex items-center gap-4 border-b pb-2">
-                  <img 
-                    src={item.products?.image_url || '/images/placeholder.jpg'} 
+                  <img
+                    src={item.products?.image_url || '/images/placeholder.jpg'}
                     alt={item.products?.name || 'Producto eliminado'}
                     class="w-16 h-16 object-cover rounded"
                   />
                   <div class="flex-1">
                     <p class="font-medium">{item.products?.name || 'Producto no disponible'}</p>
                     <p class="text-sm text-gray-600">
-                      Cantidad: {item.quantity} × {item.price}€
+                      Cantidad: {item.quantity} x {item.price}&euro;
                     </p>
                   </div>
                   <p class="font-bold">
-                    {(item.quantity * item.price).toFixed(2)}€
+                    {(item.quantity * item.price).toFixed(2)}&euro;
                   </p>
                 </div>
               ))}
@@ -89,76 +107,141 @@ const { data: orders } = await supabase
               {order.promo_code && (
                 <div class="flex justify-between text-sm text-green-600">
                   <span>Descuento aplicado ({order.promo_code}):</span>
-                  <span>-{order.discount_amount}€</span>
+                  <span>-{order.discount_amount}&euro;</span>
                 </div>
               )}
               <div class="flex justify-between text-lg font-bold">
                 <span>Total:</span>
-                <span>{order.total}€</span>
+                <span>{order.total}&euro;</span>
               </div>
             </div>
 
+            <!-- Tracking -->
+            {order.status === 'enviado' && order.tracking_number && (
+              <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800">
+                  <span class="font-semibold">Numero de seguimiento:</span> {order.tracking_number}
+                </p>
+              </div>
+            )}
+
+            <!-- Estado de cancelacion -->
+            {cancellation && cancellation.status === 'pendiente' && (
+              <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-yellow-800 font-medium">Cancelacion solicitada - Pendiente de revision</p>
+                <p class="text-xs text-yellow-600 mt-1">Tu solicitud esta siendo revisada por nuestro equipo.</p>
+              </div>
+            )}
+
+            {cancellation && cancellation.status === 'rechazada' && (
+              <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p class="text-sm text-red-800 font-medium">Solicitud de cancelacion rechazada</p>
+                {cancellation.admin_notes && (
+                  <p class="text-xs text-red-600 mt-1">Motivo: {cancellation.admin_notes}</p>
+                )}
+              </div>
+            )}
+
             <!-- Acciones -->
-            <div class="mt-4 flex gap-2">
-              {order.status === 'pagado' && (
+            <div class="mt-4 flex flex-wrap gap-2">
+              {order.status === 'pagado' && (!cancellation || cancellation.status === 'rechazada') && (
                 <button
                   class="btn btn-danger cancel-order-btn"
                   data-order-id={order.id}
                 >
-                  Cancelar Pedido
+                  Solicitar Cancelacion
                 </button>
               )}
-              
+
               {order.status === 'entregado' && (
                 <button
                   class="btn btn-secondary request-return-btn"
                   data-order-id={order.id}
                 >
-                  Solicitar Devolución
+                  Solicitar Devolucion
                 </button>
               )}
 
-              {['enviado', 'entregado'].includes(order.status) && (
+              {['enviado', 'entregado'].includes(order.status) && order.tracking_number && (
                 <button class="btn bg-purple-100 text-purple-800 hover:bg-purple-200">
                   Seguir Pedido
                 </button>
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     )}
   </div>
 
-  <!-- Modal de Devolución -->
+  <!-- Modal de Cancelacion -->
+  <div id="cancel-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-md w-full p-6">
+      <h2 class="text-2xl font-bold mb-4">Solicitar Cancelacion</h2>
+
+      <p class="text-gray-600 mb-4">
+        Tu solicitud sera revisada por nuestro equipo. Si se aprueba,
+        recibiras el reembolso completo automaticamente.
+      </p>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Motivo de la cancelacion *
+        </label>
+        <textarea
+          id="cancel-reason"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+          placeholder="Indica por que quieres cancelar el pedido..."
+        ></textarea>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="close-cancel-modal" class="btn bg-gray-200 text-gray-800 flex-1">
+          Volver
+        </button>
+        <button id="confirm-cancel" class="btn btn-danger flex-1">
+          Enviar Solicitud
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Devolucion -->
   <div id="return-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-md w-full p-6">
-      <h2 class="text-2xl font-bold mb-4">Solicitar Devolución</h2>
-      
+      <h2 class="text-2xl font-bold mb-4">Solicitar Devolucion</h2>
+
       <div class="space-y-4 mb-6">
         <div class="bg-purple-50 p-4 rounded-lg">
-          <h3 class="font-bold mb-2">Instrucciones de Envío</h3>
+          <h3 class="font-bold mb-2">Instrucciones de Envio</h3>
           <p class="text-sm">
-            <strong>Dirección:</strong><br>
+            <strong>Direccion:</strong><br>
             Venice Pet Shop - Devoluciones<br>
             Calle Principal, 123<br>
-            28001 Madrid, España
-          </p>
-        </div>
-
-        <div class="bg-purple-50 p-4 rounded-lg">
-          <h3 class="font-bold mb-2">Confirmación</h3>
-          <p class="text-sm">
-            Recibirás un email de confirmación con los detalles de la devolución.
+            28001 Madrid, Espana
           </p>
         </div>
 
         <div class="bg-orange-50 p-4 rounded-lg">
           <h3 class="font-bold mb-2">Reembolso</h3>
           <p class="text-sm">
-            El reembolso se procesará en 5-7 días hábiles una vez recibamos el producto.
+            El reembolso se procesara en 5-7 dias habiles una vez recibamos el producto.
           </p>
         </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Motivo de la devolucion *
+        </label>
+        <textarea
+          id="return-reason"
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+          placeholder="Indica el motivo de la devolucion..."
+        ></textarea>
       </div>
 
       <div class="flex gap-2">
@@ -166,7 +249,7 @@ const { data: orders } = await supabase
           Cancelar
         </button>
         <button id="confirm-return" class="btn btn-primary flex-1">
-          Confirmar Devolución
+          Confirmar Devolucion
         </button>
       </div>
     </div>
@@ -175,50 +258,82 @@ const { data: orders } = await supabase
   <script>
     import { supabase } from '../../lib/supabase';
 
-    // Cancelar pedido
+    // === CANCELACION ===
+    const cancelModal = document.getElementById('cancel-modal');
+    let currentCancelOrderId: string | null = null;
+
     document.querySelectorAll('.cancel-order-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const orderId = (e.target as HTMLElement).dataset.orderId;
-        
-        if (!confirm('¿Estás seguro de que quieres cancelar este pedido? El stock será restaurado automáticamente.')) {
-          return;
-        }
-
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          const response = await fetch('/api/cancel-order', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session!.access_token}`
-            },
-            body: JSON.stringify({
-              order_id: orderId
-            })
-          });
-
-          if (response.ok) {
-            alert('Pedido cancelado exitosamente');
-            window.location.reload();
-          } else {
-            const result = await response.json();
-            alert(result.error || 'Error al cancelar el pedido');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          alert('Error al cancelar el pedido');
-        }
+      btn.addEventListener('click', (e) => {
+        currentCancelOrderId = (e.target as HTMLElement).dataset.orderId || null;
+        (document.getElementById('cancel-reason') as HTMLTextAreaElement).value = '';
+        cancelModal?.classList.remove('hidden');
       });
     });
 
-    // Modal de devolución
+    document.getElementById('close-cancel-modal')?.addEventListener('click', () => {
+      cancelModal?.classList.add('hidden');
+      currentCancelOrderId = null;
+    });
+
+    document.getElementById('confirm-cancel')?.addEventListener('click', async () => {
+      if (!currentCancelOrderId) return;
+
+      const reason = (document.getElementById('cancel-reason') as HTMLTextAreaElement)?.value.trim();
+      if (!reason) {
+        alert('Debes indicar un motivo para la cancelacion.');
+        return;
+      }
+
+      const btn = document.getElementById('confirm-cancel') as HTMLButtonElement;
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          alert('Debes iniciar sesion');
+          return;
+        }
+
+        const response = await fetch('/api/cancel-order', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({
+            order_id: currentCancelOrderId,
+            reason: reason
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert(result.message || 'Solicitud de cancelacion enviada correctamente.');
+          cancelModal?.classList.add('hidden');
+          currentCancelOrderId = null;
+          window.location.reload();
+        } else {
+          alert(result.error || 'Error al enviar la solicitud');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al enviar la solicitud');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar Solicitud';
+      }
+    });
+
+    // === DEVOLUCION ===
     const returnModal = document.getElementById('return-modal');
     let currentReturnOrderId: string | null = null;
 
     document.querySelectorAll('.request-return-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         currentReturnOrderId = (e.target as HTMLElement).dataset.orderId || null;
+        (document.getElementById('return-reason') as HTMLTextAreaElement).value = '';
         returnModal?.classList.remove('hidden');
       });
     });
@@ -231,16 +346,20 @@ const { data: orders } = await supabase
     document.getElementById('confirm-return')?.addEventListener('click', async () => {
       if (!currentReturnOrderId) return;
 
-      const reason = prompt('Por favor, indica el motivo de la devolución:');
-      if (!reason || reason.trim() === '') {
-        alert('Debes indicar un motivo para la devolución.');
+      const reason = (document.getElementById('return-reason') as HTMLTextAreaElement)?.value.trim();
+      if (!reason) {
+        alert('Debes indicar un motivo para la devolucion.');
         return;
       }
+
+      const btn = document.getElementById('confirm-return') as HTMLButtonElement;
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          alert('Debes iniciar sesión');
+          alert('Debes iniciar sesion');
           return;
         }
 
@@ -252,25 +371,27 @@ const { data: orders } = await supabase
           },
           body: JSON.stringify({
             orderId: currentReturnOrderId,
-            reason: reason.trim()
+            reason: reason
           })
         });
 
         const result = await response.json();
 
         if (response.ok) {
-          alert('Solicitud de devolución enviada correctamente. Recibirás un email con más información.');
+          alert('Solicitud de devolucion enviada correctamente.');
           returnModal?.classList.add('hidden');
           currentReturnOrderId = null;
           window.location.reload();
         } else {
-          alert(result.error || 'Error al solicitar la devolución');
+          alert(result.error || 'Error al solicitar la devolucion');
         }
       } catch (error) {
         console.error('Error:', error);
-        alert('Error al solicitar la devolución');
+        alert('Error al solicitar la devolucion');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirmar Devolucion';
       }
     });
   </script>
 </Layout>
-

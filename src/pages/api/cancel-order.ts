@@ -3,16 +3,16 @@ import { supabase } from '../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { order_id } = await request.json();
+    const { order_id, reason } = await request.json();
 
-    if (!order_id) {
-      return new Response(JSON.stringify({ error: 'Datos inválidos' }), {
+    if (!order_id || !reason || reason.trim() === '') {
+      return new Response(JSON.stringify({ error: 'Debes indicar el pedido y el motivo de cancelacion' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Verificar autenticación con JWT
+    // Verificar autenticacion con JWT
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el pedido pertenece al usuario autenticado y está en estado 'pagado'
+    // Verificar que el pedido pertenece al usuario y esta en estado 'pagado'
     const { data: order } = await supabase
       .from('orders')
       .select('status')
@@ -46,20 +46,40 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Llamar a la función que cancela y restaura el stock
-    const { error } = await supabase.rpc('cancel_order_and_restore_stock', {
-      order_uuid: order_id
-    });
+    // Verificar que no exista una solicitud pendiente
+    const { data: existingRequest } = await supabase
+      .from('cancellation_requests')
+      .select('id')
+      .eq('order_id', order_id)
+      .eq('status', 'pendiente')
+      .single();
+
+    if (existingRequest) {
+      return new Response(JSON.stringify({ error: 'Ya existe una solicitud de cancelacion pendiente para este pedido' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Crear solicitud de cancelacion
+    const { error } = await supabase
+      .from('cancellation_requests')
+      .insert({
+        order_id: order_id,
+        user_id: user.id,
+        reason: reason.trim(),
+        status: 'pendiente'
+      });
 
     if (error) throw error;
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, message: 'Solicitud de cancelacion enviada. El equipo la revisara pronto.' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
-    console.error('Error al cancelar pedido:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Error al cancelar el pedido' }), {
+    console.error('Error al solicitar cancelacion:', error);
+    return new Response(JSON.stringify({ error: error.message || 'Error al procesar la solicitud' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
