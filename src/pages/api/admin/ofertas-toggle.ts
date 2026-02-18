@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
 
 // GET: Obtener estado actual de las ofertas flash
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async () => {
   try {
     const { data, error } = await supabase
       .from('site_settings')

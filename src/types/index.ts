@@ -6,6 +6,7 @@ export interface Product {
   stock: number;
   image_url: string;
   images?: string[];
+  brand?: string;
   animal_type: 'perro' | 'gato' | 'otros';
   size: 'mini' | 'mediano' | 'grande';
   category: 'alimentacion' | 'higiene' | 'salud' | 'accesorios' | 'juguetes';
@@ -20,6 +21,12 @@ export interface User {
   id: string;
   email: string;
   full_name?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  avatar_url?: string;
+  is_subscribed_newsletter?: boolean;
   role?: 'user' | 'admin';
   created_at: string;
 }
@@ -31,6 +38,12 @@ export interface Order {
   status: 'pendiente' | 'pagado' | 'enviado' | 'entregado' | 'cancelado';
   promo_code?: string;
   discount_amount?: number;
+  shipping_address?: string;
+  shipping_name?: string;
+  shipping_phone?: string;
+  stripe_session_id?: string;
+  payment_intent_id?: string;
+  tracking_number?: string;
   created_at: string;
   updated_at: string;
 }
@@ -47,6 +60,7 @@ export interface Newsletter {
   id: string;
   email: string;
   promo_code: string;
+  source?: string;
   created_at: string;
 }
 
@@ -55,6 +69,8 @@ export interface PromoCode {
   code: string;
   discount_percentage: number;
   active: boolean;
+  max_uses?: number;
+  current_uses?: number;
   expires_at?: string;
   created_at: string;
 }
@@ -76,6 +92,72 @@ export interface ReviewHelpfulVote {
   id: string;
   review_id: string;
   user_id: string;
+  created_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  order_id: string;
+  user_id: string;
+  invoice_number: string;
+  invoice_type: 'factura' | 'abono';
+  subtotal: number;
+  tax_amount: number;
+  total: number;
+  pdf_url?: string;
+  created_at: string;
+}
+
+export interface Return {
+  id: string;
+  order_id: string;
+  user_id: string;
+  reason: string;
+  status: 'solicitada' | 'aprobada' | 'rechazada' | 'completada';
+  refund_amount?: number;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CancellationRequest {
+  id: string;
+  order_id: string;
+  user_id: string;
+  reason: string;
+  status: 'pendiente' | 'aprobada' | 'rechazada';
+  admin_notes?: string;
+  stripe_refund_id?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Visit {
+  id: string;
+  ip_address: string;
+  page: string;
+  user_agent?: string;
+  referer?: string;
+  country?: string;
+  city?: string;
+  user_id?: string;
+  created_at: string;
+}
+
+export interface SiteSettings {
+  key: string;
+  value: string;
+  updated_at: string;
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  read?: boolean;
   created_at: string;
 }
 

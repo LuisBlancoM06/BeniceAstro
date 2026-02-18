@@ -489,7 +489,8 @@ CREATE OR REPLACE FUNCTION create_order_and_reduce_stock(
   p_total DECIMAL,
   p_items JSONB,
   p_promo_code TEXT DEFAULT NULL,
-  p_discount_amount DECIMAL DEFAULT 0
+  p_discount_amount DECIMAL DEFAULT 0,
+  p_shipping_address TEXT DEFAULT NULL
 )
 RETURNS UUID AS $$
 DECLARE
@@ -497,8 +498,8 @@ DECLARE
   item JSONB;
 BEGIN
   -- Crear el pedido
-  INSERT INTO public.orders (user_id, total, status, promo_code, discount_amount)
-  VALUES (p_user_id, p_total, 'pagado', p_promo_code, p_discount_amount)
+  INSERT INTO public.orders (user_id, total, status, promo_code, discount_amount, shipping_address)
+  VALUES (p_user_id, p_total, 'pagado', p_promo_code, p_discount_amount, p_shipping_address)
   RETURNING id INTO new_order_id;
 
   -- Procesar cada item

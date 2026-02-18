@@ -72,76 +72,121 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
 
       if (existingUsers && existingUsers.length > 0) {
         userId = existingUsers[0].id;
+      } else {
+        // Crear usuario invitado para cumplir constraint NOT NULL de user_id
+        const { data: newUser, error: userError } = await supabaseAdmin
+          .from('users')
+          .insert({
+            email: customerEmail,
+            full_name: customerName,
+            role: 'user'
+          })
+          .select('id')
+          .single();
+
+        if (newUser && !userError) {
+          userId = newUser.id;
+        }
       }
     }
 
-    // Obtener detalles de los line items
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-    // Calcular total
-    const total = (session.amount_total || 0) / 100;
-    const discountAmount = total * (discountPercent / 100);
-
-    // Crear pedido en Supabase
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .insert({
-        user_id: userId || null,
-        total: total,
-        status: 'pagado',
-        promo_code: promoCode || null,
-        discount_amount: discountAmount,
-        stripe_session_id: session.id,
-        payment_intent_id: (session.payment_intent as string) || null,
-        shipping_address: JSON.stringify((session as any).shipping_details || null)
-      })
-      .select()
-      .single();
-
-    if (orderError) {
-      console.error('Error creating order:', orderError);
+    // Si no se pudo resolver el user_id, no podemos crear el pedido (constraint NOT NULL)
+    if (!userId) {
+      console.error('No se pudo resolver user_id para el pedido. Session:', session.id);
       return;
     }
 
-    // Crear items del pedido y actualizar stock
-    const orderItemsForEmail: Array<{ name: string; quantity: number; price: number }> = [];
+    // Obtener detalles de los line items (con product expandido para acceder a metadata.product_id)
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ['data.price.product']
+    });
+
+    // Calcular subtotal descontado (excluyendo envío) y preparar items para el RPC
+    let discountedSubtotal = 0;
+    const rpcItems: Array<{ product_id: string; quantity: number; price: number; name: string }> = [];
 
     for (const item of lineItems.data) {
       if (item.description === 'Gastos de envío') continue;
 
-      // Buscar producto por nombre (ya que Stripe no guarda el ID original)
-      const { data: product } = await supabaseAdmin
-        .from('products')
-        .select('id, stock')
-        .eq('name', item.description)
-        .single();
+      const quantity = item.quantity || 1;
+      const itemTotal = (item.amount_total || 0) / 100;
+      const unitPrice = itemTotal / quantity;
+      discountedSubtotal += itemTotal;
 
-      if (product) {
-        const unitPrice = (item.amount_total || 0) / 100 / (item.quantity || 1);
+      // Obtener product_id desde metadata de Stripe (robusto) con fallback por nombre
+      let productId: string | null = null;
+      const stripeProduct = item.price?.product;
+      if (stripeProduct && typeof stripeProduct === 'object' && 'metadata' in stripeProduct) {
+        productId = (stripeProduct as any).metadata?.product_id || null;
+      }
 
-        // Crear order item
-        await supabaseAdmin
-          .from('order_items')
-          .insert({
-            order_id: order.id,
-            product_id: product.id,
-            quantity: item.quantity || 1,
-            price: unitPrice
-          });
-
-        // Reducir stock
-        await supabaseAdmin
+      // Fallback: buscar por nombre si no hay metadata
+      if (!productId) {
+        const { data: product } = await supabaseAdmin
           .from('products')
-          .update({ stock: Math.max(0, product.stock - (item.quantity || 1)) })
-          .eq('id', product.id);
+          .select('id')
+          .eq('name', item.description)
+          .single();
+        productId = product?.id || null;
+      }
 
-        orderItemsForEmail.push({
-          name: item.description || 'Producto',
-          quantity: item.quantity || 1,
-          price: unitPrice
+      if (productId) {
+        rpcItems.push({
+          product_id: productId,
+          quantity: quantity,
+          price: unitPrice,
+          name: item.description || 'Producto'
         });
+      } else {
+        console.error(`No se encontró producto para: ${item.description}`);
       }
     }
+
+    // Calcular descuento correcto:
+    // session.amount_total ya es el monto DESPUÉS del descuento (Stripe aplicó el descuento en unit_amount)
+    // Necesitamos el subtotal original (pre-descuento) para calcular el monto real descontado
+    const subtotalBeforeDiscount = discountPercent > 0
+      ? discountedSubtotal / (1 - discountPercent / 100)
+      : discountedSubtotal;
+    const discountAmount = Math.round((subtotalBeforeDiscount - discountedSubtotal) * 100) / 100;
+
+    // Total cobrado por Stripe
+    const total = (session.amount_total || 0) / 100;
+
+    // Dirección de envío
+    const shippingDetails = (session as any).shipping_details;
+    const shippingAddressStr = shippingDetails
+      ? JSON.stringify(shippingDetails)
+      : null;
+
+    // Usar el RPC atómico para crear pedido + items + verificar stock
+    // (mismo mecanismo que Flutter y create-order.ts)
+    const { data: orderId, error: rpcError } = await supabaseAdmin.rpc('create_order_and_reduce_stock', {
+      p_user_id: userId,
+      p_total: total,
+      p_items: rpcItems.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      p_promo_code: promoCode || null,
+      p_discount_amount: discountAmount,
+      p_shipping_address: shippingAddressStr
+    });
+
+    if (rpcError) {
+      console.error('Error creating order via RPC:', rpcError);
+      return;
+    }
+
+    // Actualizar el pedido con campos específicos de Stripe
+    await supabaseAdmin
+      .from('orders')
+      .update({
+        stripe_session_id: session.id,
+        payment_intent_id: (session.payment_intent as string) || null
+      })
+      .eq('id', orderId);
 
     // Generar factura
     const invoiceNumber = await generateInvoiceNumber();
@@ -149,21 +194,36 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
     await supabaseAdmin
       .from('invoices')
       .insert({
-        order_id: order.id,
-        user_id: userId || null,
+        order_id: orderId,
+        user_id: userId,
         invoice_number: invoiceNumber,
         invoice_type: 'factura',
-        subtotal: total / 1.21, // Sin IVA
+        subtotal: total / 1.21, // Sin IVA (21%)
         tax_amount: total - (total / 1.21),
         total: total
       });
 
-    console.log(`Order ${order.id} created successfully with invoice ${invoiceNumber}`);
+    console.log(`Order ${orderId} created successfully with invoice ${invoiceNumber}`);
+
+    // Incrementar current_uses del código promocional si se usó
+    if (promoCode) {
+      const { data: promoData } = await supabaseAdmin
+        .from('promo_codes')
+        .select('current_uses')
+        .eq('code', promoCode)
+        .single();
+
+      if (promoData) {
+        await supabaseAdmin
+          .from('promo_codes')
+          .update({ current_uses: (promoData.current_uses || 0) + 1 })
+          .eq('code', promoCode);
+      }
+    }
 
     // Enviar email de confirmación
     if (customerEmail) {
       try {
-        const shippingDetails = (session as any).shipping_details;
         const shippingAddress = shippingDetails?.address
           ? `${shippingDetails.name || ''}, ${shippingDetails.address.line1 || ''} ${shippingDetails.address.line2 || ''}, ${shippingDetails.address.postal_code || ''} ${shippingDetails.address.city || ''}, ${shippingDetails.address.country || ''}`
           : undefined;
@@ -171,9 +231,13 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
         await sendOrderConfirmation({
           to: customerEmail,
           customerName: customerName,
-          orderId: order.id,
-          items: orderItemsForEmail,
-          subtotal: total + discountAmount,
+          orderId: orderId,
+          items: rpcItems.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          subtotal: subtotalBeforeDiscount,
           discount: discountAmount > 0 ? discountAmount : undefined,
           total: total,
           shippingAddress: shippingAddress

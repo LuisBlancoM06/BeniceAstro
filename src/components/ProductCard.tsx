@@ -36,8 +36,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     return false;
   });
 
-  // Normalizar on_sale (puede venir como string "true" o boolean true)
-  const isOnSale = product.on_sale === true || product.on_sale === 'true';
+  // Normalizar on_sale (puede venir como boolean o truthy value)
+  const isOnSale = Boolean(product.on_sale);
   const salePrice = product.sale_price ? Number(product.sale_price) : null;
   const regularPrice = Number(product.price);
   
@@ -66,8 +66,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   };
 
-  const animalLabel = product.animal_type === 'perro' ? 'Perro' : product.animal_type === 'gato' ? 'Gato' : 'Otros';
-  
   // Imagen con fallback
   const imageUrl = product.image_url || 'https://via.placeholder.com/400x400?text=Sin+imagen';
   const [imgError, setImgError] = useState(false);

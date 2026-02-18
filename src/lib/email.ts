@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(import.meta.env.RESEND_API_KEY || '');
 
-const FROM_NAME = 'BeniceAstro';
+const FROM_NAME = 'Benice';
 const FROM_EMAIL = 'onboarding@resend.dev';
 const SUPPORT_EMAIL = 'lblancom06@gmail.com';
 
@@ -87,13 +87,13 @@ const baseTemplate = (content: string, title: string) => `
 <body>
   <div class="container">
     <div class="header">
-      <h1>BeniceAstro</h1>
+      <h1>Benice</h1>
     </div>
     <div class="content">
       ${content}
     </div>
     <div class="footer">
-      <p>&copy; ${new Date().getFullYear()} BeniceAstro. Todos los derechos reservados.</p>
+      <p>&copy; ${new Date().getFullYear()} Benice. Todos los derechos reservados.</p>
       <p>&iquest;Tienes alguna pregunta? Cont&aacute;ctanos en ${SUPPORT_EMAIL}</p>
       <p>
         <a href="#" style="color: #9ca3af;">Pol&iacute;tica de Privacidad</a> |
@@ -172,7 +172,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
     </ol>
 
     <p style="margin-top: 30px; color: #6b7280;">
-      &iexcl;Gracias por confiar en BeniceAstro! Si tienes alguna pregunta sobre tu pedido,
+      &iexcl;Gracias por confiar en Benice! Si tienes alguna pregunta sobre tu pedido,
       no dudes en contactarnos.
     </p>
   `;
@@ -194,9 +194,9 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 export async function sendWelcomeEmail(data: WelcomeEmailData) {
   const content = `
     <div class="icon">Bienvenido</div>
-    <h2>&iexcl;Bienvenido a BeniceAstro, ${data.name}!</h2>
+    <h2>&iexcl;Bienvenido a Benice, ${data.name}!</h2>
 
-    <p>Estamos encantados de tenerte en nuestra familia. En BeniceAstro encontrar&aacute;s todo lo que
+    <p>Estamos encantados de tenerte en nuestra familia. En Benice encontrar&aacute;s todo lo que
     necesitas para cuidar de tus mascotas:</p>
 
     <div style="margin: 25px 0;">
@@ -226,7 +226,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
       y obt&eacute;n un 10% de descuento en tu primera compra.
     </div>
 
-    <h3>Ventajas de ser parte de BeniceAstro:</h3>
+    <h3>Ventajas de ser parte de Benice:</h3>
     <ul>
       <li>Env&iacute;o gratis en pedidos superiores a 49&euro;</li>
       <li>Devoluciones gratuitas en 30 d&iacute;as</li>
@@ -242,7 +242,7 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
   try {
     const response = await sendEmail(
       data.to,
-      'Bienvenido a BeniceAstro',
+      'Bienvenido a Benice',
       baseTemplate(content, 'Bienvenido')
     );
     return { success: true, data: response };
@@ -301,7 +301,7 @@ export async function sendNewsletterWelcome(email: string, promoCode: string) {
     <div class="icon">Newsletter</div>
     <h2>&iexcl;Gracias por suscribirte!</h2>
 
-    <p>Ya formas parte de la comunidad BeniceAstro. Recibir&aacute;s las mejores ofertas,
+    <p>Ya formas parte de la comunidad Benice. Recibir&aacute;s las mejores ofertas,
     novedades y consejos para el cuidado de tus mascotas directamente en tu bandeja de entrada.</p>
 
     <div class="highlight">
@@ -386,7 +386,7 @@ export async function sendDeliveryConfirmation(email: string, orderId: string, c
     en los productos que compraste.</p>
 
     <p style="color: #6b7280; margin-top: 30px;">
-      &iexcl;Gracias por confiar en BeniceAstro!
+      &iexcl;Gracias por confiar en Benice!
     </p>
   `;
 

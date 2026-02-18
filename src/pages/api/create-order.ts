@@ -1,10 +1,29 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { sendOrderConfirmation } from '../../lib/email';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { user_id, items, total, promo_code, discount_amount, shipping_address, user_email } = await request.json();
+
+    // Verificar autenticación
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !authUser) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     if (!user_id || !items || items.length === 0) {
       return new Response(JSON.stringify({ error: 'Datos inválidos' }), {
@@ -14,12 +33,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Llamar a la función de Supabase para crear el pedido
-    const { data, error } = await supabase.rpc('create_order_and_reduce_stock', {
+    const { data, error } = await supabaseAdmin.rpc('create_order_and_reduce_stock', {
       p_user_id: user_id,
       p_total: total,
       p_items: items,
       p_promo_code: promo_code || null,
-      p_discount_amount: discount_amount || 0
+      p_discount_amount: discount_amount || 0,
+      p_shipping_address: shipping_address
+        ? JSON.stringify(shipping_address)
+        : null
     });
 
     if (error) throw error;
@@ -28,14 +50,14 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Incrementar current_uses del código promocional si se usó
     if (promo_code) {
-      const { data: promoData } = await supabase
+      const { data: promoData } = await supabaseAdmin
         .from('promo_codes')
         .select('current_uses')
         .eq('code', promo_code)
         .single();
 
       if (promoData) {
-        await supabase
+        await supabaseAdmin
           .from('promo_codes')
           .update({ current_uses: (promoData.current_uses || 0) + 1 })
           .eq('code', promo_code);
@@ -46,21 +68,20 @@ export const POST: APIRoute = async ({ request }) => {
     if (user_email) {
       try {
         await sendOrderConfirmation({
-          orderNumber: orderId.toString(),
-          customerEmail: user_email,
+          to: user_email,
           customerName: shipping_address?.name || 'Cliente',
+          orderId: orderId.toString(),
           items: items.map((item: any) => ({
             name: item.name,
             quantity: item.quantity,
-            price: item.price,
-            imageUrl: item.image_url
+            price: item.price
           })),
           subtotal: total + (discount_amount || 0),
-          shipping: total >= 49 ? 0 : 4.99,
-          discount: discount_amount || 0,
+          discount: discount_amount > 0 ? discount_amount : undefined,
           total: total,
-          shippingAddress: shipping_address || {},
-          estimatedDelivery: getEstimatedDelivery()
+          shippingAddress: shipping_address
+            ? `${shipping_address.name || ''}, ${shipping_address.line1 || ''} ${shipping_address.line2 || ''}, ${shipping_address.postal_code || ''} ${shipping_address.city || ''}`
+            : undefined
         });
       } catch (emailError) {
         console.error('Error al enviar email de confirmación:', emailError);
@@ -83,23 +104,3 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 };
-
-// Calcular fecha estimada de entrega (2-3 días laborables)
-function getEstimatedDelivery(): string {
-  const date = new Date();
-  let daysToAdd = 2;
-  
-  while (daysToAdd > 0) {
-    date.setDate(date.getDate() + 1);
-    // Saltar fines de semana
-    if (date.getDay() !== 0 && date.getDay() !== 6) {
-      daysToAdd--;
-    }
-  }
-  
-  return date.toLocaleDateString('es-ES', { 
-    weekday: 'long', 
-    day: 'numeric', 
-    month: 'long' 
-  });
-}

@@ -21,7 +21,7 @@ async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supab
 }
 
 // GET: Obtener todos los productos o uno específico
-export const GET: APIRoute = async ({ request, url }) => {
+export const GET: APIRoute = async ({ url }) => {
   const id = url.searchParams.get('id');
 
   try {
@@ -183,7 +183,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 };
 
 // DELETE: Eliminar producto
-export const DELETE: APIRoute = async ({ request, url, cookies }) => {
+export const DELETE: APIRoute = async ({ url, cookies }) => {
   const { isAdmin: isAdminUser, supabaseClient } = await isAdmin(cookies);
   if (!isAdminUser) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), {

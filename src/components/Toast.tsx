@@ -1,5 +1,5 @@
 // Sistema de Notificaciones Toast
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '@nanostores/react';
 import { atom } from 'nanostores';
 

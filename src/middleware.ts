@@ -1,5 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
-import { supabase } from './lib/supabase';
+import { supabaseAdmin } from './lib/supabase';
 
 export const onRequest = defineMiddleware(async (context, next) => {
   // No trackear rutas de API, assets estáticos, ni favicon
@@ -42,9 +42,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const userAgent = headers.get('user-agent') || '';
   const referer = headers.get('referer') || '';
 
-  // Registrar visita antes de continuar
+  // No trackear bots conocidos
+  const botPattern = /bot|crawl|spider|slurp|mediapartners|feedfetcher/i;
+  if (botPattern.test(userAgent)) {
+    return next();
+  }
+
+  // Registrar visita antes de continuar (usar supabaseAdmin para bypass RLS)
   try {
-    const { error } = await supabase.from('visits').insert({
+    const { error } = await supabaseAdmin.from('visits').insert({
       ip_address: ip,
       page: path,
       user_agent: userAgent,

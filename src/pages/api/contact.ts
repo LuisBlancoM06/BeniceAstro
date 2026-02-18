@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabaseAdmin } from '../../lib/supabase';
 import { sendContactEmail } from '../../lib/email';
 
 export const POST: APIRoute = async ({ request }) => {
@@ -14,6 +15,24 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Validación de email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(JSON.stringify({ error: 'Email inválido' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Guardar mensaje en Supabase
+    const { error: dbError } = await supabaseAdmin
+      .from('contact_messages')
+      .insert({ name, email, phone: phone || null, subject, message });
+
+    if (dbError) {
+      console.error('Error guardando mensaje de contacto:', dbError);
+      // No fallamos si la tabla no existe aún, seguimos enviando el email
+    }
+
     // Enviar email
     await sendContactEmail({
       name,
@@ -22,9 +41,6 @@ export const POST: APIRoute = async ({ request }) => {
       subject,
       message
     });
-
-    // Aquí podrías guardar el mensaje en Supabase también
-    // await supabase.from('contact_messages').insert({ name, email, phone, subject, message });
 
     return new Response(JSON.stringify({ success: true, message: 'Mensaje enviado correctamente' }), {
       status: 200,

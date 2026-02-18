@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -9,7 +9,6 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Si no hay header, intentar obtener de cookies
     if (!token) {
-      const cookies = request.headers.get('cookie');
       // Buscar token en cookies de Supabase
     }
 
@@ -87,9 +86,41 @@ export const POST: APIRoute = async ({ request }) => {
   }
 };
 
-// DELETE: Eliminar imagen
+// DELETE: Eliminar imagen (requiere admin)
 export const DELETE: APIRoute = async ({ request }) => {
   try {
+    // Verificar autenticación de admin
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { data: userData } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!userData || userData.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'No tienes permisos de administrador' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const { path, bucket = 'product-images' } = await request.json();
 
     if (!path) {
@@ -99,7 +130,7 @@ export const DELETE: APIRoute = async ({ request }) => {
       });
     }
 
-    const { error } = await supabase.storage
+    const { error } = await supabaseAdmin.storage
       .from(bucket)
       .remove([path]);
 

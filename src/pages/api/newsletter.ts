@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { sendNewsletterWelcome } from '../../lib/email';
 
 function generatePromoCode(): string {
@@ -31,20 +31,22 @@ export const POST: APIRoute = async ({ request }) => {
 
     const promoCode = generatePromoCode();
 
-    // Guardar código y suscripción
-    await supabase.from('promo_codes').insert({
+    // Guardar código y suscripción (usar supabaseAdmin para bypasear RLS)
+    await supabaseAdmin.from('promo_codes').insert({
       code: promoCode,
       discount_percentage: 10,
       active: true,
+      max_uses: 1,
+      current_uses: 0,
       expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     });
 
-    await supabase.from('newsletters').insert({ email, promo_code: promoCode });
+    await supabaseAdmin.from('newsletters').insert({ email, promo_code: promoCode, source: 'web' });
 
     // Enviar email con Resend
     await sendNewsletterWelcome(email, promoCode);
 
-    return new Response(JSON.stringify({ success: true, promoCode }), { status: 200 });
+    return new Response(JSON.stringify({ success: true, message: 'Suscripción completada. Revisa tu email para tu código de descuento.' }), { status: 200 });
 
   } catch (error) {
     console.error('Error:', error);

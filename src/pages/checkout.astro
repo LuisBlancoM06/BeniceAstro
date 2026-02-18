@@ -358,7 +358,8 @@ import Layout from '../layouts/Layout.astro';
       const subtotal = $cartSubtotal.get();
       const discount = discountPercent > 0 ? subtotal * (discountPercent / 100) : 0;
       const afterDiscount = subtotal - discount;
-      const shipping = afterDiscount >= 49 ? 0 : 4.99;
+      // Envío gratis basado en subtotal PRE-descuento (consistente con Flutter y backend Stripe)
+      const shipping = subtotal >= 49 ? 0 : 4.99;
       const total = afterDiscount + shipping;
 
       document.getElementById('subtotal')!.textContent = `${subtotal.toFixed(2)}€`;
@@ -386,14 +387,14 @@ import Layout from '../layouts/Layout.astro';
       const freeShippingInfo = document.getElementById('free-shipping-info') as HTMLElement;
       const freeShippingAchieved = document.getElementById('free-shipping-achieved') as HTMLElement;
       
-      if (afterDiscount >= 49) {
+      if (subtotal >= 49) {
         freeShippingInfo.classList.add('hidden');
         freeShippingAchieved.classList.remove('hidden');
-      } else if (afterDiscount > 0) {
+      } else if (subtotal > 0) {
         freeShippingInfo.classList.remove('hidden');
         freeShippingAchieved.classList.add('hidden');
-        document.getElementById('remaining-for-free')!.textContent = `${(49 - afterDiscount).toFixed(2)}€`;
-        const progress = Math.min((afterDiscount / 49) * 100, 100);
+        document.getElementById('remaining-for-free')!.textContent = `${(49 - subtotal).toFixed(2)}€`;
+        const progress = Math.min((subtotal / 49) * 100, 100);
         (document.getElementById('shipping-progress') as HTMLElement).style.width = `${progress}%`;
       } else {
         freeShippingInfo.classList.add('hidden');
