@@ -307,14 +307,18 @@ import Layout from '../layouts/Layout.astro';
             </div>
           `;
         } else {
-          resultsGrid!.innerHTML = products.map((product: any) => `
-            <a href="/producto/${product.slug || product.id}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group">
-              <div class="aspect-square bg-gray-100 p-4">
-                <img 
-                  src="${product.image_url || 'https://via.placeholder.com/300'}" 
+          resultsGrid!.innerHTML = products.map((product: any) => {
+            const imgUrl = product.slug ? `/images/productos/${product.slug}.jpg` : (product.image_url || '');
+            const imageHtml = `<img 
+                  src="${imgUrl}" 
                   alt="${product.name}"
                   class="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                />
+                  onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 font-bold text-sm text-center px-3\\'>${product.name.replace(/'/g, "\\'")}</span></div>'"
+                />`;
+            return `
+            <a href="/producto/${product.slug || product.id}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group">
+              <div class="aspect-square bg-gray-100 p-4">
+                ${imageHtml}
               </div>
               <div class="p-4">
                 <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">${product.name}</h3>
@@ -327,7 +331,7 @@ import Layout from '../layouts/Layout.astro';
                 </div>
               </div>
             </a>
-          `).join('');
+          `}).join('');
         }
 
       } catch (error) {

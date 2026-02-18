@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const { data: products, error } = await supabase
       .from('products')
-      .select('id, name, price, image_url')
+      .select('id, name, price, image_url, slug, on_sale, sale_price')
       .ilike('name', `%${query}%`)
       .limit(5);
 

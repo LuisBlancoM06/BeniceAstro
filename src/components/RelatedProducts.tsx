@@ -51,7 +51,7 @@ export default function RelatedProducts({ currentProductId, animalType, category
       id: product.id,
       name: product.name,
       price: product.on_sale ? (product.sale_price || product.price) : product.price,
-      image: product.image_url,
+      image: product.slug ? `/images/productos/${product.slug}.jpg` : product.image_url,
     }, 1);
     toast.success('Producto añadido al carrito');
   };
@@ -96,7 +96,7 @@ export default function RelatedProducts({ currentProductId, animalType, category
             <a href={`/producto/${product.slug || product.id}`} className="block relative">
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={product.image_url}
+                  src={product.slug ? `/images/productos/${product.slug}.jpg` : product.image_url}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"

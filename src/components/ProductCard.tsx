@@ -19,6 +19,64 @@ interface Product {
   brand?: string;
 }
 
+// Detectar si una URL es placeholder
+function isPlaceholder(url: string): boolean {
+  return !url || url.includes('placehold') || url.includes('placeholder') || url === '';
+}
+
+// Gradientes por tipo de animal + categoría
+function getCategoryGradient(animal: string, category: string): string {
+  const gradients: Record<string, Record<string, string>> = {
+    perro: {
+      alimentacion: 'from-orange-400 to-amber-600',
+      higiene: 'from-cyan-400 to-blue-500',
+      salud: 'from-green-400 to-emerald-600',
+      accesorios: 'from-blue-400 to-indigo-600',
+      juguetes: 'from-yellow-400 to-orange-500',
+    },
+    gato: {
+      alimentacion: 'from-purple-400 to-violet-600',
+      higiene: 'from-fuchsia-400 to-pink-600',
+      salud: 'from-teal-400 to-cyan-600',
+      accesorios: 'from-rose-400 to-pink-600',
+      juguetes: 'from-indigo-400 to-purple-600',
+    },
+    otros: {
+      alimentacion: 'from-lime-400 to-green-600',
+      higiene: 'from-sky-400 to-blue-600',
+      salud: 'from-emerald-400 to-teal-600',
+      accesorios: 'from-amber-400 to-yellow-600',
+      juguetes: 'from-sky-400 to-indigo-500',
+    },
+  };
+  return gradients[animal]?.[category] || 'from-gray-400 to-gray-600';
+}
+
+// Icono SVG por tipo de animal
+function AnimalIcon({ animal }: { animal: string }) {
+  if (animal === 'perro') {
+    return (
+      <svg className="w-12 h-12 text-white/30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4.5 12.75l6 6 9-13.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18 3c-1 0-2 .5-2 2s1 3 1 3h2s1-1 1-3-1-2-2-2zM6 3C5 3 4 3.5 4 5.5S5 8.5 5 8.5h2S8 7.5 8 5.5 7 3 6 3zM3.5 10C2.1 10 1 11.1 1 12.5V17c0 2.2 1.8 4 4 4h2c1.1 0 2-.9 2-2v-1h6v1c0 1.1.9 2 2 2h2c2.2 0 4-1.8 4-4v-4.5c0-1.4-1.1-2.5-2.5-2.5h-17z"/>
+      </svg>
+    );
+  }
+  if (animal === 'gato') {
+    return (
+      <svg className="w-12 h-12 text-white/30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v-2h-2v2zm0-4h2V7h-2v5z"/>
+        <path d="M2 2l3 5v4l-1.5 3H5L7 10V5L4 1zm20 0l-3 5v4l1.5 3H19l-2-4V5l3-4zM8.5 14a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm7 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM12 17c-1.1 0-2-.4-2.5-1h5c-.5.6-1.4 1-2.5 1z"/>
+      </svg>
+    );
+  }
+  return (
+    <svg className="w-12 h-12 text-white/30" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+  );
+}
+
 interface ProductCardProps {
   product: Product;
   'client:load'?: boolean;
@@ -66,9 +124,11 @@ export default function ProductCard({ product }: ProductCardProps) {
     window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   };
 
-  // Imagen con fallback
-  const imageUrl = product.image_url || 'https://via.placeholder.com/400x400?text=Sin+imagen';
+  // Imagen con fallback – siempre usar ruta local basada en slug
+  const imageUrl = product.slug ? `/images/productos/${product.slug}.jpg` : (product.image_url || '');
   const [imgError, setImgError] = useState(false);
+  const showPlaceholder = (!product.slug && isPlaceholder(imageUrl)) || imgError;
+  const gradient = getCategoryGradient(product.animal_type, product.category);
 
   const productUrl = `/producto/${product.slug || product.id}`;
 
@@ -79,13 +139,25 @@ export default function ProductCard({ product }: ProductCardProps) {
     >
       {/* Imagen más compacta */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-        <img
-          src={imgError ? 'https://via.placeholder.com/400x400?text=Sin+imagen' : imageUrl}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-          onError={() => setImgError(true)}
-        />
+        {showPlaceholder ? (
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-4 group-hover:scale-105 transition-transform duration-500`}>
+            <AnimalIcon animal={product.animal_type} />
+            <span className="text-white font-bold text-sm text-center mt-2 line-clamp-2 drop-shadow-md">
+              {product.brand || product.name}
+            </span>
+            <span className="text-white/70 text-xs text-center mt-1 line-clamp-1">
+              {product.category}
+            </span>
+          </div>
+        ) : (
+          <img
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            onError={() => setImgError(true)}
+          />
+        )}
         
         {/* Badge descuento */}
         {discount > 0 && (

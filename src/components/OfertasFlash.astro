@@ -81,7 +81,7 @@ const showSection = ofertasActive && hasOfertas;
                     </div>
                     <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 p-2">
                       <img 
-                        src={product.image_url || 'https://via.placeholder.com/300'} 
+                        src={product.slug ? `/images/productos/${product.slug}.jpg` : (product.image_url || '/images/productos/default.jpg')} 
                         alt={product.name}
                         class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                       />

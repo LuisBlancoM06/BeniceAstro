@@ -73,6 +73,57 @@ if (avgRating > 0) {
 } else {
   starsHtml = starEmpty.repeat(5);
 }
+
+// Detección de imágenes placeholder
+function isPlaceholder(url: string | null | undefined): boolean {
+  if (!url) return true;
+  return url.includes('placehold.co') || url.includes('via.placeholder') || url.includes('placeholder');
+}
+
+// Usar imagen local basada en slug
+const localImageUrl = `/images/productos/${product.slug}.jpg`;
+const mainIsPlaceholder = false; // Siempre usar imagen local
+
+// Gradientes por especie/categoría
+function getCategoryGradient(animal: string, category: string): string {
+  const gradients: Record<string, Record<string, string>> = {
+    perro: {
+      alimentacion: 'from-orange-400 to-amber-600',
+      higiene: 'from-blue-400 to-cyan-500',
+      salud: 'from-green-400 to-emerald-600',
+      accesorios: 'from-purple-400 to-indigo-600',
+      juguetes: 'from-pink-400 to-rose-500',
+    },
+    gato: {
+      alimentacion: 'from-emerald-400 to-teal-600',
+      higiene: 'from-sky-400 to-blue-500',
+      salud: 'from-lime-400 to-green-600',
+      accesorios: 'from-violet-400 to-purple-600',
+      juguetes: 'from-fuchsia-400 to-pink-500',
+    },
+    otros: {
+      alimentacion: 'from-yellow-400 to-orange-500',
+      higiene: 'from-teal-400 to-cyan-600',
+      salud: 'from-emerald-400 to-green-500',
+      accesorios: 'from-indigo-400 to-blue-600',
+      juguetes: 'from-rose-400 to-red-500',
+    },
+  };
+  return gradients[animal]?.[category] || 'from-purple-400 to-pink-500';
+}
+
+const mainGradient = getCategoryGradient(product.animal_type || 'otros', product.category || 'alimentacion');
+
+// SVG icons por especie
+function getAnimalSvg(animal: string): string {
+  if (animal === 'perro') {
+    return '<svg class="w-24 h-24 text-white/30" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4c-.55 0-1.05.22-1.41.59L12 9.17 7.41 4.59C7.05 4.22 6.55 4 6 4c-1.1 0-2 .9-2 2v4c0 1.1.45 2.1 1.17 2.83L9 16.66V20c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-3.34l3.83-3.83C19.55 12.1 20 11.1 20 10V6c0-1.1-.9-2-2-2z"/></svg>';
+  }
+  if (animal === 'gato') {
+    return '<svg class="w-24 h-24 text-white/30" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6zm4 4h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
+  }
+  return '<svg class="w-24 h-24 text-white/30" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+}
 ---
 
 <Layout title={`${product.name} - Venice`}>
@@ -96,7 +147,7 @@ if (avgRating > 0) {
         <!-- Galería de Imágenes -->
         <div class="space-y-4">
           <!-- Imagen Principal -->
-          <div class="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden">
+          <div class="relative aspect-square rounded-2xl overflow-hidden">
             {hasDiscount && (
               <div class="absolute top-4 left-4 z-10">
                 <span class="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
@@ -104,12 +155,23 @@ if (avgRating > 0) {
                 </span>
               </div>
             )}
-            <img 
-              id="main-image"
-              src={product.image_url || 'https://via.placeholder.com/600?text=Sin+imagen'} 
-              alt={product.name}
-              class="w-full h-full object-contain p-8 transition-transform hover:scale-105"
-            />
+            {mainIsPlaceholder ? (
+              <div class={`w-full h-full bg-gradient-to-br ${mainGradient} flex flex-col items-center justify-center p-8`}>
+                <Fragment set:html={getAnimalSvg(product.animal_type || 'otros')} />
+                <p class="mt-4 text-white/80 font-bold text-xl text-center">{product.brand || product.name}</p>
+                <p class="mt-1 text-white/60 text-sm text-center">{product.name}</p>
+              </div>
+            ) : (
+              <div class="w-full h-full bg-gray-100">
+                <img 
+                  id="main-image"
+                  src={localImageUrl} 
+                  alt={product.name}
+                  class="w-full h-full object-contain p-8 transition-transform hover:scale-105"
+                  onerror="this.parentElement.innerHTML='<div class=\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center\'><span class=\'text-white/80 font-bold text-xl text-center px-4\'>' + this.alt + '</span></div>'"
+                />
+              </div>
+            )}
           </div>
           
           <!-- Thumbnails (si hay múltiples imágenes) -->
@@ -216,7 +278,7 @@ if (avgRating > 0) {
               data-product-name={product.name}
               data-product-price={product.price}
               data-product-sale-price={hasDiscount ? product.sale_price : ''}
-              data-product-image={product.image_url}
+              data-product-image={localImageUrl}
               data-product-stock={product.stock}
             >
               {product.stock > 0 ? 'Añadir al Carrito' : 'Sin Stock'}
@@ -271,12 +333,15 @@ if (avgRating > 0) {
             {relatedProducts.map((related: any) => (
               <a href={`/producto/${related.slug || related.id}`} class="group">
                 <div class="bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
-                  <div class="aspect-square bg-gray-100 p-4">
-                    <img 
-                      src={related.image_url || 'https://via.placeholder.com/200?text=Producto'} 
-                      alt={related.name}
-                      class="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                    />
+                  <div class="aspect-square p-4">
+                    {
+                      <img 
+                        src={`/images/productos/${related.slug}.jpg`} 
+                        alt={related.name}
+                        class="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                        onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'w-full h-full rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center\'><span class=\'text-white/80 font-semibold text-xs text-center px-2\'>' + this.alt + '</span></div>'"
+                      />
+                    }
                   </div>
                   <div class="p-4">
                     <h3 class="font-medium text-gray-800 line-clamp-2 mb-2">{related.name}</h3>

@@ -303,10 +303,15 @@ import Layout from '../layouts/Layout.astro';
         const unitPrice = item.salePrice || item.price;
         const lineTotal = (unitPrice * item.quantity).toFixed(2);
         const hasDiscount = item.salePrice && item.salePrice < item.price;
+        const imgSrc = item.image || '';
+        const isPlaceholderImg = imgSrc.includes('placehold.co') || imgSrc.includes('via.placeholder') || !imgSrc;
+        const checkoutImageHtml = isPlaceholderImg
+          ? `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg"><span class="text-white/80 text-[10px] font-semibold text-center px-1">${item.name}</span></div>`
+          : `<img src="${imgSrc}" alt="${item.name}" class="w-full h-full object-contain p-1.5" onerror="this.outerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 text-[10px] font-semibold text-center px-1\\'>${item.name.replace(/'/g, "\\'")}</span></div>'" />`;
         return `
         <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50/80 rounded-xl border border-gray-100 hover:border-purple-200/60 hover:shadow-sm transition-all group">
           <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 group-hover:border-purple-100">
-            <img src="${item.image || 'https://via.placeholder.com/100'}" alt="${item.name}" class="w-full h-full object-contain p-1.5" />
+            ${checkoutImageHtml}
           </div>
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-sm text-gray-800 truncate">${item.name}</h3>

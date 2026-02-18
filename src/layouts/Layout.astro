@@ -539,7 +539,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
               <div class="p-2">
                 ${products.slice(0, 5).map((p: any) => `
                   <a href="/producto/${p.slug || p.id}" class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                    <img src="${p.image_url}" alt="${p.name}" class="w-14 h-14 object-cover rounded-lg">
+                    <img src="${p.slug ? `/images/productos/${p.slug}.jpg` : p.image_url}" alt="${p.name}" class="w-14 h-14 object-cover rounded-lg">
                     <div class="flex-1 min-w-0">
                       <div class="font-medium text-gray-900 truncate">${p.name}</div>
                       <div class="flex items-center gap-2">
@@ -692,7 +692,7 @@ const { title, description = 'Tienda online de productos para mascotas', hideNew
           } else {
             mobileSearchResults!.innerHTML = products.slice(0, 5).map((p: any) => `
               <a href="/producto/${p.slug || p.id}" class="flex items-center gap-3 p-3 hover:bg-gray-50 border-b last:border-0">
-                <img src="${p.image_url}" alt="${p.name}" class="w-10 h-10 object-cover rounded">
+                <img src="${p.slug ? `/images/productos/${p.slug}.jpg` : p.image_url}" alt="${p.name}" class="w-10 h-10 object-cover rounded">
                 <div class="flex-1 min-w-0">
                   <div class="font-medium text-sm truncate">${p.name}</div>
                   <span class="text-orange-500 font-bold text-sm">${p.on_sale ? p.sale_price : p.price}€</span>
