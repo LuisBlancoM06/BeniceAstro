@@ -98,7 +98,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   } catch (error: any) {
     console.error('Error al crear pedido:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Error al procesar el pedido' }), {
+    return new Response(JSON.stringify({ error: 'Error al procesar el pedido' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS visits (
 
 -- Índices para consultas rápidas
 CREATE INDEX IF NOT EXISTS idx_visits_created_at ON visits(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_visits_ip ON visits(ip_address);
 CREATE INDEX IF NOT EXISTS idx_visits_page ON visits(page);
 
 -- RLS: Solo admins pueden leer las visitas
@@ -38,25 +37,24 @@ CREATE POLICY "Solo admins leen visitas" ON visits
     )
   );
 
--- Vista resumen de visitas por día
+-- Vista resumen de visitas por día (sin exponer IPs)
 CREATE OR REPLACE VIEW visits_daily AS
 SELECT 
   DATE(created_at) as fecha,
   COUNT(*) as total_visitas,
-  COUNT(DISTINCT ip_address) as visitantes_unicos,
+  COUNT(DISTINCT user_id) as visitantes_unicos,
   COUNT(DISTINCT page) as paginas_vistas
 FROM visits
 GROUP BY DATE(created_at)
 ORDER BY fecha DESC;
 
--- Vista de IPs más frecuentes
-CREATE OR REPLACE VIEW visits_top_ips AS
+-- Vista de páginas más visitadas (sin IPs)
+CREATE OR REPLACE VIEW visits_top_pages AS
 SELECT 
-  ip_address,
+  page,
   COUNT(*) as total_visitas,
   MAX(created_at) as ultima_visita,
-  COUNT(DISTINCT page) as paginas_visitadas,
-  ARRAY_AGG(DISTINCT page ORDER BY page) as paginas
+  COUNT(DISTINCT user_id) as usuarios_unicos
 FROM visits
-GROUP BY ip_address
+GROUP BY page
 ORDER BY total_visitas DESC;

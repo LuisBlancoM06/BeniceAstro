@@ -81,7 +81,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (error) {
       console.error('Error uploading to Supabase:', error);
-      return new Response(JSON.stringify({ error: error.message }), {
+      return new Response(JSON.stringify({ error: 'Error al subir la imagen' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -103,7 +103,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   } catch (error: any) {
     console.error('Error in upload-image:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -169,7 +169,7 @@ export const DELETE: APIRoute = async ({ request }) => {
 
   } catch (error: any) {
     console.error('Error deleting image:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

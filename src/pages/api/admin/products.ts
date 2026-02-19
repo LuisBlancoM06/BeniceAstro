@@ -50,7 +50,8 @@ export const GET: APIRoute = async ({ url }) => {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error obteniendo productos:', error);
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -117,7 +118,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     });
   } catch (error: any) {
     console.error('Error al crear producto:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -175,7 +176,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     });
   } catch (error: any) {
     console.error('Error al actualizar producto:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -215,7 +216,7 @@ export const DELETE: APIRoute = async ({ url, cookies }) => {
     });
   } catch (error: any) {
     console.error('Error al eliminar producto:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

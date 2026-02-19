@@ -22,10 +22,10 @@ const filtroUsuario = Astro.url.searchParams.get('usuario') || '';
 const page = parseInt(Astro.url.searchParams.get('page') || '1');
 const perPage = 50;
 
-// Consultar visitas
+// Consultar visitas (sin ip_address por privacidad/RGPD)
 let query = supabase
   .from('visits')
-  .select('*', { count: 'exact' })
+  .select('id, page, user_agent, referer, user_id, created_at', { count: 'exact' })
   .order('created_at', { ascending: false })
   .range((page - 1) * perPage, page * perPage - 1);
 
@@ -180,7 +180,7 @@ const topPages = Object.entries(pageCounts)
       </div>
     </div>
 
-    <!-- Top IPs y Top Páginas -->
+    <!-- Top Usuarios y Top Páginas -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       <!-- Top Usuarios Registrados -->

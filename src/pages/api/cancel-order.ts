@@ -79,7 +79,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   } catch (error: any) {
     console.error('Error al solicitar cancelacion:', error);
-    return new Response(JSON.stringify({ error: error.message || 'Error al procesar la solicitud' }), {
+    return new Response(JSON.stringify({ error: 'Error al procesar la solicitud' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

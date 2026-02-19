@@ -164,7 +164,7 @@ export const GET: APIRoute = async ({ request }) => {
     });
   } catch (error: any) {
     console.error('Error en analytics:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

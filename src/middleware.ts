@@ -24,11 +24,35 @@ const securityHeaders: Record<string, string> = {
   ].join('; '),
 };
 
+/**
+ * Anonimiza una dirección IP eliminando el último octeto (IPv4)
+ * o los últimos 80 bits (IPv6) para cumplir con la RGPD.
+ */
+function anonymizeIP(ip: string): string {
+  if (!ip || ip === 'desconocida') return 'anonima';
+  // IPv4: reemplazar último octeto por 0
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) {
+    return ip.replace(/\.\d{1,3}$/, '.0');
+  }
+  // IPv6: truncar los últimos segmentos
+  if (ip.includes(':')) {
+    const parts = ip.split(':');
+    if (parts.length > 4) {
+      return parts.slice(0, 4).join(':') + '::0';
+    }
+  }
+  return 'anonima';
+}
+
 function addSecurityHeaders(response: Response): Response {
   const newHeaders = new Headers(response.headers);
   for (const [key, value] of Object.entries(securityHeaders)) {
     newHeaders.set(key, value);
   }
+  // Eliminar headers que exponen información del servidor
+  newHeaders.delete('X-Powered-By');
+  newHeaders.delete('Server');
+  newHeaders.set('Server', 'Benice');
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -66,15 +90,18 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return addSecurityHeaders(response);
   }
 
-  // Obtener IP real del visitante (orden de prioridad por fiabilidad)
+  // Obtener IP del visitante y anonimizarla inmediatamente (RGPD)
   const headers = context.request.headers;
-  const ip =
-    headers.get('cf-connecting-ip') ||                          // Cloudflare
-    headers.get('x-real-ip') ||                                 // Nginx proxy
-    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||   // Proxy genérico (primera IP = cliente real)
-    headers.get('x-client-ip') ||                               // Apache
-    headers.get('true-client-ip') ||                            // Akamai / Cloudflare Enterprise
+  const rawIp =
+    headers.get('cf-connecting-ip') ||
+    headers.get('x-real-ip') ||
+    headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    headers.get('x-client-ip') ||
+    headers.get('true-client-ip') ||
     clientAddr;
+
+  // Anonimizar la IP antes de cualquier almacenamiento
+  const ip = anonymizeIP(rawIp);
 
   const userAgent = headers.get('user-agent') || '';
   const referer = headers.get('referer') || '';

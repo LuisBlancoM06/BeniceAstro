@@ -58,7 +58,8 @@ export const GET: APIRoute = async ({ url }) => {
     const { data: reviews, error } = await query;
 
     if (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+      console.error('Error obteniendo reseñas:', error);
+      return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -163,7 +164,8 @@ export const POST: APIRoute = async ({ request }) => {
         .single();
 
       if (updateError) {
-        return new Response(JSON.stringify({ error: updateError.message }), {
+        console.error('Error actualizando reseña:', updateError);
+        return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
         });
@@ -189,7 +191,8 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (insertError) {
-      return new Response(JSON.stringify({ error: insertError.message }), {
+      console.error('Error creando reseña:', insertError);
+      return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -272,7 +275,8 @@ export const DELETE: APIRoute = async ({ request, url }) => {
       .eq('id', reviewId);
 
     if (deleteError) {
-      return new Response(JSON.stringify({ error: deleteError.message }), {
+      console.error('Error eliminando reseña:', deleteError);
+      return new Response(JSON.stringify({ error: 'Error interno del servidor' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });
