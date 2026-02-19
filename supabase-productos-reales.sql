@@ -22,8 +22,8 @@ VALUES
   'royal-canin-maxi-adult',
   'Pienso completo para perros adultos de razas grandes (26-44 kg). Fórmula con nutrientes que ayudan a mantener la salud articular y un peso óptimo. Croqueta adaptada para mandíbulas grandes.',
   54.99, 44.99, true, 45,
-  '/images/productos/royal-canin-maxi-adult.jpg',
-  ARRAY['/images/productos/royal-canin-maxi-adult.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-maxi-adult.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-maxi-adult.jpg'],
   'perro', 'grande', 'alimentacion', 'adulto', 'Royal Canin'
 ),
 (
@@ -31,8 +31,8 @@ VALUES
   'ultima-adult-medium-maxi',
   'Pienso Ultima de Affinity para perros adultos medianos y grandes. Con pollo fresco, arroz integral y cereales. Favorece la digestión y el pelo brillante. Marca líder en supermercados de España.',
   42.99, NULL, false, 50,
-  '/images/productos/ultima-adult-medium-maxi.jpg',
-  ARRAY['/images/productos/ultima-adult-medium-maxi.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ultima-adult-medium-maxi.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ultima-adult-medium-maxi.jpg'],
   'perro', 'grande', 'alimentacion', 'adulto', 'Ultima'
 ),
 (
@@ -40,8 +40,8 @@ VALUES
   'pedigree-adult-pollo-arroz',
   'Pienso completo para perros adultos con pollo y arroz. Refuerza el sistema inmunitario, favorece la digestión saludable y aporta energía. La marca de alimentación canina más conocida del mundo.',
   29.99, NULL, false, 60,
-  '/images/productos/pedigree-adult-pollo-arroz.jpg',
-  ARRAY['/images/productos/pedigree-adult-pollo-arroz.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/pedigree-adult-pollo-arroz.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/pedigree-adult-pollo-arroz.jpg'],
   'perro', 'grande', 'alimentacion', 'adulto', 'Pedigree'
 ),
 (
@@ -49,8 +49,8 @@ VALUES
   'advance-articular-care-perro',
   'Pienso dietético para perros con problemas articulares. Con colágeno, ácido hialurónico y vitamina C para proteger las articulaciones. Marca veterinaria española de Affinity.',
   48.50, 39.99, true, 20,
-  '/images/productos/advance-articular-care-perro.jpg',
-  ARRAY['/images/productos/advance-articular-care-perro.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/advance-articular-care-perro.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/advance-articular-care-perro.jpg'],
   'perro', 'mediano', 'alimentacion', 'senior', 'Advance'
 ),
 (
@@ -58,8 +58,8 @@ VALUES
   'royal-canin-mini-puppy',
   'Alimento completo para cachorros de razas pequeñas (hasta 10 kg) de 2 a 10 meses. Apoya el sistema inmunitario en desarrollo con un complejo de antioxidantes.',
   32.99, NULL, false, 55,
-  '/images/productos/royal-canin-mini-puppy.jpg',
-  ARRAY['/images/productos/royal-canin-mini-puppy.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-mini-puppy.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-mini-puppy.jpg'],
   'perro', 'mini', 'alimentacion', 'cachorro', 'Royal Canin'
 ),
 (
@@ -67,8 +67,8 @@ VALUES
   'purina-one-adult-pollo',
   'Pienso de alta calidad con pollo como ingrediente principal. Fórmula Bifensis con doble defensa: refuerza las defensas naturales del perro por dentro y por fuera. Nutrición avanzada visible en 30 días.',
   34.99, NULL, false, 55,
-  '/images/productos/purina-one-adult-pollo.jpg',
-  ARRAY['/images/productos/purina-one-adult-pollo.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-one-adult-pollo.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-one-adult-pollo.jpg'],
   'perro', 'mediano', 'alimentacion', 'adulto', 'Purina ONE'
 ),
 (
@@ -76,8 +76,8 @@ VALUES
   'hills-science-plan-adult-medium-pollo',
   'Nutrición clínicamente probada con pollo como ingrediente principal. Antioxidantes, ácidos grasos omega-6 y vitamina E para piel y pelo brillante.',
   46.99, NULL, false, 40,
-  '/images/productos/hills-science-plan-adult-medium-pollo.jpg',
-  ARRAY['/images/productos/hills-science-plan-adult-medium-pollo.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/hills-science-plan-adult-medium-pollo.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/hills-science-plan-adult-medium-pollo.jpg'],
   'perro', 'mediano', 'alimentacion', 'adulto', 'Hill''s'
 ),
 (
@@ -85,8 +85,8 @@ VALUES
   'brekkies-excel-adult-buey',
   'Pienso completo con buey, verduras y cereales integrales. Enriquecido con vitaminas y calcio. Marca Affinity, una de las más vendidas en España. Saco grande de 20 kg.',
   25.99, 21.99, true, 70,
-  '/images/productos/brekkies-excel-adult-buey.jpg',
-  ARRAY['/images/productos/brekkies-excel-adult-buey.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/brekkies-excel-adult-buey.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/brekkies-excel-adult-buey.jpg'],
   'perro', 'grande', 'alimentacion', 'adulto', 'Brekkies'
 ),
 (
@@ -94,8 +94,8 @@ VALUES
   'purina-pro-plan-medium-puppy-pollo',
   'Pienso para cachorros de razas medianas con OPTISTART. Calostro natural para reforzar defensas y DHA procedente de aceite de pescado para el cerebro.',
   38.99, NULL, false, 45,
-  '/images/productos/purina-pro-plan-medium-puppy-pollo.jpg',
-  ARRAY['/images/productos/purina-pro-plan-medium-puppy-pollo.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-pro-plan-medium-puppy-pollo.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-pro-plan-medium-puppy-pollo.jpg'],
   'perro', 'mediano', 'alimentacion', 'cachorro', 'Purina Pro Plan'
 ),
 (
@@ -103,8 +103,8 @@ VALUES
   'friskies-adult-buey-verduras',
   'Pienso completo y equilibrado para perros adultos. Con buey, pollo y verduras seleccionadas. Rico en proteínas y con todos los nutrientes esenciales. Marca Purina de confianza.',
   18.99, NULL, false, 65,
-  '/images/productos/friskies-adult-buey-verduras.jpg',
-  ARRAY['/images/productos/friskies-adult-buey-verduras.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/friskies-adult-buey-verduras.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/friskies-adult-buey-verduras.jpg'],
   'perro', 'mediano', 'alimentacion', 'adulto', 'Friskies'
 ),
 
@@ -116,8 +116,8 @@ VALUES
   'tropiclean-champu-avena-te',
   'Champú natural de avena coloidal y extracto de árbol del té. Alivia la piel irritada, hidrata en profundidad. Sin parabenos ni colorantes artificiales. pH balanceado.',
   14.99, NULL, false, 60,
-  '/images/productos/tropiclean-champu-avena-te.jpg',
-  ARRAY['/images/productos/tropiclean-champu-avena-te.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tropiclean-champu-avena-te.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tropiclean-champu-avena-te.jpg'],
   'perro', 'mediano', 'higiene', 'adulto', 'TropiClean'
 ),
 (
@@ -125,8 +125,8 @@ VALUES
   'furminator-deshedding-perro-grande',
   'Cepillo profesional antipelaje para perros de más de 23 kg. Reduce la caída del pelo hasta un 90%. Botón de liberación de pelo fácil.',
   34.99, 29.99, true, 25,
-  '/images/productos/furminator-deshedding-perro-grande.jpg',
-  ARRAY['/images/productos/furminator-deshedding-perro-grande.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/furminator-deshedding-perro-grande.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/furminator-deshedding-perro-grande.jpg'],
   'perro', 'grande', 'higiene', 'adulto', 'FURminator'
 ),
 (
@@ -134,8 +134,8 @@ VALUES
   'beaphar-toallitas-limpiadoras-perro',
   'Pack de 100 toallitas húmedas para limpieza diaria de ojos, orejas y patas. Con aloe vera y manzanilla. Hipoalergénicas y sin alcohol.',
   8.99, NULL, false, 80,
-  '/images/productos/beaphar-toallitas-limpiadoras-perro.jpg',
-  ARRAY['/images/productos/beaphar-toallitas-limpiadoras-perro.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/beaphar-toallitas-limpiadoras-perro.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/beaphar-toallitas-limpiadoras-perro.jpg'],
   'perro', 'mediano', 'higiene', 'adulto', 'Beaphar'
 ),
 
@@ -147,8 +147,8 @@ VALUES
   'seresto-collar-antiparasitario-grande',
   'Collar antiparasitario de larga duración (8 meses) contra pulgas y garrapatas. Perros mayores de 8 kg. Sin olor, resistente al agua, liberación controlada.',
   38.50, 32.99, true, 40,
-  '/images/productos/seresto-collar-antiparasitario-grande.jpg',
-  ARRAY['/images/productos/seresto-collar-antiparasitario-grande.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/seresto-collar-antiparasitario-grande.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/seresto-collar-antiparasitario-grande.jpg'],
   'perro', 'grande', 'salud', 'adulto', 'Seresto'
 ),
 (
@@ -156,8 +156,8 @@ VALUES
   'frontline-tri-act-perro-20-40kg',
   'Pipetas antiparasitarias spot-on. Triple acción: repele, trata y previene pulgas, garrapatas y mosquitos. Pack de 3 pipetas para 3 meses de protección.',
   32.99, NULL, false, 35,
-  '/images/productos/frontline-tri-act-perro-20-40kg.jpg',
-  ARRAY['/images/productos/frontline-tri-act-perro-20-40kg.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/frontline-tri-act-perro-20-40kg.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/frontline-tri-act-perro-20-40kg.jpg'],
   'perro', 'grande', 'salud', 'adulto', 'Frontline'
 ),
 (
@@ -165,8 +165,8 @@ VALUES
   'pedigree-dentastix',
   'Snacks dentales que reducen la formación de sarro hasta un 80%. Textura especial que limpia hasta la línea de las encías. Para perros medianos. Pack mensual de 56 unidades.',
   12.99, 9.99, true, 70,
-  '/images/productos/pedigree-dentastix.jpg',
-  ARRAY['/images/productos/pedigree-dentastix.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/pedigree-dentastix.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/pedigree-dentastix.jpg'],
   'perro', 'mediano', 'salud', 'adulto', 'Pedigree'
 ),
 
@@ -178,8 +178,8 @@ VALUES
   'flexi-new-classic-correa-5m',
   'Correa retráctil con cinta de 5 metros para perros hasta 50 kg. Sistema de frenado ergonómico fiable. Gancho cromado resistente. Diseño compacto y ligero.',
   22.99, NULL, false, 45,
-  '/images/productos/flexi-new-classic-correa-5m.jpg',
-  ARRAY['/images/productos/flexi-new-classic-correa-5m.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/flexi-new-classic-correa-5m.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/flexi-new-classic-correa-5m.jpg'],
   'perro', 'grande', 'accesorios', 'adulto', 'Flexi'
 ),
 (
@@ -187,8 +187,8 @@ VALUES
   'trixie-cama-vital-best-of-all',
   'Cama ortopédica con relleno de espuma viscoelástica. Funda lavable a máquina, borde acolchado elevado. Fondo antideslizante. Tamaño 80x60 cm.',
   49.99, 42.99, true, 20,
-  '/images/productos/trixie-cama-vital-best-of-all.jpg',
-  ARRAY['/images/productos/trixie-cama-vital-best-of-all.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-cama-vital-best-of-all.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-cama-vital-best-of-all.jpg'],
   'perro', 'grande', 'accesorios', 'adulto', 'Trixie'
 ),
 (
@@ -196,8 +196,8 @@ VALUES
   'julius-k9-idc-powerharness',
   'Arnés profesional con sistema de cierre de seguridad. Etiquetas intercambiables, reflectante, asa superior de agarre. Interior forrado transpirable.',
   39.99, NULL, false, 30,
-  '/images/productos/julius-k9-idc-powerharness.jpg',
-  ARRAY['/images/productos/julius-k9-idc-powerharness.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/julius-k9-idc-powerharness.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/julius-k9-idc-powerharness.jpg'],
   'perro', 'grande', 'accesorios', 'adulto', 'Julius-K9'
 ),
 (
@@ -205,8 +205,8 @@ VALUES
   'trixie-comedero-elevado-acero',
   'Doble comedero de acero inoxidable con soporte elevado regulable en altura. Capacidad 2x1.8 L. Antideslizante. Ideal para perros grandes y articulaciones.',
   27.99, NULL, false, 35,
-  '/images/productos/trixie-comedero-elevado-acero.jpg',
-  ARRAY['/images/productos/trixie-comedero-elevado-acero.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-comedero-elevado-acero.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-comedero-elevado-acero.jpg'],
   'perro', 'grande', 'accesorios', 'adulto', 'Trixie'
 ),
 
@@ -218,8 +218,8 @@ VALUES
   'kong-classic-rojo-grande',
   'El juguete original de caucho natural KONG. Rebote impredecible que mantiene al perro entretenido. Se puede rellenar con premios. Ultra resistente. Talla L.',
   14.99, NULL, false, 65,
-  '/images/productos/kong-classic-rojo-grande.jpg',
-  ARRAY['/images/productos/kong-classic-rojo-grande.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/kong-classic-rojo-grande.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/kong-classic-rojo-grande.jpg'],
   'perro', 'grande', 'juguetes', 'adulto', 'Kong'
 ),
 (
@@ -227,8 +227,8 @@ VALUES
   'nylabone-durachew-hueso-bacon',
   'Hueso masticable de nylon duradero con sabor a bacon real. Para perros de masticación potente (hasta 23 kg). Limpia los dientes mientras juegan.',
   11.99, NULL, false, 50,
-  '/images/productos/nylabone-durachew-hueso-bacon.jpg',
-  ARRAY['/images/productos/nylabone-durachew-hueso-bacon.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/nylabone-durachew-hueso-bacon.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/nylabone-durachew-hueso-bacon.jpg'],
   'perro', 'mediano', 'juguetes', 'adulto', 'Nylabone'
 ),
 (
@@ -236,8 +236,8 @@ VALUES
   'trixie-dog-activity-flip-board',
   'Juego de inteligencia nivel 2 para perros. Diferentes mecanismos de apertura para esconder premios. Estimulación mental, reduce ansiedad y aburrimiento.',
   16.99, 13.99, true, 40,
-  '/images/productos/trixie-dog-activity-flip-board.jpg',
-  ARRAY['/images/productos/trixie-dog-activity-flip-board.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-dog-activity-flip-board.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-dog-activity-flip-board.jpg'],
   'perro', 'mediano', 'juguetes', 'adulto', 'Trixie'
 ),
 
@@ -249,8 +249,8 @@ VALUES
   'royal-canin-kitten',
   'Alimento completo para gatitos de 4 a 12 meses. Apoya el sistema inmunitario en desarrollo con un complejo antioxidante. Croqueta de textura suave adaptada.',
   35.99, NULL, false, 50,
-  '/images/productos/royal-canin-kitten.jpg',
-  ARRAY['/images/productos/royal-canin-kitten.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-kitten.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-kitten.jpg'],
   'gato', 'mini', 'alimentacion', 'cachorro', 'Royal Canin'
 ),
 (
@@ -258,8 +258,8 @@ VALUES
   'royal-canin-indoor-27',
   'Pienso para gatos adultos de interior (1-7 años). Fórmula que ayuda a reducir las heces olorosas y controlar el peso. Con L-carnitina y fibras.',
   42.99, NULL, false, 40,
-  '/images/productos/royal-canin-indoor-27.jpg',
-  ARRAY['/images/productos/royal-canin-indoor-27.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-indoor-27.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-indoor-27.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Royal Canin'
 ),
 (
@@ -267,8 +267,8 @@ VALUES
   'purina-felix-fantastic-seleccion-mixta',
   'Pack de 12 sobres de comida húmeda en gelatina. Variedad de sabores: pollo, ternera, salmón y atún. Trocitos jugosos que encantan a todos los gatos.',
   9.99, 7.99, true, 80,
-  '/images/productos/purina-felix-fantastic-seleccion-mixta.jpg',
-  ARRAY['/images/productos/purina-felix-fantastic-seleccion-mixta.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-felix-fantastic-seleccion-mixta.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-felix-fantastic-seleccion-mixta.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Purina Felix'
 ),
 (
@@ -276,8 +276,8 @@ VALUES
   'purina-one-gato-esterilizado',
   'Pienso de alta calidad para gatos esterilizados. Con salmón como ingrediente principal y sin colorantes artificiales. Fórmula Bifensis para doble defensa inmunitaria.',
   28.99, NULL, false, 45,
-  '/images/productos/purina-one-gato-esterilizado.jpg',
-  ARRAY['/images/productos/purina-one-gato-esterilizado.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-one-gato-esterilizado.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/purina-one-gato-esterilizado.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Purina ONE'
 ),
 (
@@ -285,8 +285,8 @@ VALUES
   'hills-sterilised-cat-pollo',
   'Nutrición óptima para gatos esterilizados. Control de peso con L-carnitina, fibras para saciedad y minerales controlados para salud urinaria.',
   39.99, NULL, false, 35,
-  '/images/productos/hills-sterilised-cat-pollo.jpg',
-  ARRAY['/images/productos/hills-sterilised-cat-pollo.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/hills-sterilised-cat-pollo.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/hills-sterilised-cat-pollo.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Hill''s'
 ),
 (
@@ -294,8 +294,8 @@ VALUES
   'whiskas-temptations-pollo-queso',
   'Snacks crujientes por fuera y cremosos por dentro. Irresistibles para tu gato. Solo 2 kcal por unidad. Ideales como recompensa o para entrenamiento.',
   3.49, NULL, false, 100,
-  '/images/productos/whiskas-temptations-pollo-queso.jpg',
-  ARRAY['/images/productos/whiskas-temptations-pollo-queso.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/whiskas-temptations-pollo-queso.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/whiskas-temptations-pollo-queso.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Whiskas'
 ),
 (
@@ -303,8 +303,8 @@ VALUES
   'friskies-gato-salmon-verduras',
   'Comida completa para gatos adultos con salmón y verduras. Receta equilibrada con vitaminas A, D y E. Marca Purina de confianza para el día a día.',
   8.99, NULL, false, 90,
-  '/images/productos/friskies-gato-salmon-verduras.jpg',
-  ARRAY['/images/productos/friskies-gato-salmon-verduras.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/friskies-gato-salmon-verduras.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/friskies-gato-salmon-verduras.jpg'],
   'gato', 'mini', 'alimentacion', 'adulto', 'Friskies'
 ),
 (
@@ -312,8 +312,8 @@ VALUES
   'royal-canin-ageing-12-sterilised',
   'Para gatos esterilizados mayores de 12 años. Apoya la función renal, mantiene la masa muscular. Fósforo adaptado y antioxidantes para el envejecimiento.',
   38.50, NULL, false, 25,
-  '/images/productos/royal-canin-ageing-12-sterilised.jpg',
-  ARRAY['/images/productos/royal-canin-ageing-12-sterilised.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-ageing-12-sterilised.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/royal-canin-ageing-12-sterilised.jpg'],
   'gato', 'mini', 'alimentacion', 'senior', 'Royal Canin'
 ),
 
@@ -325,8 +325,8 @@ VALUES
   'catsan-hygiene-plus-arena-20l',
   'Arena higiénica no aglomerante con gránulos minerales blancos. Control de olores hasta 5 días. Extra absorbente. Sin polvo.',
   15.99, 12.99, true, 60,
-  '/images/productos/catsan-hygiene-plus-arena-20l.jpg',
-  ARRAY['/images/productos/catsan-hygiene-plus-arena-20l.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catsan-hygiene-plus-arena-20l.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catsan-hygiene-plus-arena-20l.jpg'],
   'gato', 'mini', 'higiene', 'adulto', 'Catsan'
 ),
 (
@@ -334,8 +334,8 @@ VALUES
   'ever-clean-extra-strong-clumping',
   'Arena aglomerante premium con tecnología de control de olor activado por carbón. Aglomerados duros y compactos. Perfumada.',
   22.99, NULL, false, 40,
-  '/images/productos/ever-clean-extra-strong-clumping.jpg',
-  ARRAY['/images/productos/ever-clean-extra-strong-clumping.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ever-clean-extra-strong-clumping.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ever-clean-extra-strong-clumping.jpg'],
   'gato', 'mini', 'higiene', 'adulto', 'Ever Clean'
 ),
 (
@@ -343,8 +343,8 @@ VALUES
   'furminator-deshedding-gato-pelo-corto',
   'Herramienta profesional para reducir la muda de pelo en gatos de pelo corto. Alcanza el subpelo sin dañar la capa superior. Reduce pelo suelto un 90%.',
   24.99, NULL, false, 30,
-  '/images/productos/furminator-deshedding-gato-pelo-corto.jpg',
-  ARRAY['/images/productos/furminator-deshedding-gato-pelo-corto.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/furminator-deshedding-gato-pelo-corto.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/furminator-deshedding-gato-pelo-corto.jpg'],
   'gato', 'mini', 'higiene', 'adulto', 'FURminator'
 ),
 
@@ -356,8 +356,8 @@ VALUES
   'frontline-combo-spot-on-gato',
   'Pipetas antiparasitarias para gatos. Doble acción: elimina pulgas adultas y sus huevos/larvas del entorno. También eficaz contra garrapatas.',
   24.99, NULL, false, 45,
-  '/images/productos/frontline-combo-spot-on-gato.jpg',
-  ARRAY['/images/productos/frontline-combo-spot-on-gato.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/frontline-combo-spot-on-gato.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/frontline-combo-spot-on-gato.jpg'],
   'gato', 'mini', 'salud', 'adulto', 'Frontline'
 ),
 (
@@ -365,8 +365,8 @@ VALUES
   'feliway-classic-difusor-recambio',
   'Difusor de feromonas felinas sintéticas que reduce estrés, marcaje y arañazos. Cubre hasta 70 m². Efecto calmante clínicamente probado. Duración 30 días.',
   28.99, 24.99, true, 30,
-  '/images/productos/feliway-classic-difusor-recambio.jpg',
-  ARRAY['/images/productos/feliway-classic-difusor-recambio.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/feliway-classic-difusor-recambio.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/feliway-classic-difusor-recambio.jpg'],
   'gato', 'mini', 'salud', 'adulto', 'Feliway'
 ),
 
@@ -378,8 +378,8 @@ VALUES
   'catit-vesper-high-base-rascador',
   'Rascador y mueble para gatos con plataforma elevada acolchada, cueva interior y postes de sisal natural. Diseño moderno en madera de nogal. Altura 56 cm.',
   69.99, 59.99, true, 15,
-  '/images/productos/catit-vesper-high-base-rascador.jpg',
-  ARRAY['/images/productos/catit-vesper-high-base-rascador.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catit-vesper-high-base-rascador.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catit-vesper-high-base-rascador.jpg'],
   'gato', 'mediano', 'accesorios', 'adulto', 'Catit'
 ),
 (
@@ -387,8 +387,8 @@ VALUES
   'petsafe-scoopfree-arenero-autolimpiante',
   'Arenero automático que limpia solo. Bandeja desechable con arena de cristal que absorbe olores. Sensor de movimiento. Sin contacto con residuos.',
   149.99, NULL, false, 10,
-  '/images/productos/petsafe-scoopfree-arenero-autolimpiante.jpg',
-  ARRAY['/images/productos/petsafe-scoopfree-arenero-autolimpiante.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/petsafe-scoopfree-arenero-autolimpiante.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/petsafe-scoopfree-arenero-autolimpiante.jpg'],
   'gato', 'mediano', 'accesorios', 'adulto', 'PetSafe'
 ),
 (
@@ -396,8 +396,8 @@ VALUES
   'trixie-transportin-capri-2',
   'Transportín de plástico resistente con puerta metálica con cierre de seguridad. Ventilación lateral, asa ergonómica plegable. Apto para gatos hasta 8 kg.',
   24.99, NULL, false, 25,
-  '/images/productos/trixie-transportin-capri-2.jpg',
-  ARRAY['/images/productos/trixie-transportin-capri-2.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-transportin-capri-2.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-transportin-capri-2.jpg'],
   'gato', 'mini', 'accesorios', 'adulto', 'Trixie'
 ),
 
@@ -409,8 +409,8 @@ VALUES
   'catit-senses-super-roller-circuit',
   'Circuito de juego interactivo con pelota iluminada. Diseño modular que permite crear diferentes recorridos. Estimula el instinto cazador, incluye hierba gatera.',
   19.99, NULL, false, 35,
-  '/images/productos/catit-senses-super-roller-circuit.jpg',
-  ARRAY['/images/productos/catit-senses-super-roller-circuit.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catit-senses-super-roller-circuit.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/catit-senses-super-roller-circuit.jpg'],
   'gato', 'mini', 'juguetes', 'adulto', 'Catit'
 ),
 (
@@ -418,8 +418,8 @@ VALUES
   'kong-kickeroo-catnip-gato',
   'Juguete alargado relleno de hierba gatera premium y papel crujiente. Ideal para patadas traseras. Plumas en los extremos para mayor diversión. Lavable.',
   8.99, NULL, false, 55,
-  '/images/productos/kong-kickeroo-catnip-gato.jpg',
-  ARRAY['/images/productos/kong-kickeroo-catnip-gato.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/kong-kickeroo-catnip-gato.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/kong-kickeroo-catnip-gato.jpg'],
   'gato', 'mini', 'juguetes', 'adulto', 'Kong'
 ),
 
@@ -431,8 +431,8 @@ VALUES
   'versele-laga-crispy-muesli-conejos',
   'Alimento completo y variado para conejos enanos. Mezcla rica en fibra con verduras, cereales y hierbas aromáticas. Con vitamina A y D3 añadidas. 2.75 kg.',
   9.99, NULL, false, 50,
-  '/images/productos/versele-laga-crispy-muesli-conejos.jpg',
-  ARRAY['/images/productos/versele-laga-crispy-muesli-conejos.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/versele-laga-crispy-muesli-conejos.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/versele-laga-crispy-muesli-conejos.jpg'],
   'otros', 'mini', 'alimentacion', 'adulto', 'Versele-Laga'
 ),
 (
@@ -440,8 +440,8 @@ VALUES
   'vitakraft-menu-premium-hamster',
   'Alimento principal para hámsters con cereales, semillas, fruta y proteína animal. Enriquecido con vitaminas y minerales esenciales. Sin conservantes artificiales.',
   4.99, NULL, false, 60,
-  '/images/productos/vitakraft-menu-premium-hamster.jpg',
-  ARRAY['/images/productos/vitakraft-menu-premium-hamster.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/vitakraft-menu-premium-hamster.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/vitakraft-menu-premium-hamster.jpg'],
   'otros', 'mini', 'alimentacion', 'adulto', 'Vitakraft'
 ),
 (
@@ -449,8 +449,8 @@ VALUES
   'tetra-min-copos-peces-tropicales',
   'Alimento en copos para peces tropicales de agua dulce. Fórmula BioActive con prebióticos para mejorar resistencia. Clean & Clear Water formula.',
   7.99, 5.99, true, 70,
-  '/images/productos/tetra-min-copos-peces-tropicales.jpg',
-  ARRAY['/images/productos/tetra-min-copos-peces-tropicales.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tetra-min-copos-peces-tropicales.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tetra-min-copos-peces-tropicales.jpg'],
   'otros', 'mini', 'alimentacion', 'adulto', 'Tetra'
 ),
 
@@ -462,8 +462,8 @@ VALUES
   'ferplast-jaula-criceti-15-hamster',
   'Jaula completa para hámsters con bebedero, comedero, rueda y casita incluidos. Base de plástico profunda, parte superior de rejilla con puerta. 78x48x39 cm.',
   59.99, NULL, false, 15,
-  '/images/productos/ferplast-jaula-criceti-15-hamster.jpg',
-  ARRAY['/images/productos/ferplast-jaula-criceti-15-hamster.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ferplast-jaula-criceti-15-hamster.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/ferplast-jaula-criceti-15-hamster.jpg'],
   'otros', 'mini', 'accesorios', 'adulto', 'Ferplast'
 ),
 (
@@ -471,8 +471,8 @@ VALUES
   'trixie-jaula-pajaros-san-remo',
   'Jaula para pájaros pequeños como canarios y periquitos. Con 2 comederos, 2 perchas y bandeja extraíble. Fácil limpieza. 59x33x71 cm.',
   44.99, NULL, false, 20,
-  '/images/productos/trixie-jaula-pajaros-san-remo.jpg',
-  ARRAY['/images/productos/trixie-jaula-pajaros-san-remo.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-jaula-pajaros-san-remo.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-jaula-pajaros-san-remo.jpg'],
   'otros', 'mini', 'accesorios', 'adulto', 'Trixie'
 ),
 (
@@ -480,8 +480,8 @@ VALUES
   'tetra-aquaart-acuario-led-60l',
   'Acuario completo con iluminación LED eficiente, filtro EasyCrystal y calentador. Tapa con modo día/noche. Cristal curvado frontal elegante.',
   129.99, 109.99, true, 8,
-  '/images/productos/tetra-aquaart-acuario-led-60l.jpg',
-  ARRAY['/images/productos/tetra-aquaart-acuario-led-60l.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tetra-aquaart-acuario-led-60l.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/tetra-aquaart-acuario-led-60l.jpg'],
   'otros', 'mini', 'accesorios', 'adulto', 'Tetra'
 ),
 
@@ -493,8 +493,8 @@ VALUES
   'beaphar-care-vitamina-c-cobayas',
   'Suplemento líquido de vitamina C esencial para cobayas (no la sintetizan). Fácil de añadir al agua. Previene escorbuto y refuerza sistema inmune.',
   8.99, NULL, false, 40,
-  '/images/productos/beaphar-care-vitamina-c-cobayas.jpg',
-  ARRAY['/images/productos/beaphar-care-vitamina-c-cobayas.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/beaphar-care-vitamina-c-cobayas.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/beaphar-care-vitamina-c-cobayas.jpg'],
   'otros', 'mini', 'salud', 'adulto', 'Beaphar'
 ),
 (
@@ -502,8 +502,8 @@ VALUES
   'versele-laga-oropharma-omni-vit',
   'Suplemento de vitaminas y aminoácidos para aves de jaula. Aumenta la vitalidad y mejora el plumaje. Soluble en agua o mezclable con pasta de cría.',
   12.99, NULL, false, 35,
-  '/images/productos/versele-laga-oropharma-omni-vit.jpg',
-  ARRAY['/images/productos/versele-laga-oropharma-omni-vit.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/versele-laga-oropharma-omni-vit.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/versele-laga-oropharma-omni-vit.jpg'],
   'otros', 'mini', 'salud', 'adulto', 'Versele-Laga'
 ),
 
@@ -515,8 +515,8 @@ VALUES
   'trixie-rueda-ejercicio-silenciosa-28cm',
   'Rueda de ejercicio ultra silenciosa para hámsters sirios y jerbos. Superficie cerrada sin barrotes para proteger las patitas. Rodamiento de bolas.',
   14.99, NULL, false, 30,
-  '/images/productos/trixie-rueda-ejercicio-silenciosa-28cm.jpg',
-  ARRAY['/images/productos/trixie-rueda-ejercicio-silenciosa-28cm.jpg'],
+  'https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-rueda-ejercicio-silenciosa-28cm.jpg',
+  ARRAY['https://res.cloudinary.com/dqeoftgqy/image/upload/benice/productos/trixie-rueda-ejercicio-silenciosa-28cm.jpg'],
   'otros', 'mini', 'juguetes', 'adulto', 'Trixie'
 )
 

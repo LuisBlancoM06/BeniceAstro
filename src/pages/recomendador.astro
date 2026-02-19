@@ -308,7 +308,7 @@ import Layout from '../layouts/Layout.astro';
           `;
         } else {
           resultsGrid!.innerHTML = products.map((product: any) => {
-            const imgUrl = product.slug ? `/images/productos/${product.slug}.jpg` : (product.image_url || '');
+            const imgUrl = product.image_url || '';
             const imageHtml = `<img 
                   src="${imgUrl}" 
                   alt="${product.name}"

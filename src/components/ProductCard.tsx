@@ -124,8 +124,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     window.dispatchEvent(new CustomEvent('wishlistUpdated'));
   };
 
-  // Imagen con fallback – siempre usar ruta local basada en slug
-  const imageUrl = product.slug ? `/images/productos/${product.slug}.jpg` : (product.image_url || '');
+  // Imagen desde Cloudinary (image_url en la base de datos)
+  const imageUrl = product.image_url || '';
   const [imgError, setImgError] = useState(false);
   const showPlaceholder = (!product.slug && isPlaceholder(imageUrl)) || imgError;
   const gradient = getCategoryGradient(product.animal_type, product.category);

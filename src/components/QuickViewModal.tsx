@@ -64,8 +64,8 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
 
   if (!product) return null;
 
-  const localImg = product.slug ? `/images/productos/${product.slug}.jpg` : product.image_url;
-  const images = [localImg];
+  const mainImg = product.image_url || '';
+  const images = [mainImg];
   const finalPrice = product.on_sale && product.sale_price ? product.sale_price : product.price;
   const discount = product.on_sale && product.sale_price 
     ? Math.round((1 - product.sale_price / product.price) * 100)

@@ -80,9 +80,9 @@ function isPlaceholder(url: string | null | undefined): boolean {
   return url.includes('placehold.co') || url.includes('via.placeholder') || url.includes('placeholder');
 }
 
-// Usar imagen local basada en slug
-const localImageUrl = `/images/productos/${product.slug}.jpg`;
-const mainIsPlaceholder = false; // Siempre usar imagen local
+// Usar imagen de Cloudinary desde la base de datos
+const localImageUrl = product.image_url || '';
+const mainIsPlaceholder = false;
 
 // Gradientes por especie/categoría
 function getCategoryGradient(animal: string, category: string): string {
@@ -336,7 +336,7 @@ function getAnimalSvg(animal: string): string {
                   <div class="aspect-square p-4">
                     {
                       <img 
-                        src={`/images/productos/${related.slug}.jpg`} 
+                        src={related.image_url || ''} 
                         alt={related.name}
                         class="w-full h-full object-contain group-hover:scale-105 transition-transform"
                         onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'w-full h-full rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center\'><span class=\'text-white/80 font-semibold text-xs text-center px-2\'>' + this.alt + '</span></div>'"
