@@ -78,7 +78,7 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
       id: product.id,
       name: product.name,
       price: finalPrice,
-      image: localImg,
+      image: mainImg,
     }, quantity);
     
     // Animación y feedback

@@ -1,6 +1,41 @@
 import { defineMiddleware } from 'astro:middleware';
 import { supabaseAdmin } from './lib/supabase';
 
+// Security headers aplicados a TODAS las respuestas
+const securityHeaders: Record<string, string> = {
+  'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://media.zooplus.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https://*.supabase.co https://api.stripe.com https://res.cloudinary.com",
+    "frame-src 'self' https://js.stripe.com",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+  ].join('; '),
+};
+
+function addSecurityHeaders(response: Response): Response {
+  const newHeaders = new Headers(response.headers);
+  for (const [key, value] of Object.entries(securityHeaders)) {
+    newHeaders.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   // No trackear rutas de API, assets estáticos, ni favicon
   const path = context.url.pathname;
@@ -16,7 +51,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     path.endsWith('.jpg') ||
     path.endsWith('.ico')
   ) {
-    return next();
+    const response = await next();
+    return addSecurityHeaders(response);
   }
 
   // En páginas prerendered (build time), clientAddress y request.headers no están disponibles.
@@ -26,7 +62,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     clientAddr = context.clientAddress || 'desconocida';
   } catch {
     // Prerender — omitir tracking
-    return next();
+    const response = await next();
+    return addSecurityHeaders(response);
   }
 
   // Obtener IP real del visitante (orden de prioridad por fiabilidad)
@@ -45,7 +82,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // No trackear bots conocidos
   const botPattern = /bot|crawl|spider|slurp|mediapartners|feedfetcher/i;
   if (botPattern.test(userAgent)) {
-    return next();
+    const response = await next();
+    return addSecurityHeaders(response);
   }
 
   // Registrar visita antes de continuar (usar supabaseAdmin para bypass RLS)
@@ -63,5 +101,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     console.error('Error tracking visit:', e);
   }
 
-  return next();
+  const response = await next();
+  return addSecurityHeaders(response);
 });

@@ -5,11 +5,35 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Verificar autenticación
     const authHeader = request.headers.get('Authorization');
-    let token = authHeader?.replace('Bearer ', '');
+    const token = authHeader?.replace('Bearer ', '');
 
-    // Si no hay header, intentar obtener de cookies
     if (!token) {
-      // Buscar token en cookies de Supabase
+      return new Response(JSON.stringify({ error: 'No autorizado - Token requerido' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Verificar que el token es válido y el usuario es admin
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Token inválido o expirado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { data: userData } = await supabaseAdmin
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (!userData || userData.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'No tienes permisos de administrador' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const formData = await request.formData();

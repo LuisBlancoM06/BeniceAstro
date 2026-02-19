@@ -69,11 +69,17 @@ import Layout from '../../layouts/Layout.astro';
 
         if (error) throw error;
 
-        // Guardar tokens en cookies para SSR
+        // Guardar tokens en cookies HttpOnly vía servidor
         if (data.session) {
-          const maxAge = 60 * 60 * 24 * 7; // 7 días
-          document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
-          document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+          const res = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token,
+            }),
+          });
+          if (!res.ok) throw new Error('Error al guardar sesión');
         }
 
         // Redirigir a la página principal
