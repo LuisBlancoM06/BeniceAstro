@@ -13,7 +13,7 @@ const securityHeaders: Record<string, string> = {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://media.zooplus.com",
+    "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://media.zooplus.com https://images.unsplash.com",
     "font-src 'self' https://fonts.gstatic.com",
     "connect-src 'self' https://*.supabase.co https://api.stripe.com https://res.cloudinary.com",
     "frame-src 'self' https://js.stripe.com",

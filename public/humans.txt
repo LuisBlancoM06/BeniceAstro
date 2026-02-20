@@ -1,0 +1,18 @@
+/* TEAM */
+Name: Benice Pet Shop
+Site: https://benicetiendanimal.victoriafp.online
+Location: Madrid, España
+
+/* TECHNOLOGY */
+Framework: Astro
+Styling: Tailwind CSS
+UI Components: React
+Database: Supabase (PostgreSQL)
+Payments: Stripe
+Hosting: Coolify
+Language: TypeScript
+
+/* SITE */
+Last update: 2026-02-20
+Standards: HTML5, CSS3, ES2022
+Software: VS Code, Git
