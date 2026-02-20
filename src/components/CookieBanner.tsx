@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CookiePreferences {
   necessary: boolean;
@@ -15,6 +15,7 @@ interface Props {
 
 export default function CookieBanner(_props: Props) {
   const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>({
     necessary: true, // Siempre activadas
@@ -22,6 +23,11 @@ export default function CookieBanner(_props: Props) {
     marketing: false,
   });
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const closeBanner = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => setIsVisible(false), 300);
+  }, []);
 
   useEffect(() => {
     try {
@@ -37,33 +43,33 @@ export default function CookieBanner(_props: Props) {
     };
   }, []);
 
-  const acceptAll = () => {
+  const acceptAll = useCallback(() => {
     const allAccepted = { necessary: true, analytics: true, marketing: true };
     try {
       localStorage.setItem('cookie-consent', JSON.stringify(allAccepted));
       localStorage.setItem('cookie-consent-date', new Date().toISOString());
     } catch { /* localStorage not available */ }
-    setIsVisible(false);
+    closeBanner();
     loadAnalytics();
-  };
+  }, [closeBanner]);
 
-  const rejectAll = () => {
+  const rejectAll = useCallback(() => {
     const onlyNecessary = { necessary: true, analytics: false, marketing: false };
     try {
       localStorage.setItem('cookie-consent', JSON.stringify(onlyNecessary));
       localStorage.setItem('cookie-consent-date', new Date().toISOString());
     } catch { /* localStorage not available */ }
-    setIsVisible(false);
-  };
+    closeBanner();
+  }, [closeBanner]);
 
-  const savePreferences = () => {
+  const savePreferences = useCallback(() => {
     try {
       localStorage.setItem('cookie-consent', JSON.stringify(preferences));
       localStorage.setItem('cookie-consent-date', new Date().toISOString());
     } catch { /* localStorage not available */ }
-    setIsVisible(false);
+    closeBanner();
     if (preferences.analytics) loadAnalytics();
-  };
+  }, [preferences, closeBanner]);
 
   const loadAnalytics = () => {
     // Aquí cargarías Google Analytics u otros scripts
@@ -75,10 +81,19 @@ export default function CookieBanner(_props: Props) {
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-[60]" />
+      <div 
+        className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`} 
+        onClick={rejectAll}
+        aria-hidden="true"
+      />
       
       {/* Banner */}
-      <div className="fixed bottom-0 left-0 right-0 z-[70] p-4">
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-[70] p-4 transition-all duration-300 ${isClosing ? 'translate-y-full opacity-0' : 'animate-fade-in-up'}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Preferencias de cookies"
+      >
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
           {!showSettings ? (
             // Vista principal

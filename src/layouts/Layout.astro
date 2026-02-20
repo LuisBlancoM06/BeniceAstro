@@ -97,6 +97,7 @@ const breadcrumbLD = pathParts.length > 0 ? {
   <!-- DNS Prefetch y Preconnect para recursos externos -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link rel="dns-prefetch" href="https://ayyknhzftdlytpapdugj.supabase.co">
   <link rel="dns-prefetch" href="https://js.stripe.com">
   <link rel="dns-prefetch" href="https://res.cloudinary.com">
@@ -141,6 +142,8 @@ const breadcrumbLD = pathParts.length > 0 ? {
   )}
 </head>
 <body class="antialiased">
+  <!-- Skip to content para accesibilidad -->
+  <a href="#main-content" class="skip-to-content">Ir al contenido principal</a>
   <!-- Banner superior con notificaciones rotativas -->
   <div class="bg-gradient-to-r from-purple-700 via-purple-700 to-orange-500 text-white py-2 text-sm overflow-hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -172,7 +175,7 @@ const breadcrumbLD = pathParts.length > 0 ? {
   </div>
 
   <!-- Navegación principal -->
-  <nav class="bg-white shadow-md sticky top-0 z-40">
+  <nav class="bg-white shadow-md sticky top-0 z-40" aria-label="Navegación principal">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-center items-center h-16 gap-6">
         <!-- Logo -->
@@ -328,7 +331,7 @@ const breadcrumbLD = pathParts.length > 0 ? {
   <!-- Quick View Modal -->
   <QuickViewModal client:load />
 
-  <main class="min-h-screen">
+  <main id="main-content" class="min-h-screen">
     <slot />
   </main>
 
@@ -341,7 +344,7 @@ const breadcrumbLD = pathParts.length > 0 ? {
   <!-- Cookie Banner GDPR -->
   <CookieBanner client:load />
 
-  <footer class="bg-gray-900 text-white mt-12">
+  <footer class="bg-gray-900 text-white mt-12" role="contentinfo">
     <!-- Beneficios -->
     <div class="border-b border-gray-800">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

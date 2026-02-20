@@ -115,6 +115,7 @@ function ToastItem({ toast: t, onClose }: { toast: ToastMessage; onClose: () => 
       </div>
       <button
         onClick={handleClose}
+        aria-label="Cerrar notificación"
         className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,7 +140,13 @@ export default function ToastContainer(_props: ToastContainerProps) {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+    <div 
+      className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none"
+      role="region"
+      aria-label="Notificaciones"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       <style>{`
         @keyframes slideInRight {
           from { transform: translateX(100%); opacity: 0; }
@@ -147,7 +154,7 @@ export default function ToastContainer(_props: ToastContainerProps) {
         }
       `}</style>
       {toasts.map((t) => (
-        <div key={t.id} className="pointer-events-auto">
+        <div key={t.id} className="pointer-events-auto" role="alert">
           <ToastItem toast={t} onClose={() => removeToast(t.id)} />
         </div>
       ))}

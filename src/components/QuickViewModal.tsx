@@ -1,5 +1,5 @@
 // Modal de Vista Rápida de Producto
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStore } from '@nanostores/react';
 import { atom } from 'nanostores';
 import { addToCart } from '../stores/cart';
@@ -46,21 +46,40 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isAdding, setIsAdding] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const handleClose = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      closeQuickView();
+    }, 250);
+  }, []);
 
   useEffect(() => {
     if (product) {
       setQuantity(1);
       setSelectedImage(0);
-      // Bloquear scroll del body
+      setIsClosing(false);
       document.body.style.overflow = 'hidden';
+      // Focus para accesibilidad
+      setTimeout(() => closeButtonRef.current?.focus(), 100);
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     }
+
+    // Cerrar con Escape
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && product) handleClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
     
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [product]);
+  }, [product, handleClose]);
 
   if (!product) return null;
 
@@ -89,7 +108,7 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
     setIsAdding(false);
     
     toast.success('¡Añadido al carrito!', `${quantity}x ${product.name}`);
-    closeQuickView();
+    handleClose();
   };
 
   const addToWishlist = () => {
@@ -106,20 +125,25 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${isClosing ? 'pointer-events-none' : ''}`}
       onClick={(e) => {
-        if (e.target === e.currentTarget) closeQuickView();
+        if (e.target === e.currentTarget) handleClose();
       }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Vista rápida de ${product.name}`}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`} />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-scale-in">
+      <div className={`relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transition-all duration-300 ${isClosing ? 'scale-95 opacity-0' : 'animate-scale-in'}`}>
         {/* Botón cerrar */}
         <button
-          onClick={closeQuickView}
-          className="absolute top-4 right-4 z-10 p-2 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all"
+          ref={closeButtonRef}
+          onClick={handleClose}
+          aria-label="Cerrar vista rápida"
+          className="absolute top-4 right-4 z-10 p-2.5 bg-white/80 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

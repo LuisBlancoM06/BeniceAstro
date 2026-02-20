@@ -40,15 +40,17 @@ export default function AddToCartButton({
         <div className="flex items-center border border-gray-200 rounded-lg bg-white">
           <button 
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            aria-label="Reducir cantidad"
             className="px-4 py-2 hover:bg-gray-100 transition-colors text-lg font-medium"
           >
-            -
+            −
           </button>
           <span className="px-4 py-2 border-x border-gray-200 min-w-[50px] text-center font-medium">
             {quantity}
           </span>
           <button 
             onClick={() => setQuantity(quantity + 1)}
+            aria-label="Aumentar cantidad"
             className="px-4 py-2 hover:bg-gray-100 transition-colors text-lg font-medium"
           >
             +
@@ -59,6 +61,7 @@ export default function AddToCartButton({
       <button 
         onClick={handleAdd}
         disabled={isAdded}
+        aria-label={isAdded ? 'Producto añadido al carrito' : `Añadir ${product.name} al carrito`}
         className={`
           flex-1 flex items-center justify-center gap-2 py-3 px-6 font-bold rounded-xl 
           transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5
