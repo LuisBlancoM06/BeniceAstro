@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     // Verificar rol de admin
-    const { data: userData } = await supabase
+    const { data: userData } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', user.id)
@@ -42,7 +42,7 @@ export const GET: APIRoute = async ({ request }) => {
     const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     // 1. Ventas totales del mes
-    const { data: salesData } = await supabase
+    const { data: salesData } = await supabaseAdmin
       .from('orders')
       .select('total')
       .in('status', ['pagado', 'enviado', 'entregado'])
@@ -51,25 +51,25 @@ export const GET: APIRoute = async ({ request }) => {
     const totalSalesMonth = salesData?.reduce((sum, order) => sum + parseFloat(order.total), 0) || 0;
 
     // 2. Pedidos pendientes
-    const { count: pendingOrders } = await supabase
+    const { count: pendingOrders } = await supabaseAdmin
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pendiente');
 
     // 3. Total de pedidos del mes
-    const { count: totalOrdersMonth } = await supabase
+    const { count: totalOrdersMonth } = await supabaseAdmin
       .from('orders')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startOfMonth);
 
     // 4. Nuevos clientes del mes
-    const { count: newCustomersMonth } = await supabase
+    const { count: newCustomersMonth } = await supabaseAdmin
       .from('users')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startOfMonth);
 
     // 5. Producto más vendido (del mes)
-    const { data: orderItems } = await supabase
+    const { data: orderItems } = await supabaseAdmin
       .from('order_items')
       .select(`
         product_id,
@@ -92,7 +92,7 @@ export const GET: APIRoute = async ({ request }) => {
     const topProduct = Object.values(productSales).sort((a, b) => b.quantity - a.quantity)[0] || null;
 
     // 6. Ventas de los últimos 7 días para el gráfico
-    const { data: weeklyOrders } = await supabase
+    const { data: weeklyOrders } = await supabaseAdmin
       .from('orders')
       .select('total, created_at')
       .in('status', ['pagado', 'enviado', 'entregado'])
@@ -123,7 +123,7 @@ export const GET: APIRoute = async ({ request }) => {
     const chartData = Object.values(salesByDay);
 
     // 7. Stock bajo (menos de 10 unidades)
-    const { data: lowStockProducts, count: lowStockCount } = await supabase
+    const { data: lowStockProducts, count: lowStockCount } = await supabaseAdmin
       .from('products')
       .select('id, name, stock', { count: 'exact' })
       .lt('stock', 10)

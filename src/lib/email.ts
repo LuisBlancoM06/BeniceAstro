@@ -7,6 +7,16 @@ const FROM_NAME = 'Benice';
 const FROM_EMAIL = 'onboarding@resend.dev';
 const SUPPORT_EMAIL = 'lblancom06@gmail.com';
 
+// Helper para escapar HTML y prevenir XSS
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface OrderEmailData {
   to: string;
   customerName: string;
@@ -449,37 +459,43 @@ export async function sendContactEmail(data: {
   message: string;
   phone?: string;
 }) {
+  const safeName = escapeHtml(data.name);
+  const safeEmail = escapeHtml(data.email);
+  const safeSubject = escapeHtml(data.subject);
+  const safeMessage = escapeHtml(data.message);
+  const safePhone = data.phone ? escapeHtml(data.phone) : '';
+
   const content = `
     <h2>Nuevo mensaje de contacto</h2>
 
     <table style="width: 100%; border-collapse: collapse;">
       <tr>
         <td style="padding: 10px; background: #f9fafb; width: 120px;"><strong>Nombre:</strong></td>
-        <td style="padding: 10px;">${data.name}</td>
+        <td style="padding: 10px;">${safeName}</td>
       </tr>
       <tr>
         <td style="padding: 10px; background: #f9fafb;"><strong>Email:</strong></td>
-        <td style="padding: 10px;"><a href="mailto:${data.email}">${data.email}</a></td>
+        <td style="padding: 10px;"><a href="mailto:${safeEmail}">${safeEmail}</a></td>
       </tr>
       ${data.phone ? `
       <tr>
         <td style="padding: 10px; background: #f9fafb;"><strong>Tel&eacute;fono:</strong></td>
-        <td style="padding: 10px;">${data.phone}</td>
+        <td style="padding: 10px;">${safePhone}</td>
       </tr>
       ` : ''}
       <tr>
         <td style="padding: 10px; background: #f9fafb;"><strong>Asunto:</strong></td>
-        <td style="padding: 10px;">${data.subject}</td>
+        <td style="padding: 10px;">${safeSubject}</td>
       </tr>
     </table>
 
     <h3 style="margin-top: 20px;">Mensaje:</h3>
     <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; white-space: pre-wrap;">
-${data.message}
+${safeMessage}
     </div>
 
     <p style="margin-top: 20px;">
-      <a href="mailto:${data.email}?subject=Re: ${data.subject}" class="btn">
+      <a href="mailto:${safeEmail}?subject=Re: ${encodeURIComponent(data.subject)}" class="btn">
         Responder
       </a>
     </p>
@@ -488,7 +504,7 @@ ${data.message}
   try {
     const response = await sendEmail(
       SUPPORT_EMAIL,
-      `[Contacto] ${data.subject}`,
+      `[Contacto] ${safeSubject}`,
       baseTemplate(content, 'Nuevo Contacto'),
       data.email
     );

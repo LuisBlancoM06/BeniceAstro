@@ -33,7 +33,7 @@ export const GET: APIRoute = async ({ site: astroSite }) => {
     const { data: products } = await supabase
       .from('products')
       .select('slug, updated_at')
-      .eq('active', true);
+      .gt('stock', 0);
 
     if (products) {
       productPages = products.map(p => ({

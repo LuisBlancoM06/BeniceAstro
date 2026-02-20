@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar que el pedido pertenece al usuario y está en estado válido
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')
       .select('id, status, user_id, total')
       .eq('id', orderId)
@@ -55,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar que no existe ya una devolución para este pedido
-    const { data: existingReturn } = await supabase
+    const { data: existingReturn } = await supabaseAdmin
       .from('returns')
       .select('id')
       .eq('order_id', orderId)
@@ -69,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Crear solicitud de devolución
-    const { data: returnData, error: returnError } = await supabase
+    const { data: returnData, error: returnError } = await supabaseAdmin
       .from('returns')
       .insert({
         order_id: orderId,

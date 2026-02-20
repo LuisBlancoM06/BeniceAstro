@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar que el pedido pertenece al usuario y esta en estado 'pagado'
-    const { data: order } = await supabase
+    const { data: order } = await supabaseAdmin
       .from('orders')
       .select('status')
       .eq('id', order_id)
@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar que no exista una solicitud pendiente
-    const { data: existingRequest } = await supabase
+    const { data: existingRequest } = await supabaseAdmin
       .from('cancellation_requests')
       .select('id')
       .eq('order_id', order_id)
@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Crear solicitud de cancelacion
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('cancellation_requests')
       .insert({
         order_id: order_id,

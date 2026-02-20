@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 // GET: Obtener estado actual de las ofertas flash
 export const GET: APIRoute = async () => {
