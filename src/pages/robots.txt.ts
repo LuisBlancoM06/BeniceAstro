@@ -12,6 +12,7 @@ Disallow: /api/
 Disallow: /cuenta/
 Disallow: /checkout/
 Disallow: /auth/
+Disallow: /carrito
 
 Sitemap: ${siteUrl}/sitemap.xml
 `;
@@ -19,8 +20,8 @@ Sitemap: ${siteUrl}/sitemap.xml
   return new Response(robotsTxt, {
     status: 200,
     headers: {
-      'Content-Type': 'text/plain',
-      'Cache-Control': 'public, max-age=86400',
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
     },
   });
 };
