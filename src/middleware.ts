@@ -61,8 +61,19 @@ function addSecurityHeaders(response: Response): Response {
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
-  // No trackear rutas de API, assets estáticos, ni favicon
   const path = context.url.pathname;
+
+  // Redirect trailing slashes to non-trailing (SEO: evita duplicados)
+  // Excepto la raíz "/" y rutas de API
+  if (path !== '/' && path.endsWith('/') && !path.startsWith('/api/')) {
+    const cleanUrl = path.replace(/\/+$/, '') + context.url.search;
+    return new Response(null, {
+      status: 301,
+      headers: { 'Location': cleanUrl },
+    });
+  }
+
+  // No trackear rutas de API, assets estáticos, ni favicon
   if (
     path.startsWith('/api/') ||
     path.startsWith('/_') ||

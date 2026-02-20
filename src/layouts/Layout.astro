@@ -16,6 +16,9 @@ interface Props {
 const { title, description = 'Tienda online de productos para mascotas', hideNewsletterPopup = false } = Astro.props;
 const siteUrl = (import.meta.env.PUBLIC_SITE_URL || Astro.site?.origin || 'https://benicetiendanimal.victoriafp.online').replace(/\/$/, '');
 const ogImage = `${siteUrl}/images/og-default.jpg`;
+// Canonical URL: sin trailing slash, sin query params
+const canonicalPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const canonicalUrl = `${siteUrl}${canonicalPath}`;
 ---
 
 <!DOCTYPE html>
@@ -43,7 +46,7 @@ const ogImage = `${siteUrl}/images/og-default.jpg`;
   <meta name="twitter:image" content={ogImage}>
   <meta name="twitter:image:alt" content="Benice Pet Shop - Tienda de mascotas">
   <meta name="twitter:site" content="@benicepetshop">
-  <link rel="canonical" href={Astro.url.href}>
+  <link rel="canonical" href={canonicalUrl}>
   <title>{title} - Benice Pet Shop</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="48x48">
@@ -356,7 +359,7 @@ const ogImage = `${siteUrl}/images/og-default.jpg`;
               <a href="tel:900123456" class="hover:text-white transition-colors">900 123 456</a>
             </li>
             <li class="flex items-center gap-2">
-              <a href="mailto:info@benice.es" class="hover:text-white transition-colors">info@benice.es</a>
+              <a href="#" class="hover:text-white transition-colors benice-email" data-user="info" data-domain="benice.es">info@benice.es</a>
             </li>
             <li class="flex items-center gap-2">
               <a href="https://wa.me/34600000000" class="hover:text-white transition-colors">WhatsApp</a>
@@ -718,6 +721,17 @@ const ogImage = `${siteUrl}/images/og-default.jpg`;
           mobileSearchResults?.classList.remove('hidden');
         } catch { /* ignore */ }
       }, 300);
+    });
+  </script>
+
+  <!-- Anti-ofuscación de emails: reconstruye mailto: con JS para evitar que Cloudflare los rompa -->
+  <script is:inline>
+    document.querySelectorAll('.benice-email').forEach(function(el) {
+      var u = el.getAttribute('data-user');
+      var d = el.getAttribute('data-domain');
+      if (u && d) {
+        el.setAttribute('href', 'mailto:' + u + '@' + d);
+      }
     });
   </script>
 </body>
