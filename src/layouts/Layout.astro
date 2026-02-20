@@ -26,6 +26,9 @@ const canonicalUrl = `${siteUrl}${canonicalPath}`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION && (
+    <meta name="google-site-verification" content={import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION} />
+  )}
   <meta name="description" content={description}>
   <meta name="theme-color" content="#7e22ce">
   <meta name="author" content="Benice Pet Shop">
