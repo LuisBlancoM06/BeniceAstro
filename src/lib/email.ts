@@ -119,7 +119,7 @@ const baseTemplate = (content: string, title: string) => `
 export async function sendOrderConfirmation(data: OrderEmailData) {
   const itemsHtml = data.items.map(item => `
     <tr>
-      <td>${item.name}</td>
+      <td>${escapeHtml(item.name)}</td>
       <td style="text-align: center;">${item.quantity}</td>
       <td style="text-align: right;">${item.price.toFixed(2)}&euro;</td>
       <td style="text-align: right;">${(item.quantity * item.price).toFixed(2)}&euro;</td>
@@ -128,7 +128,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 
   const content = `
     <div class="icon">Confirmado</div>
-    <h2>&iexcl;Gracias por tu pedido, ${data.customerName}!</h2>
+    <h2>&iexcl;Gracias por tu pedido, ${escapeHtml(data.customerName)}!</h2>
     <p>Tu pedido ha sido confirmado y est&aacute; siendo procesado. Aqu&iacute; tienes el resumen:</p>
 
     <div class="highlight success">
@@ -171,7 +171,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 
     ${data.shippingAddress ? `
     <h3>Direcci&oacute;n de env&iacute;o</h3>
-    <p style="background: #f3f4f6; padding: 15px; border-radius: 8px;">${data.shippingAddress}</p>
+    <p style="background: #f3f4f6; padding: 15px; border-radius: 8px;">${escapeHtml(data.shippingAddress)}</p>
     ` : ''}
 
     <h3>&iquest;Qu&eacute; sigue?</h3>
@@ -204,7 +204,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
 export async function sendWelcomeEmail(data: WelcomeEmailData) {
   const content = `
     <div class="icon">Bienvenido</div>
-    <h2>&iexcl;Bienvenido a Benice, ${data.name}!</h2>
+    <h2>&iexcl;Bienvenido a Benice, ${escapeHtml(data.name)}!</h2>
 
     <p>Estamos encantados de tenerte en nuestra familia. En Benice encontrar&aacute;s todo lo que
     necesitas para cuidar de tus mascotas:</p>
@@ -266,13 +266,13 @@ export async function sendWelcomeEmail(data: WelcomeEmailData) {
 export async function sendShippingNotification(data: ShippingEmailData) {
   const content = `
     <div class="icon">Enviado</div>
-    <h2>&iexcl;Tu pedido est&aacute; en camino, ${data.customerName}!</h2>
+    <h2>&iexcl;Tu pedido est&aacute; en camino, ${escapeHtml(data.customerName)}!</h2>
 
     <p>&iexcl;Buenas noticias! Tu pedido ha sido enviado y est&aacute; de camino a tu direcci&oacute;n.</p>
 
     <div class="highlight success">
-      <strong>N&uacute;mero de seguimiento:</strong> ${data.trackingNumber}<br>
-      <strong>Transportista:</strong> ${data.carrier}
+      <strong>N&uacute;mero de seguimiento:</strong> ${escapeHtml(data.trackingNumber)}<br>
+      <strong>Transportista:</strong> ${escapeHtml(data.carrier)}
     </div>
 
     <h3>Fecha estimada de entrega</h3>
@@ -349,7 +349,7 @@ export async function sendOrderCancellation(email: string, orderId: string, cust
     <div class="icon">Cancelado</div>
     <h2>Pedido cancelado</h2>
 
-    <p>Hola ${customerName},</p>
+    <p>Hola ${escapeHtml(customerName)},</p>
     <p>Tu pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido cancelado correctamente.</p>
 
     <div class="highlight">
@@ -382,7 +382,7 @@ export async function sendOrderCancellation(email: string, orderId: string, cust
 export async function sendDeliveryConfirmation(email: string, orderId: string, customerName: string) {
   const content = `
     <div class="icon">Entregado</div>
-    <h2>&iexcl;Tu pedido ha sido entregado, ${customerName}!</h2>
+    <h2>&iexcl;Tu pedido ha sido entregado, ${escapeHtml(customerName)}!</h2>
 
     <p>Tu pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido entregado correctamente.</p>
 
@@ -419,14 +419,14 @@ export async function sendCancellationRejected(email: string, orderId: string, c
     <div class="icon">Informaci&oacute;n</div>
     <h2>Solicitud de cancelaci&oacute;n no aprobada</h2>
 
-    <p>Hola ${customerName},</p>
+    <p>Hola ${escapeHtml(customerName)},</p>
     <p>Tu solicitud de cancelaci&oacute;n para el pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong>
     no ha podido ser aprobada.</p>
 
     ${adminNotes ? `
     <div class="highlight">
       <strong>Motivo:</strong><br>
-      ${adminNotes}
+      ${escapeHtml(adminNotes)}
     </div>
     ` : ''}
 

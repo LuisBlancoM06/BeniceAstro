@@ -1,5 +1,5 @@
 import { addToCart, type CartItem } from '../stores/cart';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface AddToCartButtonProps {
   product: Omit<CartItem, 'quantity'>;
@@ -8,20 +8,28 @@ interface AddToCartButtonProps {
   showQuantitySelector?: boolean;
 }
 
-export default function AddToCartButton({ 
-  product, 
+export default function AddToCartButton({
+  product,
   quantity: initialQuantity = 1,
   className = '',
   showQuantitySelector = false
 }: AddToCartButtonProps) {
   const [quantity, setQuantity] = useState(initialQuantity);
   const [isAdded, setIsAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const handleAdd = () => {
     addToCart(product, quantity);
     setIsAdded(true);
-    
-    setTimeout(() => {
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setIsAdded(false);
     }, 2000);
   };

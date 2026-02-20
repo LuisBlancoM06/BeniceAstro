@@ -50,17 +50,20 @@ export function addToCart(product: Omit<CartItem, 'quantity'>, quantity: number 
   const items = $cartItems.get();
   const existingIndex = items.findIndex(item => item.id === product.id);
 
+  const maxQty = 99;
+
   if (existingIndex > -1) {
-    // Actualizar cantidad
+    // Actualizar cantidad, cap at maxQty
     const newItems = [...items];
+    const newQuantity = Math.min(newItems[existingIndex].quantity + quantity, maxQty);
     newItems[existingIndex] = {
       ...newItems[existingIndex],
-      quantity: newItems[existingIndex].quantity + quantity
+      quantity: newQuantity
     };
     $cartItems.set(newItems);
   } else {
-    // Añadir nuevo item
-    $cartItems.set([...items, { ...product, quantity }]);
+    // Añadir nuevo item, cap at maxQty
+    $cartItems.set([...items, { ...product, quantity: Math.min(quantity, maxQty) }]);
   }
 
   // Guardar en localStorage

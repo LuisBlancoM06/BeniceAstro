@@ -78,7 +78,13 @@ if (accessToken) {
   import ProductCard from '../../components/ProductCard.tsx';
 
   function loadFavorites() {
-    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    let wishlist: any[] = [];
+    try {
+      const raw = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      wishlist = Array.isArray(raw) ? raw : [];
+    } catch {
+      wishlist = [];
+    }
     const grid = document.getElementById('favorites-grid');
     const emptyState = document.getElementById('empty-state');
     const countEl = document.getElementById('favorites-count');

@@ -11,7 +11,7 @@ const securityHeaders: Record<string, string> = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net",
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://media.zooplus.com https://images.unsplash.com",
     "font-src 'self' https://fonts.gstatic.com",

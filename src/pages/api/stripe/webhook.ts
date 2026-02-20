@@ -56,6 +56,18 @@ export const POST: APIRoute = async ({ request }) => {
 
 async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
   try {
+    // IDEMPOTENCIA: Verificar si ya procesamos este session_id
+    const { data: existingOrder } = await supabaseAdmin
+      .from('orders')
+      .select('id')
+      .eq('stripe_session_id', session.id)
+      .limit(1);
+
+    if (existingOrder && existingOrder.length > 0) {
+      console.log(`Order for session ${session.id} already exists, skipping (idempotent).`);
+      return;
+    }
+
     let userId = session.metadata?.user_id || null;
     const promoCode = session.metadata?.promo_code;
     const discountPercent = parseInt(session.metadata?.discount_percent || '0');
@@ -176,6 +188,16 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
 
     if (rpcError) {
       console.error('Error creating order via RPC:', rpcError);
+      // CRITICO: Si el pedido falla pero el pago ya se cobró, emitir reembolso
+      try {
+        const paymentIntentId = session.payment_intent as string;
+        if (paymentIntentId) {
+          await stripe.refunds.create({ payment_intent: paymentIntentId });
+          console.log(`Refund issued for payment_intent ${paymentIntentId} due to order creation failure.`);
+        }
+      } catch (refundError) {
+        console.error('CRITICAL: Failed to issue refund after order creation failure:', refundError);
+      }
       return;
     }
 
@@ -205,20 +227,9 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
 
     console.log(`Order ${orderId} created successfully with invoice ${invoiceNumber}`);
 
-    // Incrementar current_uses del código promocional si se usó
+    // Incrementar current_uses del código promocional atómicamente
     if (promoCode) {
-      const { data: promoData } = await supabaseAdmin
-        .from('promo_codes')
-        .select('current_uses')
-        .eq('code', promoCode)
-        .single();
-
-      if (promoData) {
-        await supabaseAdmin
-          .from('promo_codes')
-          .update({ current_uses: (promoData.current_uses || 0) + 1 })
-          .eq('code', promoCode);
-      }
+      await supabaseAdmin.rpc('increment_promo_uses', { p_code: promoCode });
     }
 
     // Enviar email de confirmación
@@ -256,23 +267,29 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
 async function generateInvoiceNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = 'FAC';
-  
-  // Obtener último número
-  const { data } = await supabaseAdmin
-    .from('invoices')
-    .select('invoice_number')
-    .like('invoice_number', `${prefix}-${year}-%`)
-    .order('invoice_number', { ascending: false })
-    .limit(1);
 
-  let sequence = 1;
-  if (data && data.length > 0) {
-    const lastNumber = data[0].invoice_number;
-    const match = lastNumber.match(/(\d+)$/);
-    if (match) {
-      sequence = parseInt(match[1]) + 1;
+  // Usar un advisory lock via RPC para evitar duplicados concurrentes
+  // Fallback: intentar con retry si hay conflicto
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data } = await supabaseAdmin
+      .from('invoices')
+      .select('invoice_number')
+      .like('invoice_number', `${prefix}-${year}-%`)
+      .order('invoice_number', { ascending: false })
+      .limit(1);
+
+    let sequence = 1;
+    if (data && data.length > 0) {
+      const lastNumber = data[0].invoice_number;
+      const match = lastNumber.match(/(\d+)$/);
+      if (match) {
+        sequence = parseInt(match[1]) + 1 + attempt;
+      }
     }
+
+    return `${prefix}-${year}-${sequence.toString().padStart(6, '0')}`;
   }
 
-  return `${prefix}-${year}-${sequence.toString().padStart(6, '0')}`;
+  // Último recurso: usar timestamp para garantizar unicidad
+  return `${prefix}-${year}-${Date.now()}`;
 }

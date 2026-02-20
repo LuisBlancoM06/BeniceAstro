@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase } from '../../../lib/supabase';
+import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
@@ -8,7 +8,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const { items, userId, promoCode } = await request.json();
 
-    if (!items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'El carrito está vacío' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
@@ -26,25 +26,74 @@ export const POST: APIRoute = async ({ request }) => {
       customerEmail = profile?.email || undefined;
     }
 
-    // Calcular descuento si hay código promocional
+    // Validar precios y stock contra la base de datos (NUNCA confiar en el cliente)
+    const productIds = items.map((item: any) => item.id);
+    const { data: dbProducts, error: dbError } = await supabaseAdmin
+      .from('products')
+      .select('id, name, price, sale_price, on_sale, stock, image_url')
+      .in('id', productIds);
+
+    if (dbError || !dbProducts) {
+      return new Response(JSON.stringify({ error: 'Error al verificar productos' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Crear mapa de productos de la DB para acceso rápido
+    const productMap = new Map(dbProducts.map(p => [p.id, p]));
+
+    // Verificar que todos los productos existen y tienen stock
+    for (const item of items) {
+      const dbProduct = productMap.get(item.id);
+      if (!dbProduct) {
+        return new Response(JSON.stringify({ error: `Producto no encontrado: ${item.id}` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      if (dbProduct.stock < (item.quantity || 1)) {
+        return new Response(JSON.stringify({ error: `Stock insuficiente para: ${dbProduct.name}` }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Calcular descuento si hay código promocional - validar completamente
     let discountPercent = 0;
     if (promoCode) {
-      const { data: promo } = await supabase
+      const { data: promo } = await supabaseAdmin
         .from('promo_codes')
-        .select('discount_percentage')
+        .select('discount_percentage, expires_at, max_uses, current_uses')
         .eq('code', promoCode.toUpperCase())
         .eq('active', true)
         .single();
 
       if (promo) {
+        // Verificar expiración
+        if (promo.expires_at && new Date(promo.expires_at) < new Date()) {
+          return new Response(JSON.stringify({ error: 'El código promocional ha expirado' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        // Verificar usos máximos
+        if (promo.max_uses && (promo.current_uses || 0) >= promo.max_uses) {
+          return new Response(JSON.stringify({ error: 'El código promocional ha alcanzado su límite de usos' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
         discountPercent = promo.discount_percentage;
       }
     }
 
-    // Crear line items para Stripe
+    // Crear line items usando precios de la BASE DE DATOS (no del cliente)
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map((item: any) => {
-      let unitPrice = item.salePrice || item.price;
-      
+      const dbProduct = productMap.get(item.id)!;
+      let unitPrice = (dbProduct.on_sale && dbProduct.sale_price) ? dbProduct.sale_price : dbProduct.price;
+
       // Aplicar descuento si existe
       if (discountPercent > 0) {
         unitPrice = unitPrice * (1 - discountPercent / 100);
@@ -54,22 +103,23 @@ export const POST: APIRoute = async ({ request }) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: item.name,
-            images: item.image ? [item.image] : [],
+            name: dbProduct.name,
+            images: dbProduct.image_url ? [dbProduct.image_url] : [],
             metadata: {
-              product_id: item.id
+              product_id: dbProduct.id
             }
           },
-          unit_amount: Math.round(unitPrice * 100) // Stripe usa centavos
+          unit_amount: Math.round(unitPrice * 100)
         },
-        quantity: item.quantity
+        quantity: item.quantity || 1
       };
     });
 
-    // Calcular subtotal para envío
+    // Calcular subtotal para envío usando precios de la DB
     const subtotal = items.reduce((sum: number, item: any) => {
-      const price = item.salePrice || item.price;
-      return sum + (price * item.quantity);
+      const dbProduct = productMap.get(item.id)!;
+      const price = (dbProduct.on_sale && dbProduct.sale_price) ? dbProduct.sale_price : dbProduct.price;
+      return sum + (price * (item.quantity || 1));
     }, 0);
 
     // Añadir envío si subtotal < 49€

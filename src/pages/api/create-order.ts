@@ -25,16 +25,19 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    if (!user_id || !items || items.length === 0) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'Datos inválidos' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
+    // SEGURIDAD: Usar siempre el ID del usuario autenticado, nunca el del body
+    const secureUserId = authUser.id;
+
     // Llamar a la función de Supabase para crear el pedido
     const { data, error } = await supabaseAdmin.rpc('create_order_and_reduce_stock', {
-      p_user_id: user_id,
+      p_user_id: secureUserId,
       p_total: total,
       p_items: items,
       p_promo_code: promo_code || null,
@@ -48,20 +51,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     const orderId = data;
 
-    // Incrementar current_uses del código promocional si se usó
+    // Incrementar current_uses del código promocional atómicamente
     if (promo_code) {
-      const { data: promoData } = await supabaseAdmin
-        .from('promo_codes')
-        .select('current_uses')
-        .eq('code', promo_code)
-        .single();
-
-      if (promoData) {
-        await supabaseAdmin
-          .from('promo_codes')
-          .update({ current_uses: (promoData.current_uses || 0) + 1 })
-          .eq('code', promo_code);
-      }
+      await supabaseAdmin.rpc('increment_promo_uses', { p_code: promo_code });
     }
 
     // Enviar email de confirmación

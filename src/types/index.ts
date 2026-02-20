@@ -161,6 +161,9 @@ export interface ContactMessage {
   created_at: string;
 }
 
+/** @deprecated Legacy cart item shape (nested product). The active CartItem used by the cart store
+ *  lives in stores/cart.ts with a flattened structure (id, name, price, image, quantity).
+ *  Kept here for backward-compatibility with any code that still references it. */
 export interface CartItem {
   product: Product;
   quantity: number;

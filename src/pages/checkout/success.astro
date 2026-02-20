@@ -1,7 +1,25 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import Stripe from 'stripe';
 
 const sessionId = Astro.url.searchParams.get('session_id');
+
+// Verificar el pago server-side con Stripe
+let paymentVerified = false;
+if (sessionId && sessionId.startsWith('cs_')) {
+  try {
+    const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    paymentVerified = session.payment_status === 'paid';
+  } catch {
+    paymentVerified = false;
+  }
+}
+
+// Redirigir si no hay session_id válido o el pago no está verificado
+if (!sessionId || !paymentVerified) {
+  return Astro.redirect('/');
+}
 ---
 
 <Layout title="¡Pago Exitoso! - Benice Pet Shop" hideNewsletterPopup={true}>
@@ -220,15 +238,8 @@ const sessionId = Astro.url.searchParams.get('session_id');
   <script>
     import { clearCart } from '../../stores/cart';
 
-    // Solo limpiar carrito si hay un session_id válido en la URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-    if (sessionId && sessionId.startsWith('cs_')) {
-      clearCart();
-    } else if (!sessionId) {
-      // Sin session_id = acceso directo, redirigir
-      window.location.href = '/';
-    }
+    // Pago ya verificado server-side, limpiar carrito
+    clearCart();
 
     // Efecto de confetti
     function createConfetti() {

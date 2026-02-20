@@ -9,7 +9,7 @@ const { data: products } = await supabase
   .eq('on_sale', true)
   .order('created_at', { ascending: false });
 
-// Fecha límite para el countdown (ejemplo: 7 días desde ahora)
+// Fecha límite para el countdown - se calcula en el cliente para persistir entre visitas
 const endDate = new Date();
 endDate.setDate(endDate.getDate() + 7);
 ---
@@ -220,12 +220,28 @@ endDate.setDate(endDate.getDate() + 7);
 </style>
 
 <script define:vars={{ endDate: endDate.toISOString() }}>
-  // Countdown timer
+  // Countdown timer - persist end date so it doesn't reset on every visit
+  function getCountdownEnd() {
+    try {
+      const stored = localStorage.getItem('ofertas-countdown-end');
+      if (stored) {
+        const storedDate = new Date(stored);
+        if (storedDate > new Date()) return storedDate;
+      }
+    } catch { /* localStorage not available */ }
+    const fallback = new Date(endDate);
+    try {
+      localStorage.setItem('ofertas-countdown-end', fallback.toISOString());
+    } catch { /* localStorage not available */ }
+    return fallback;
+  }
+
+  const countdownEnd = getCountdownEnd();
+
   function updateCountdown() {
-    const end = new Date(endDate);
     const now = new Date();
-    const diff = end - now;
-    
+    const diff = countdownEnd - now;
+
     if (diff <= 0) {
       document.getElementById('days').textContent = '00';
       document.getElementById('hours').textContent = '00';
@@ -233,18 +249,18 @@ endDate.setDate(endDate.getDate() + 7);
       document.getElementById('seconds').textContent = '00';
       return;
     }
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     document.getElementById('days').textContent = days.toString().padStart(2, '0');
     document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
     document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
     document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
   }
-  
+
   updateCountdown();
   setInterval(updateCountdown, 1000);
 </script>

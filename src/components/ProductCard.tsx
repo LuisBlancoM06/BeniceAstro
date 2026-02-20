@@ -88,8 +88,12 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const [isFavorite, setIsFavorite] = useState(() => {
     if (typeof window !== 'undefined') {
-      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      return wishlist.some((p: any) => p.id === product.id);
+      try {
+        const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        return Array.isArray(wishlist) && wishlist.some((p: any) => p.id === product.id);
+      } catch {
+        return false;
+      }
     }
     return false;
   });
@@ -107,17 +111,21 @@ export default function ProductCard({ product }: ProductCardProps) {
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    
-    if (isFavorite) {
-      const newWishlist = wishlist.filter((p: any) => p.id !== product.id);
-      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
-      setIsFavorite(false);
-    } else {
-      wishlist.push(product);
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-      setIsFavorite(true);
+
+    try {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+
+      if (isFavorite) {
+        const newWishlist = wishlist.filter((p: any) => p.id !== product.id);
+        localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+        setIsFavorite(false);
+      } else {
+        wishlist.push(product);
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        setIsFavorite(true);
+      }
+    } catch {
+      // localStorage not available
     }
     
     // Disparar evento para actualizar otros componentes

@@ -2,19 +2,20 @@ import type { APIRoute } from 'astro';
 import { createServerClient, supabase } from '../../../lib/supabase';
 import type { AstroCookies } from 'astro';
 
-// Función helper para verificar si es admin usando cookies
+// Función helper para verificar si es admin usando cookies (validando JWT server-side)
 async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supabaseClient: ReturnType<typeof createServerClient> }> {
   const supabaseClient = createServerClient(cookies);
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  
-  if (!session?.user) {
+  // Usar getUser() que valida el JWT contra el servidor de Supabase (no getSession)
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+  if (error || !user) {
     return { isAdmin: false, supabaseClient };
   }
 
   const { data: userData } = await supabaseClient
     .from('users')
     .select('role')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .single();
 
   return { isAdmin: userData?.role === 'admin', supabaseClient };

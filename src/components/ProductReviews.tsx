@@ -47,9 +47,11 @@ export default function ProductReviews({ productId, productName }: ProductReview
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Toast simple
+  const toastTimerRef = { current: null as ReturnType<typeof setTimeout> | null };
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000);
   };
 
   // Verificar sesión del usuario
@@ -94,7 +96,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
         }
       }
     } catch {
-      // silencioso
+      showToast('Error al cargar reseñas', 'error');
     } finally {
       setLoading(false);
     }
@@ -182,7 +184,7 @@ export default function ProductReviews({ productId, productName }: ProductReview
     setShowForm(true);
   };
 
-  // Marcar como útil
+  // Marcar como útil (persistir en servidor)
   const markHelpful = async (reviewId: string) => {
     if (!currentUser) {
       showToast('Inicia sesión para votar', 'info');
@@ -193,6 +195,16 @@ export default function ProductReviews({ productId, productName }: ProductReview
       r.id === reviewId ? { ...r, helpful_count: r.helpful_count + 1 } : r
     ));
     showToast('¡Gracias por tu feedback!', 'info');
+
+    // Persistir en servidor
+    try {
+      await fetch(`/api/reviews?action=helpful&reviewId=${reviewId}`, { method: 'PATCH' });
+    } catch {
+      // Revertir en caso de error
+      setReviews(prev => prev.map(r =>
+        r.id === reviewId ? { ...r, helpful_count: r.helpful_count - 1 } : r
+      ));
+    }
   };
 
   // Componente de estrellas

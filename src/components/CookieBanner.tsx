@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CookiePreferences {
   necessary: boolean;
@@ -21,35 +21,46 @@ export default function CookieBanner(_props: Props) {
     analytics: false,
     marketing: false,
   });
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Comprobar si ya aceptó cookies
-    const consent = localStorage.getItem('cookie-consent');
-    if (!consent) {
-      // Mostrar banner después de 1 segundo
-      setTimeout(() => setIsVisible(true), 1000);
+    try {
+      const consent = localStorage.getItem('cookie-consent');
+      if (!consent) {
+        timerRef.current = setTimeout(() => setIsVisible(true), 1000);
+      }
+    } catch {
+      // localStorage not available
     }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
 
   const acceptAll = () => {
     const allAccepted = { necessary: true, analytics: true, marketing: true };
-    localStorage.setItem('cookie-consent', JSON.stringify(allAccepted));
-    localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    try {
+      localStorage.setItem('cookie-consent', JSON.stringify(allAccepted));
+      localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    } catch { /* localStorage not available */ }
     setIsVisible(false);
-    // Aquí cargarías los scripts de analytics/marketing
     loadAnalytics();
   };
 
   const rejectAll = () => {
     const onlyNecessary = { necessary: true, analytics: false, marketing: false };
-    localStorage.setItem('cookie-consent', JSON.stringify(onlyNecessary));
-    localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    try {
+      localStorage.setItem('cookie-consent', JSON.stringify(onlyNecessary));
+      localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    } catch { /* localStorage not available */ }
     setIsVisible(false);
   };
 
   const savePreferences = () => {
-    localStorage.setItem('cookie-consent', JSON.stringify(preferences));
-    localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    try {
+      localStorage.setItem('cookie-consent', JSON.stringify(preferences));
+      localStorage.setItem('cookie-consent-date', new Date().toISOString());
+    } catch { /* localStorage not available */ }
     setIsVisible(false);
     if (preferences.analytics) loadAnalytics();
   };

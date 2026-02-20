@@ -96,7 +96,7 @@ export default function RelatedProducts({ currentProductId, animalType, category
             <a href={`/producto/${product.slug || product.id}`} className="block relative">
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={product.image_url || ''}
+                  src={product.image_url || '/images/placeholder.png'}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
@@ -120,11 +120,11 @@ export default function RelatedProducts({ currentProductId, animalType, category
               <div className="flex items-center gap-2 mt-2 mb-3">
                 {product.on_sale ? (
                   <>
-                    <span className="text-lg font-bold text-orange-500">{product.sale_price}€</span>
-                    <span className="text-sm text-gray-400 line-through">{product.price}€</span>
+                    <span className="text-lg font-bold text-orange-500">{product.sale_price?.toFixed(2)}€</span>
+                    <span className="text-sm text-gray-400 line-through">{product.price.toFixed(2)}€</span>
                   </>
                 ) : (
-                  <span className="text-lg font-bold text-orange-500">{product.price}€</span>
+                  <span className="text-lg font-bold text-orange-500">{product.price.toFixed(2)}€</span>
                 )}
               </div>
 

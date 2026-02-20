@@ -52,18 +52,48 @@ export default function RichTextEditor({
     [syncContent, updateActiveFormats],
   );
 
-  // Insertar enlace
+  // Insertar enlace (validar URL para prevenir javascript: XSS)
   const insertLink = useCallback(() => {
     const url = prompt('URL del enlace:');
     if (url) {
+      // Validar que la URL sea http/https para prevenir javascript: XSS
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          alert('Solo se permiten URLs http:// o https://');
+          return;
+        }
+      } catch {
+        // Si no es una URL absoluta, verificar que no empiece con javascript:
+        if (url.trim().toLowerCase().startsWith('javascript:')) {
+          alert('URL no válida');
+          return;
+        }
+      }
       execCommand('createLink', url);
     }
   }, [execCommand]);
 
-  // Cargar contenido inicial
+  // Cargar contenido inicial (sanitizado contra XSS)
   useEffect(() => {
     if (editorRef.current && initialContent) {
-      editorRef.current.innerHTML = initialContent;
+      // Usar DOMParser para sanitizar el HTML y prevenir XSS
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(initialContent, 'text/html');
+      // Eliminar scripts y event handlers
+      doc.querySelectorAll('script').forEach(el => el.remove());
+      doc.querySelectorAll('*').forEach(el => {
+        for (const attr of Array.from(el.attributes)) {
+          if (attr.name.startsWith('on')) {
+            el.removeAttribute(attr.name);
+          }
+        }
+        // Eliminar javascript: en hrefs
+        if (el.tagName === 'A' && el.getAttribute('href')?.toLowerCase().startsWith('javascript:')) {
+          el.removeAttribute('href');
+        }
+      });
+      editorRef.current.innerHTML = doc.body.innerHTML;
       syncContent();
     }
   }, [initialContent, syncContent]);

@@ -14,7 +14,8 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const { email } = await request.json();
 
-    if (!email || !email.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: 'Email inválido' }), { status: 400 });
     }
 

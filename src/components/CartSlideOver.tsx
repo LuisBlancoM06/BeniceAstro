@@ -108,14 +108,20 @@ export default function CartSlideOver(_props: Props) {
                   {/* Imagen */}
                   <div className="w-20 h-20 bg-white rounded-lg overflow-hidden flex-shrink-0">
                     {item.image && !item.image.includes('placehold.co') && !item.image.includes('via.placeholder') ? (
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
                         className="w-full h-full object-contain"
                         onError={(e) => {
                           const target = e.currentTarget;
                           target.style.display = 'none';
-                          target.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center"><span class="text-white/80 text-[10px] font-semibold text-center px-1">${item.name}</span></div>`;
+                          const fallback = document.createElement('div');
+                          fallback.className = 'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center';
+                          const span = document.createElement('span');
+                          span.className = 'text-white/80 text-[10px] font-semibold text-center px-1';
+                          span.textContent = item.name;
+                          fallback.appendChild(span);
+                          target.parentElement?.appendChild(fallback);
                         }}
                       />
                     ) : (

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ImageUploaderProps {
   currentImages?: string[];
@@ -7,9 +7,9 @@ interface ImageUploaderProps {
   bucketName?: string;
 }
 
-export default function ImageUploader({ 
-  currentImages = [], 
-  onImagesChange, 
+export default function ImageUploader({
+  currentImages = [],
+  onImagesChange,
   maxImages = 5,
   bucketName = 'product-images'
 }: ImageUploaderProps) {
@@ -18,6 +18,11 @@ export default function ImageUploader({
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync with parent prop changes
+  useEffect(() => {
+    setImages(currentImages);
+  }, [currentImages]);
 
   const handleUpload = async (files: FileList) => {
     if (images.length + files.length > maxImages) {

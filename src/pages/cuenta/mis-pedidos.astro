@@ -264,7 +264,7 @@ const getCancellation = (orderId: string) => {
 
     document.querySelectorAll('.cancel-order-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        currentCancelOrderId = (e.target as HTMLElement).dataset.orderId || null;
+        currentCancelOrderId = (e.currentTarget as HTMLElement).dataset.orderId || null;
         (document.getElementById('cancel-reason') as HTMLTextAreaElement).value = '';
         cancelModal?.classList.remove('hidden');
       });
@@ -332,7 +332,7 @@ const getCancellation = (orderId: string) => {
 
     document.querySelectorAll('.request-return-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        currentReturnOrderId = (e.target as HTMLElement).dataset.orderId || null;
+        currentReturnOrderId = (e.currentTarget as HTMLElement).dataset.orderId || null;
         (document.getElementById('return-reason') as HTMLTextAreaElement).value = '';
         returnModal?.classList.remove('hidden');
       });

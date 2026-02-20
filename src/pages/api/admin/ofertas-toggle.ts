@@ -52,7 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Verificar rol de admin en la base de datos
-    const { data: userData } = await supabase
+    const { data: userData } = await supabaseAdmin
       .from('users')
       .select('role')
       .eq('id', user.id)
@@ -69,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { active } = body;
 
     // Upsert la configuración
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('site_settings')
       .upsert({ 
         key: 'ofertas_flash_active', 

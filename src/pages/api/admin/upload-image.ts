@@ -72,7 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
     const buffer = new Uint8Array(arrayBuffer);
 
     // Subir a Supabase Storage
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabaseAdmin.storage
       .from(bucket)
       .upload(finalFileName, buffer, {
         contentType: file.type,
@@ -88,7 +88,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Obtener URL pública
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseAdmin.storage
       .from(bucket)
       .getPublicUrl(data.path);
 

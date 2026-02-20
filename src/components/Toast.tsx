@@ -1,5 +1,5 @@
 // Sistema de Notificaciones Toast
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { atom } from 'nanostores';
 
@@ -82,10 +82,18 @@ const borderColors = {
 // Componente Toast individual
 function ToastItem({ toast: t, onClose }: { toast: ToastMessage; onClose: () => void }) {
   const [isLeaving, setIsLeaving] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   const handleClose = () => {
     setIsLeaving(true);
-    setTimeout(onClose, 300);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    closeTimerRef.current = setTimeout(onClose, 300);
   };
 
   return (
@@ -95,8 +103,8 @@ function ToastItem({ toast: t, onClose }: { toast: ToastMessage; onClose: () => 
         bg-white ${borderColors[t.type]}
         transform transition-all duration-300 ease-out
         ${isLeaving ? 'translate-x-full opacity-0' : 'translate-x-0 opacity-100'}
-        animate-slide-in-right
       `}
+      style={{ animation: 'slideInRight 0.3s ease-out' }}
     >
       <div className={`flex-shrink-0 p-1 rounded-full text-white ${bgColors[t.type]}`}>
         {icons[t.type]}
@@ -132,6 +140,12 @@ export default function ToastContainer(_props: ToastContainerProps) {
 
   return (
     <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
       {toasts.map((t) => (
         <div key={t.id} className="pointer-events-auto">
           <ToastItem toast={t} onClose={() => removeToast(t.id)} />

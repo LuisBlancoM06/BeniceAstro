@@ -131,7 +131,7 @@ export const GET: APIRoute = async ({ request }) => {
       .limit(5);
 
     // 8. Últimos pedidos
-    const { data: recentOrders } = await supabase
+    const { data: recentOrders } = await supabaseAdmin
       .from('orders')
       .select(`
         id,
