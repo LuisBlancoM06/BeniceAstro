@@ -2,6 +2,9 @@
   "name": "beniceastro",
   "type": "module",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "node ./dist/server/entry.mjs",
