@@ -11,6 +11,7 @@ interface SitemapEntry {
 }
 
 export const GET: APIRoute = async ({ site: astroSite }) => {
+  try {
   const site = (import.meta.env.PUBLIC_SITE_URL || astroSite?.origin || 'https://benicetiendanimal.victoriafp.online').replace(/\/$/, '');
   const today = new Date().toISOString().split('T')[0];
 
@@ -103,4 +104,25 @@ ${uniquePages.map(page => `  <url>
       'X-Robots-Tag': 'noindex',
     }
   });
+  } catch (err) {
+    console.error('Sitemap: Critical error generating sitemap:', err);
+    // Devolver sitemap mínimo válido para que los crawlers no fallen
+    const fallbackSite = (import.meta.env.PUBLIC_SITE_URL || astroSite?.origin || 'https://benicetiendanimal.victoriafp.online').replace(/\/$/, '');
+    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${fallbackSite}/</loc>
+    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+    return new Response(fallbackXml, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=600',
+      }
+    });
+  }
 };

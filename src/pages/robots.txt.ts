@@ -14,35 +14,11 @@ Disallow: /checkout/
 Disallow: /auth/
 Disallow: /carrito
 
-# Bloquear bots de IA / scraping
-User-agent: GPTBot
-Disallow: /
-
+# Bots de IA adicionales (no gestionados por Cloudflare)
 User-agent: ChatGPT-User
 Disallow: /
 
-User-agent: ClaudeBot
-Disallow: /
-
 User-agent: Claude-Web
-Disallow: /
-
-User-agent: CCBot
-Disallow: /
-
-User-agent: Google-Extended
-Disallow: /
-
-User-agent: Amazonbot
-Disallow: /
-
-User-agent: Applebot-Extended
-Disallow: /
-
-User-agent: Bytespider
-Disallow: /
-
-User-agent: meta-externalagent
 Disallow: /
 
 User-agent: FacebookBot
@@ -61,6 +37,12 @@ User-agent: Omgilibot
 Disallow: /
 
 User-agent: YouBot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: img2dataset
 Disallow: /
 
 Sitemap: ${siteUrl}/sitemap.xml
