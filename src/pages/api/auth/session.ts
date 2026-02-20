@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabase } from '../../../lib/supabase';
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
@@ -7,6 +8,24 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     if (!access_token || !refresh_token) {
       return new Response(JSON.stringify({ error: 'Tokens requeridos' }), {
         status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Validar formato básico de JWT (3 partes base64 separadas por punto)
+    const jwtRegex = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+    if (!jwtRegex.test(access_token) || !jwtRegex.test(refresh_token)) {
+      return new Response(JSON.stringify({ error: 'Formato de token inválido' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verificar que el access_token es válido consultando a Supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser(access_token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Token de acceso inválido o expirado' }), {
+        status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }

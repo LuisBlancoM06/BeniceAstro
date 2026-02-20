@@ -1,7 +1,8 @@
 import { defineMiddleware } from 'astro:middleware';
 import { supabaseAdmin } from './lib/supabase';
+import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from './lib/rate-limiter';
 
-// Security headers aplicados a TODAS las respuestas
+// Security headers aplicados a TODAS las respuestas (CSP se genera dinámicamente)
 const securityHeaders: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
   'X-Content-Type-Options': 'nosniff',
@@ -9,6 +10,8 @@ const securityHeaders: Record<string, string> = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-origin',
   'Content-Security-Policy': [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net",
@@ -23,6 +26,18 @@ const securityHeaders: Record<string, string> = {
     "upgrade-insecure-requests",
   ].join('; '),
 };
+
+/** Mapa de rutas a su configuración de rate-limit */
+const rateLimitMap: Array<{ pattern: string | RegExp; config: typeof RATE_LIMITS[keyof typeof RATE_LIMITS] }> = [
+  { pattern: '/api/contact', config: RATE_LIMITS.form },
+  { pattern: '/api/newsletter', config: RATE_LIMITS.form },
+  { pattern: '/api/returns', config: RATE_LIMITS.form },
+  { pattern: '/api/cancel-order', config: RATE_LIMITS.form },
+  { pattern: '/api/auth/session', config: RATE_LIMITS.auth },
+  { pattern: '/api/search', config: RATE_LIMITS.search },
+  { pattern: '/api/stripe/webhook', config: RATE_LIMITS.webhook },
+  { pattern: /^\/api\//, config: RATE_LIMITS.api },
+];
 
 /**
  * Anonimiza una dirección IP eliminando el último octeto (IPv4)
@@ -62,6 +77,7 @@ function addSecurityHeaders(response: Response): Response {
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const path = context.url.pathname;
+  const method = context.request.method.toUpperCase();
 
   // Redirect trailing slashes to non-trailing (SEO: evita duplicados)
   // Excepto la raíz "/" y rutas de API
@@ -71,6 +87,54 @@ export const onRequest = defineMiddleware(async (context, next) => {
       status: 301,
       headers: { 'Location': cleanUrl },
     });
+  }
+
+  // --- Rate Limiting ---
+  if (path.startsWith('/api/')) {
+    let clientAddr: string;
+    try {
+      clientAddr = context.clientAddress || 'unknown';
+    } catch {
+      clientAddr = 'unknown';
+    }
+
+    // Buscar configuración de rate-limit para esta ruta
+    const rlMatch = rateLimitMap.find(r =>
+      typeof r.pattern === 'string' ? path === r.pattern : r.pattern.test(path)
+    );
+    if (rlMatch) {
+      const key = getRateLimitKey(context.request, path, clientAddr);
+      const blocked = checkRateLimit(key, rlMatch.config);
+      if (blocked) return addSecurityHeaders(blocked);
+    }
+  }
+
+  // Protección CSRF/origin para endpoints mutadores
+  if (path.startsWith('/api/') && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    const csrfExemptPaths = new Set<string>([
+      '/api/stripe/webhook',
+    ]);
+
+    if (!csrfExemptPaths.has(path)) {
+      const origin = context.request.headers.get('origin');
+      const authHeader = context.request.headers.get('authorization');
+      const expectedOrigin = context.url.origin;
+
+      if (origin && origin !== expectedOrigin) {
+        return addSecurityHeaders(new Response(JSON.stringify({ error: 'CSRF blocked: origin inválido' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        }));
+      }
+
+      // Si no hay Origin, exigir al menos Authorization para evitar POSTs ciegos.
+      if (!origin && !authHeader) {
+        return addSecurityHeaders(new Response(JSON.stringify({ error: 'CSRF blocked: origen no verificable' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json; charset=utf-8' },
+        }));
+      }
+    }
   }
 
   // No trackear rutas de API, assets estáticos, ni favicon

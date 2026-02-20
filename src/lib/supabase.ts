@@ -18,14 +18,18 @@ if (!supabaseServiceRoleKey) {
   console.warn('WARNING: Missing SUPABASE_SERVICE_ROLE_KEY - admin operations will fail');
 }
 
-export const supabaseAdmin = supabaseServiceRoleKey
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      }
-    })
-  : supabase; // Fallback al cliente anon si no hay service role key (logged warning above)
+// Cliente admin: FAIL-CLOSED
+// Si falta service role key, NO se hace fallback al cliente anónimo para evitar bypass accidental.
+export const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey || 'MISSING_SUPABASE_SERVICE_ROLE_KEY',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    }
+  }
+);
 
 // Cliente para SSR que lee cookies de Astro
 export function createServerClient(cookies: AstroCookies) {

@@ -19,6 +19,74 @@ const ogImage = `${siteUrl}/images/og-default.jpg`;
 // Canonical URL: sin trailing slash, sin query params
 const canonicalPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const canonicalUrl = `${siteUrl}${canonicalPath}`;
+
+// JSON-LD Structured Data
+const organizationLD = {
+  "@context": "https://schema.org",
+  "@type": "PetStore",
+  "name": "Benice Pet Shop",
+  "url": siteUrl,
+  "logo": `${siteUrl}/images/logo/logo.svg`,
+  "description": "Tienda online de productos para mascotas - perros, gatos, pájaros, peces y roedores",
+  "telephone": "+34900123456",
+  "email": "info@benice.es",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Calle Gran Vía, 123",
+    "addressLocality": "Madrid",
+    "postalCode": "28013",
+    "addressCountry": "ES"
+  },
+  "sameAs": [
+    "https://facebook.com/benicepetshop",
+    "https://instagram.com/benicepetshop",
+    "https://twitter.com/benicepetshop"
+  ],
+  "priceRange": "€€",
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "opens": "00:00",
+    "closes": "23:59"
+  }
+};
+
+const websiteLD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Benice Pet Shop",
+  "url": siteUrl,
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": `${siteUrl}/productos?q={search_term_string}`
+    },
+    "query-input": "required name=search_term_string"
+  }
+};
+
+// Breadcrumbs dinámicos
+const pathParts = canonicalPath.split('/').filter(Boolean);
+const breadcrumbItems = [
+  { "@type": "ListItem", "position": 1, "name": "Inicio", "item": siteUrl }
+];
+let currentPath = '';
+pathParts.forEach((part, i) => {
+  currentPath += `/${part}`;
+  breadcrumbItems.push({
+    "@type": "ListItem",
+    "position": i + 2,
+    "name": part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '),
+    "item": `${siteUrl}${currentPath}`
+  });
+});
+
+const breadcrumbLD = pathParts.length > 0 ? {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": breadcrumbItems
+} : null;
 ---
 
 <!DOCTYPE html>
@@ -26,6 +94,12 @@ const canonicalUrl = `${siteUrl}${canonicalPath}`;
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- DNS Prefetch y Preconnect para recursos externos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://ayyknhzftdlytpapdugj.supabase.co">
+  <link rel="dns-prefetch" href="https://js.stripe.com">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
   <meta name="google-site-verification" content="H9_x1DJqClBe_brtdbbfIC-6qY51T_c3Wou8WrOdY2k" />
   {import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION && (
     <meta name="google-site-verification" content={import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION} />
@@ -41,7 +115,7 @@ const canonicalUrl = `${siteUrl}${canonicalPath}`;
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Benice Pet Shop - Tienda de mascotas">
-  <meta property="og:url" content={Astro.url.href}>
+  <meta property="og:url" content={canonicalUrl}>
   <meta property="og:site_name" content="Benice Pet Shop">
   <meta property="og:locale" content="es_ES">
   <meta name="twitter:card" content="summary_large_image">
@@ -57,6 +131,14 @@ const canonicalUrl = `${siteUrl}${canonicalPath}`;
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
   <link rel="manifest" href="/site.webmanifest">
   <meta name="msapplication-config" content="/browserconfig.xml">
+  <!-- Structured Data: Organization -->
+  <script type="application/ld+json" set:html={JSON.stringify(organizationLD)} />
+  <!-- Structured Data: WebSite con SearchAction -->
+  <script type="application/ld+json" set:html={JSON.stringify(websiteLD)} />
+  <!-- Structured Data: Breadcrumbs -->
+  {breadcrumbLD && (
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLD)} />
+  )}
 </head>
 <body class="antialiased">
   <!-- Banner superior con notificaciones rotativas -->

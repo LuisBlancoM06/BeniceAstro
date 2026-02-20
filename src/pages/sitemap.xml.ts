@@ -49,13 +49,27 @@ export const GET: APIRoute = async ({ site: astroSite }) => {
   // Paginas dinamicas de productos (incluir todos los activos, no solo con stock)
   let productPages: SitemapEntry[] = [];
   try {
-    const { data: products, error } = await supabase
+    let products: Array<{ slug: string | null; updated_at: string | null }> | null = null;
+
+    // Intento 1: esquema con columna "active"
+    const withActive = await supabase
       .from('products')
       .select('slug, updated_at')
       .eq('active', true);
 
-    if (error) {
-      console.error('Sitemap: Error fetching products:', error.message);
+    if (withActive.error) {
+      // Intento 2: esquema sin columna "active" (fallback robusto)
+      const fallback = await supabase
+        .from('products')
+        .select('slug, updated_at');
+
+      if (fallback.error) {
+        console.error('Sitemap: Error fetching products:', fallback.error.message);
+      } else {
+        products = fallback.data as Array<{ slug: string | null; updated_at: string | null }>;
+      }
+    } else {
+      products = withActive.data as Array<{ slug: string | null; updated_at: string | null }>;
     }
 
     if (products) {
