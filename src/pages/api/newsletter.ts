@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabase, supabaseAdmin } from '../../lib/supabase';
+import { supabaseAdmin } from '../../lib/supabase';
 import { sendNewsletterWelcome } from '../../lib/email';
 
 function generatePromoCode(): string {
@@ -15,12 +15,12 @@ export const POST: APIRoute = async ({ request }) => {
     const { email } = await request.json();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    if (!email || typeof email !== 'string' || email.length > 254 || !emailRegex.test(email)) {
       return new Response(JSON.stringify({ error: 'Email inválido' }), { status: 400 });
     }
 
-    // Verificar si ya está suscrito
-    const { data: existing } = await supabase
+    // SEGURIDAD: Usar supabaseAdmin para verificar existencia (RLS bloquea SELECT para anon)
+    const { data: existing } = await supabaseAdmin
       .from('newsletters')
       .select('id')
       .eq('email', email)

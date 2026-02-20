@@ -12,6 +12,14 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Validar longitud del motivo
+    if (typeof reason !== 'string' || reason.trim().length > 1000) {
+      return new Response(JSON.stringify({ error: 'El motivo no puede superar los 1000 caracteres' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Verificar autenticacion con JWT
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {

@@ -118,8 +118,10 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    if (rating < 1 || rating > 5) {
-      return new Response(JSON.stringify({ error: 'La puntuación debe ser entre 1 y 5' }), {
+    // SEGURIDAD: Validar que rating es un entero entre 1 y 5
+    const parsedRating = parseInt(rating, 10);
+    if (!Number.isInteger(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+      return new Response(JSON.stringify({ error: 'La puntuación debe ser un número entero entre 1 y 5' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -154,7 +156,7 @@ export const POST: APIRoute = async ({ request }) => {
       const { data: updated, error: updateError } = await authClient
         .from('product_reviews')
         .update({
-          rating,
+          rating: parsedRating,
           comment: comment || '',
           user_name: userName,
           updated_at: new Date().toISOString(),
@@ -184,7 +186,7 @@ export const POST: APIRoute = async ({ request }) => {
         product_id: productId,
         user_id: user.id,
         user_name: userName,
-        rating,
+        rating: parsedRating,
         comment: comment || '',
       })
       .select()

@@ -91,6 +91,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // --- Rate Limiting ---
   if (path.startsWith('/api/')) {
+    // SEGURIDAD: Limitar tamaño del body para prevenir ataques de denegación de servicio
+    const contentLength = context.request.headers.get('content-length');
+    const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB (por uploads de imágenes)
+    if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
+      return addSecurityHeaders(new Response(JSON.stringify({ error: 'Payload demasiado grande' }), {
+        status: 413,
+        headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      }));
+    }
+
     let clientAddr: string;
     try {
       clientAddr = context.clientAddress || 'unknown';

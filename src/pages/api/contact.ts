@@ -15,6 +15,21 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Validación de longitud máxima para evitar abuso de almacenamiento
+    if (name.length > 100 || email.length > 254 || subject.length > 200 || message.length > 5000) {
+      return new Response(JSON.stringify({ error: 'Uno o más campos exceden la longitud máxima permitida' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (phone && (typeof phone !== 'string' || phone.length > 20)) {
+      return new Response(JSON.stringify({ error: 'Teléfono inválido' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Validación de email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return new Response(JSON.stringify({ error: 'Email inválido' }), {

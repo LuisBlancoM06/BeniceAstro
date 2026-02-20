@@ -22,8 +22,11 @@ WORKDIR /app
 
 # Copiar solo lo necesario para producción
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./
+COPY --from=build /app/package-lock.json* ./
+
+# SEGURIDAD: Instalar solo dependencias de producción (excluir devDependencies)
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Variables de entorno
 ENV NODE_ENV=production

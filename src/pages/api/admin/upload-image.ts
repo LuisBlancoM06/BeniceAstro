@@ -38,8 +38,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const fileName = formData.get('fileName') as string;
-    const bucket = formData.get('bucket') as string || 'product-images';
+    const rawFileName = formData.get('fileName') as string;
+    // SEGURIDAD: Forzar bucket a 'product-images' — no permitir selección del cliente
+    const bucket = 'product-images';
 
     if (!file) {
       return new Response(JSON.stringify({ error: 'No se proporcionó archivo' }), {
@@ -48,9 +49,10 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Validar tipo de archivo
-    if (!file.type.startsWith('image/')) {
-      return new Response(JSON.stringify({ error: 'Solo se permiten imágenes' }), {
+    // Validar tipo de archivo con lista blanca estricta
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      return new Response(JSON.stringify({ error: 'Solo se permiten imágenes (JPEG, PNG, WebP, GIF, AVIF)' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -64,8 +66,19 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Generar nombre único si no se proporciona
-    const finalFileName = fileName || `${Date.now()}-${Math.random().toString(36).substring(7)}.${file.type.split('/')[1]}`;
+    // SEGURIDAD: Sanitizar nombre de archivo — solo alfanuméricos, guiones y puntos
+    const ext = file.type.split('/')[1] === 'jpeg' ? 'jpg' : file.type.split('/')[1];
+    let sanitizedName = '';
+    if (rawFileName) {
+      sanitizedName = rawFileName
+        .replace(/\.\./g, '')       // Eliminar path traversal
+        .replace(/[\/\\]/g, '')    // Eliminar separadores de ruta
+        .replace(/[^a-zA-Z0-9_-]/g, '') // Solo alfanuméricos, guiones y underscores
+        .slice(0, 100);              // Máximo 100 chars
+    }
+    const finalFileName = sanitizedName
+      ? `${sanitizedName}-${Date.now()}.${ext}`
+      : `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${ext}`;
 
     // Convertir File a ArrayBuffer
     const arrayBuffer = await file.arrayBuffer();
@@ -145,7 +158,9 @@ export const DELETE: APIRoute = async ({ request }) => {
       });
     }
 
-    const { path, bucket = 'product-images' } = await request.json();
+    const { path } = await request.json();
+    // SEGURIDAD: Forzar bucket a 'product-images'
+    const bucket = 'product-images';
 
     if (!path) {
       return new Response(JSON.stringify({ error: 'No se proporcionó path' }), {
