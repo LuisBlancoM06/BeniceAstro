@@ -3,8 +3,8 @@ import { supabase } from '../lib/supabase';
 
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
-  const site = 'https://beniceastro.com';
+export const GET: APIRoute = async ({ site: astroSite }) => {
+  const site = (import.meta.env.PUBLIC_SITE_URL || astroSite?.origin || 'https://benicetiendanimal.victoriafp.online').replace(/\/$/, '');
 
   // Páginas estáticas
   const staticPages: { url: string; priority: string; changefreq: string; lastmod?: string }[] = [

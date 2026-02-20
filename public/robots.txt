@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin/
-Disallow: /api/
-Disallow: /cuenta/
-Disallow: /checkout/
-Disallow: /auth/
-
-Sitemap: https://beniceastro.com/sitemap.xml
