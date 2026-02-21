@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { supabaseAdmin } from '../../../lib/supabase';
 import { sendOrderConfirmation } from '../../../lib/email';
+import { syncCheckoutToCustomer } from '../../../lib/stripe-customer';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
@@ -256,6 +257,20 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
         console.log(`Confirmation email sent to ${customerEmail}`);
       } catch (emailError) {
         console.error('Error sending confirmation email:', emailError);
+      }
+    }
+
+    // Sincronizar datos de envío y contacto al Stripe Customer para futuras compras
+    const stripeCustomerIdFromSession = typeof session.customer === 'string'
+      ? session.customer
+      : (session.customer as Stripe.Customer)?.id;
+
+    if (stripeCustomerIdFromSession) {
+      try {
+        await syncCheckoutToCustomer(stripeCustomerIdFromSession, session);
+      } catch (syncError) {
+        // No-blocking: datos de sincronización no son críticos
+        console.error('Error syncing checkout to customer:', syncError);
       }
     }
 

@@ -23,10 +23,14 @@ export interface User {
   full_name?: string;
   phone?: string;
   address?: string;
+  address_line1?: string;
+  address_line2?: string;
   city?: string;
   postal_code?: string;
+  country?: string;
   avatar_url?: string;
   is_subscribed_newsletter?: boolean;
+  stripe_customer_id?: string;
   role?: 'user' | 'admin';
   created_at: string;
 }

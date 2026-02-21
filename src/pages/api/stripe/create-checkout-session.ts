@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
+import { getOrCreateStripeCustomer } from '../../../lib/stripe-customer';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
@@ -15,15 +16,22 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Obtener email del usuario si está logueado
+    // Obtener Stripe Customer vinculado (o crearlo) para usuarios logueados
+    // Esto permite que Stripe pre-rellene nombre, email, teléfono y dirección
+    let stripeCustomerId: string | undefined;
     let customerEmail: string | undefined;
     if (userId) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('email')
-        .eq('id', userId)
-        .single();
-      customerEmail = profile?.email || undefined;
+      try {
+        stripeCustomerId = await getOrCreateStripeCustomer(userId);
+      } catch {
+        // Fallback: usar solo email si falla la creación del Customer
+        const { data: profile } = await supabaseAdmin
+          .from('users')
+          .select('email')
+          .eq('id', userId)
+          .single();
+        customerEmail = profile?.email || undefined;
+      }
     }
 
     // Validar precios y stock contra la base de datos (NUNCA confiar en el cliente)
@@ -137,13 +145,15 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Crear sesión de checkout
-    const session = await stripe.checkout.sessions.create({
+    // Si hay Stripe Customer vinculado, usarlo para pre-rellenar TODOS los datos
+    // (nombre, email, teléfono, dirección). Si no, fallback a customer_email.
+    // NOTA: 'customer' y 'customer_email' son mutuamente excluyentes en la API de Stripe.
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       success_url: `${request.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get('origin')}/checkout/cancel`,
-      customer_email: customerEmail, // Pre-rellenar email en Stripe si el usuario está logueado
       metadata: {
         user_id: userId || '',
         promo_code: promoCode || '',
@@ -153,8 +163,25 @@ export const POST: APIRoute = async ({ request }) => {
         allowed_countries: ['ES', 'PT', 'FR', 'DE', 'IT']
       },
       billing_address_collection: 'required',
-      locale: 'es'
-    });
+      locale: 'es',
+    };
+
+    if (stripeCustomerId) {
+      // Customer vinculado: Stripe pre-rellena email, nombre, teléfono y dirección
+      sessionParams.customer = stripeCustomerId;
+      sessionParams.customer_update = {
+        // Permitir que el usuario modifique sus datos en Stripe Checkout
+        // y que se guarden automáticamente en el Customer para futuras compras
+        name: 'auto',
+        address: 'auto',
+        shipping: 'auto',
+      };
+    } else if (customerEmail) {
+      // Fallback: solo pre-rellenar email
+      sessionParams.customer_email = customerEmail;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return new Response(JSON.stringify({ 
       sessionId: session.id,

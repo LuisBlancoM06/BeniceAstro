@@ -205,12 +205,20 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
       const { data: { session } } = await supabase.auth.getSession();
 
       try {
-        const { error } = await supabase
-          .from('users')
-          .update({ full_name: fullName, phone, address })
-          .eq('id', session!.user.id);
+        // Usar endpoint API para actualizar perfil + sincronizar a Stripe
+        const res = await fetch('/api/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session!.access_token}`,
+          },
+          body: JSON.stringify({ full_name: fullName, phone, address }),
+        });
 
-        if (error) throw error;
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Error al actualizar');
+        }
 
         profileMessage!.textContent = 'Perfil actualizado correctamente';
         profileMessage!.className = 'p-3 rounded-lg text-sm bg-green-100 text-green-700';
