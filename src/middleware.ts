@@ -2,7 +2,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { supabaseAdmin } from './lib/supabase';
 import { checkRateLimit, getRateLimitKey, RATE_LIMITS } from './lib/rate-limiter';
 
-// Security headers aplicados a TODAS las respuestas (CSP se genera dinámicamente)
+// Security headers aplicados a TODAS las respuestas
 const securityHeaders: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
   'X-Content-Type-Options': 'nosniff',
@@ -10,16 +10,22 @@ const securityHeaders: Record<string, string> = {
   'X-XSS-Protection': '1; mode=block',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Resource-Policy': 'same-origin',
+  'X-DNS-Prefetch-Control': 'on',
+  // Relajamos COOP para permitir que herramientas externas (web-check, Lighthouse) puedan
+  // hacer screenshots. 'same-origin-allow-popups' mantiene protección pero sin bloquear.
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+  // cross-site permite que las imágenes de CDN (Cloudinary, Unsplash) se carguen correctamente
+  'Cross-Origin-Resource-Policy': 'cross-origin',
+  'Cross-Origin-Embedder-Policy': 'unsafe-none',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://media.zooplus.com https://images.unsplash.com",
-    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https: http:",
+    "font-src 'self' https://fonts.gstatic.com data:",
     "connect-src 'self' https://*.supabase.co https://api.stripe.com https://res.cloudinary.com",
     "frame-src 'self' https://js.stripe.com",
+    "frame-ancestors 'self'",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

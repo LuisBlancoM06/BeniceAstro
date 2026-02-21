@@ -1,0 +1,31 @@
+import type { APIRoute } from 'astro';
+
+export const prerender = false;
+
+export const GET: APIRoute = async () => {
+    const securityTxt = `-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+Contact: mailto:seguridad@benice.es
+Expires: 2027-02-19T00:00:00.000Z
+Preferred-Languages: es, en
+Canonical: https://benicetiendanimal.victoriafp.online/.well-known/security.txt
+Policy: https://benicetiendanimal.victoriafp.online/legal/privacidad
+-----BEGIN PGP SIGNATURE-----
+
+iKYEARYKAE4WIQSllbQKMHMt6tGdA2CqrXxO/t3SDQUCaZjTxBsUgAAAAAAEAA1t
+YW51MiwyLjUrMS4xMSwyLDEUHHNlZ3VyaWRhZEBiZW5pY2UuZXMACgkQqq18Tv7d
+0g0OkAD/apfRsbVRnp/d7mT05pEyMH+ZIoYI3mrXYIAI/MEC0q8A/Ajrn68OhMKh
+RCiPHRU/ryLlCw1h3hEzUXkF0H4yTLEN
+=yrRV
+-----END PGP SIGNATURE-----
+`;
+
+    return new Response(securityTxt, {
+        status: 200,
+        headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=86400',
+        },
+    });
+};
