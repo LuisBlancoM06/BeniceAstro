@@ -1,26 +1,16 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../lib/supabase';
+import ProductCard from '../../components/ProductCard.tsx';
 
-const { data: products } = await supabase
+const { data: allProducts } = await supabase
   .from('products')
   .select('*')
   .eq('animal_type', 'perro')
   .order('created_at', { ascending: false });
 
-const totalProducts = products?.length || 0;
-
-const sizes = [
-  { id: 'mini', name: 'Mini / Toy', description: 'Hasta 5kg', emoji: '🐕' },
-  { id: 'mediano', name: 'Mediano', description: '5-25kg', emoji: '🦮' },
-  { id: 'grande', name: 'Grande', description: '+25kg', emoji: '🐕‍🦺' },
-];
-
-const ages = [
-  { id: 'cachorro', name: 'Cachorro', description: '0-12 meses', emoji: '🐶' },
-  { id: 'adulto', name: 'Adulto', description: '1-7 años', emoji: '🐕' },
-  { id: 'senior', name: 'Senior', description: '+7 años', emoji: '🦴' },
-];
+const products = allProducts || [];
+const totalProducts = products.length;
 ---
 
 <Layout title="Productos para Perros" description="Encuentra los mejores productos para perros: alimentación premium, juguetes, correas y más. Envío gratis en pedidos +49€.">
@@ -84,179 +74,192 @@ const ages = [
     </div>
   </section>
 
-  <!-- Productos -->
-  <section id="productos" class="py-12 scroll-mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar Filtros -->
-        <aside class="lg:w-72 flex-shrink-0">
-          <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-24 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-              <h3 class="font-bold text-lg flex items-center gap-2">
-                <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                </svg>
-                Filtros
-              </h3>
-              <button id="clear-filters" class="text-sm text-orange-500 hover:text-orange-700 font-medium transition-colors">Limpiar</button>
-            </div>
+  <!-- Productos con filtros -->
+  <section id="productos" class="scroll-mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-            <!-- Tamaño -->
-            <div class="mb-6">
-              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Tamaño</h4>
-              <div class="space-y-2.5">
-                {sizes.map((size) => (
-                  <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" name="size" value={size.id} class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
-                    <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">{size.name}</span>
-                    <span class="text-xs text-gray-400">({size.description})</span>
-                  </label>
-                ))}
+        <!-- Filtros -->
+        <aside class="lg:col-span-1" aria-label="Filtros de productos">
+          <div class="sticky top-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-gray-800">
+              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+              Filtros
+            </h2>
+
+            <!-- Categoría -->
+            <div class="filter-section border-t border-gray-100 pt-4" data-open="true">
+              <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-orange-500 transition-colors">
+                <span>Categoría</span>
+                <svg class="filter-arrow w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="filter-content space-y-2">
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="category" value="alimentacion" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Alimentación</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="category" value="higiene" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Higiene</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="category" value="salud" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Salud</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="category" value="accesorios" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Accesorios</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="category" value="juguetes" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Juguetes</span>
+                </label>
               </div>
             </div>
 
-            <div class="border-t border-gray-100 my-4"></div>
-
-            <!-- Edad -->
-            <div class="mb-6">
-              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Edad</h4>
-              <div class="space-y-2.5">
-                {ages.map((age) => (
-                  <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" name="age" value={age.id} class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
-                    <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">{age.name}</span>
-                    <span class="text-xs text-gray-400">({age.description})</span>
-                  </label>
-                ))}
+            <!-- Productos en Oferta -->
+            <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+              <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-orange-500 transition-colors">
+                <span>Productos en Oferta</span>
+                <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="filter-content space-y-2 hidden">
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="on_sale" value="true" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Solo ofertas</span>
+                </label>
               </div>
             </div>
-
-            <div class="border-t border-gray-100 my-4"></div>
 
             <!-- Precio -->
-            <div class="mb-6">
-              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Precio</h4>
-              <div class="space-y-2.5">
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <input type="radio" name="price" value="0-20" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
-                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">Hasta 20€</span>
+            <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+              <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-orange-500 transition-colors">
+                <span>Precio</span>
+                <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="filter-content space-y-2 hidden">
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="price_range" value="0-10" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Menos de 10€</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <input type="radio" name="price" value="20-50" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
-                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">20€ - 50€</span>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="price_range" value="10-25" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">10€ - 25€</span>
                 </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <input type="radio" name="price" value="50+" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
-                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">Más de 50€</span>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="price_range" value="25-50" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">25€ - 50€</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="price_range" value="50-999" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Más de 50€</span>
                 </label>
               </div>
             </div>
 
-            <div class="border-t border-gray-100 my-4"></div>
+            <!-- Edad -->
+            <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+              <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-orange-500 transition-colors">
+                <span>Edad</span>
+                <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="filter-content space-y-2 hidden">
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="age_range" value="cachorro" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Cachorro / Joven</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="age_range" value="adulto" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Adulto</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="age_range" value="senior" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Senior</span>
+                </label>
+              </div>
+            </div>
 
-            <!-- Solo ofertas -->
-            <label class="flex items-center gap-3 cursor-pointer mb-6">
-              <input type="checkbox" name="on_sale" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
-              <span class="font-medium text-gray-700 text-sm">Solo ofertas</span>
-              <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-semibold">HOT</span>
-            </label>
+            <!-- Tamaño raza -->
+            <div class="filter-section border-t border-gray-100 pt-4 mt-4" data-open="false">
+              <button type="button" class="filter-toggle w-full flex items-center justify-between text-left font-semibold text-gray-700 mb-3 hover:text-orange-500 transition-colors">
+                <span>Tamaño raza</span>
+                <svg class="filter-arrow w-4 h-4 transition-transform -rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="filter-content space-y-2 hidden">
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="size" value="mini" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Mini</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="size" value="mediano" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Mediano</span>
+                </label>
+                <label class="flex items-center gap-2.5 cursor-pointer group">
+                  <input type="checkbox" data-filter="size" value="grande" class="filter-check w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500">
+                  <span class="text-sm text-gray-600 group-hover:text-gray-900">Grande</span>
+                </label>
+              </div>
+            </div>
 
-            <button id="apply-filters" class="w-full bg-orange-500 text-white py-2.5 rounded-xl hover:bg-orange-600 transition-all font-medium shadow-sm hover:shadow-md">
-              Aplicar filtros
+            <!-- Limpiar filtros -->
+            <button type="button" id="clear-filters" class="mt-5 w-full text-sm text-orange-500 hover:text-orange-700 font-medium py-2.5 border border-orange-200 rounded-xl hover:bg-orange-50 transition-all hidden">
+              ✕ Limpiar filtros
             </button>
           </div>
         </aside>
 
-        <!-- Grid de productos -->
-        <div class="flex-1">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <p id="product-count" class="text-gray-500 text-sm font-medium">{totalProducts} productos</p>
-            <select id="sort-select" class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
-              <option>Más relevantes</option>
-              <option>Precio: menor a mayor</option>
-              <option>Precio: mayor a menor</option>
-            </select>
-          </div>
-
-          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {products?.map((product: any) => (
-              <div class="product-card" data-product={JSON.stringify(product)}></div>
-            ))}
-          </div>
-
-          {(!products || products.length === 0) && (
-            <div class="text-center py-20">
-              <div class="w-20 h-20 mx-auto mb-6 bg-orange-50 rounded-full flex items-center justify-center">
-                <svg class="w-10 h-10 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold text-gray-700 mb-2">No hay productos disponibles</h3>
-              <p class="text-gray-500 max-w-sm mx-auto">Pronto añadiremos más productos para perros. ¡Vuelve pronto!</p>
-              <a href="/productos" class="inline-flex items-center gap-2 mt-6 text-orange-500 font-medium hover:text-orange-700 transition-colors">
-                Ver todos los productos
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-              </a>
+        <!-- Grid de Productos -->
+        <section class="lg:col-span-3" aria-label="Listado de productos">
+          <div class="flex items-center justify-between mb-5">
+            <p class="text-sm text-gray-500">
+              <span id="result-count" class="text-orange-500 font-bold">{totalProducts}</span> Resultados
+            </p>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-500 hidden sm:inline">Ordenar por</span>
+              <select id="sort-select" class="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer">
+                <option value="default">Relevancia</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="name-asc">Nombre: A - Z</option>
+                <option value="name-desc">Nombre: Z - A</option>
+              </select>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  </section>
+          </div>
 
-  <!-- Consejos -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-gray-900">Consejos para tu perro</h2>
-        <p class="text-gray-500 mt-2">Artículos útiles para cuidar mejor a tu mejor amigo</p>
-      </div>
-      <div class="grid md:grid-cols-3 gap-6">
-        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-          <div class="w-full h-48 bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-4 stagger-children">
+            {products.map((product: any) => {
+              const price = product.sale_price && (product.on_sale === true || product.on_sale === 'true') 
+                ? Number(product.sale_price) : Number(product.price);
+              const isOnSale = product.on_sale === true || product.on_sale === 'true';
+              return (
+                <div 
+                  class="product-card animate-fade-in-up"
+                  data-category={product.category}
+                  data-size={product.size}
+                  data-age={product.age_range}
+                  data-onsale={String(isOnSale)}
+                  data-price={String(price)}
+                  data-name={product.name}
+                >
+                  <ProductCard product={product} client:load />
+                </div>
+              );
+            })}
           </div>
-          <div class="p-6">
-            <span class="text-purple-600 text-xs font-bold uppercase tracking-wider">Alimentación</span>
-            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-purple-700 transition-colors">¿Cómo elegir el mejor pienso?</h3>
-            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Descubre los factores clave para elegir la alimentación perfecta para tu perro.</p>
-            <a href="/blog" class="inline-flex items-center gap-1 text-purple-600 font-medium mt-4 text-sm hover:gap-2 transition-all">
-              Leer más
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
+
+          <div id="no-results" class="text-center py-16 hidden">
+            <div class="animate-fade-in">
+              <svg class="w-20 h-20 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos con estos filtros</h3>
+              <p class="text-sm text-gray-400 mb-4">Prueba cambiando o quitando filtros</p>
+              <button type="button" onclick="document.getElementById('clear-filters')?.click()" class="text-orange-500 hover:text-orange-600 font-medium text-sm underline underline-offset-2">
+                Limpiar todos los filtros
+              </button>
+            </div>
           </div>
-        </article>
-        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-          <div class="w-full h-48 bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-          </div>
-          <div class="p-6">
-            <span class="text-orange-500 text-xs font-bold uppercase tracking-wider">Higiene</span>
-            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-orange-600 transition-colors">Baño perfecto en casa</h3>
-            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Guía completa para bañar a tu perro como un profesional sin salir de casa.</p>
-            <a href="/blog" class="inline-flex items-center gap-1 text-orange-500 font-medium mt-4 text-sm hover:gap-2 transition-all">
-              Leer más
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-          </div>
-        </article>
-        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-          <div class="w-full h-48 bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          </div>
-          <div class="p-6">
-            <span class="text-emerald-600 text-xs font-bold uppercase tracking-wider">Salud</span>
-            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-emerald-600 transition-colors">Calendario de vacunas</h3>
-            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Todo lo que necesitas saber sobre las vacunas esenciales de tu perro.</p>
-            <a href="/blog" class="inline-flex items-center gap-1 text-emerald-600 font-medium mt-4 text-sm hover:gap-2 transition-all">
-              Leer más
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-          </div>
-        </article>
+        </section>
       </div>
     </div>
   </section>
@@ -283,79 +286,105 @@ const ages = [
 </Layout>
 
 <script>
-  import { createElement } from 'react';
-  import { createRoot } from 'react-dom/client';
-  import ProductCard from '../../components/ProductCard.tsx';
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    const productCards = document.querySelectorAll('.product-card');
-    const allProducts: any[] = [];
-    const roots = new Map();
+  // Secciones colapsables
+  document.querySelectorAll('.filter-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.closest('.filter-section')!;
+      const content = section.querySelector('.filter-content')!;
+      const arrow = section.querySelector('.filter-arrow')!;
+      const isOpen = section.getAttribute('data-open') === 'true';
+      if (isOpen) {
+        content.classList.add('hidden');
+        arrow.classList.add('-rotate-90');
+        section.setAttribute('data-open', 'false');
+      } else {
+        content.classList.remove('hidden');
+        arrow.classList.remove('-rotate-90');
+        section.setAttribute('data-open', 'true');
+      }
+    });
+  });
 
-    productCards.forEach((container) => {
-      const productData = container.getAttribute('data-product');
-      if (productData) {
-        const product = JSON.parse(productData);
-        allProducts.push({ product, container });
-        const root = createRoot(container);
-        roots.set(container, root);
-        root.render(createElement(ProductCard, { product }));
+  function applyFilters() {
+    const filters: Record<string, string[]> = {};
+    document.querySelectorAll<HTMLInputElement>('.filter-check:checked').forEach(cb => {
+      const key = cb.getAttribute('data-filter')!;
+      if (!filters[key]) filters[key] = [];
+      filters[key].push(cb.value);
+    });
+
+    const hasFilters = Object.keys(filters).length > 0;
+    document.getElementById('clear-filters')?.classList.toggle('hidden', !hasFilters);
+
+    const cards = document.querySelectorAll<HTMLElement>('#products-grid .product-card');
+    let visible = 0;
+
+    cards.forEach(card => {
+      let show = true;
+
+      for (const [key, values] of Object.entries(filters)) {
+        if (key === 'category') {
+          if (!values.includes(card.dataset.category || '')) show = false;
+        } else if (key === 'size') {
+          if (!values.includes(card.dataset.size || '')) show = false;
+        } else if (key === 'age_range') {
+          if (!values.includes(card.dataset.age || '')) show = false;
+        } else if (key === 'on_sale') {
+          if (card.dataset.onsale !== 'true') show = false;
+        } else if (key === 'price_range') {
+          const price = parseFloat(card.dataset.price || '0');
+          const inRange = values.some(range => {
+            const [min, max] = range.split('-').map(Number);
+            return price >= min && price <= max;
+          });
+          if (!inRange) show = false;
+        }
+      }
+
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    document.getElementById('result-count')!.textContent = String(visible);
+    document.getElementById('no-results')!.classList.toggle('hidden', visible > 0);
+  }
+
+  function applySorting() {
+    const grid = document.getElementById('products-grid')!;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.product-card'));
+    const sortVal = (document.getElementById('sort-select') as HTMLSelectElement).value;
+
+    cards.sort((a, b) => {
+      switch (sortVal) {
+        case 'price-asc':
+          return parseFloat(a.dataset.price || '0') - parseFloat(b.dataset.price || '0');
+        case 'price-desc':
+          return parseFloat(b.dataset.price || '0') - parseFloat(a.dataset.price || '0');
+        case 'name-asc':
+          return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+        case 'name-desc':
+          return (b.dataset.name || '').localeCompare(a.dataset.name || '');
+        default:
+          return 0;
       }
     });
 
-    const applyBtn = document.getElementById('apply-filters');
-    const clearBtn = document.getElementById('clear-filters');
-    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
-    const countText = document.getElementById('product-count');
+    cards.forEach(card => grid.appendChild(card));
+    applyFilters();
+  }
 
-    function getFilteredProducts() {
-      const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map((el) => (el as HTMLInputElement).value);
-      const selectedAges = Array.from(document.querySelectorAll('input[name="age"]:checked')).map((el) => (el as HTMLInputElement).value);
-      const selectedPrice = (document.querySelector('input[name="price"]:checked') as HTMLInputElement)?.value;
-      const onSaleOnly = (document.querySelector('input[name="on_sale"]') as HTMLInputElement)?.checked;
+  // Filtrar al instante al cambiar checkbox
+  document.querySelectorAll('.filter-check').forEach(cb => {
+    cb.addEventListener('change', applyFilters);
+  });
 
-      return allProducts.filter(({ product }) => {
-        if (selectedSizes.length > 0 && !selectedSizes.includes(product.size)) return false;
-        if (selectedAges.length > 0 && !selectedAges.includes(product.age_range)) return false;
-        if (onSaleOnly && !product.on_sale) return false;
-        if (selectedPrice) {
-          const price = product.on_sale && product.sale_price ? product.sale_price : product.price;
-          if (selectedPrice === '0-20' && price > 20) return false;
-          if (selectedPrice === '20-50' && (price < 20 || price > 50)) return false;
-          if (selectedPrice === '50+' && price < 50) return false;
-        }
-        return true;
-      });
-    }
+  // Ordenar
+  document.getElementById('sort-select')?.addEventListener('change', applySorting);
 
-    function renderFiltered() {
-      const filtered = getFilteredProducts();
-      const sortValue = sortSelect?.value || '';
-      if (sortValue.includes('menor a mayor')) filtered.sort((a: any, b: any) => a.product.price - b.product.price);
-      else if (sortValue.includes('mayor a menor')) filtered.sort((a: any, b: any) => b.product.price - a.product.price);
-
-      allProducts.forEach(({ container }) => (container as HTMLElement).style.display = 'none');
-      filtered.forEach(({ container }) => (container as HTMLElement).style.display = '');
-      if (countText) countText.textContent = `${filtered.length} productos`;
-    }
-
-    applyBtn?.addEventListener('click', renderFiltered);
-    sortSelect?.addEventListener('change', renderFiltered);
-
-    clearBtn?.addEventListener('click', () => {
-      document.querySelectorAll('input[name="size"]:checked, input[name="age"]:checked, input[name="price"]:checked, input[name="on_sale"]:checked').forEach((el) => {
-        (el as HTMLInputElement).checked = false;
-      });
-      renderFiltered();
-    });
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const sizeParam = urlParams.get('tamano');
-    if (sizeParam) {
-      const cb = document.querySelector(`input[name="size"][value="${sizeParam}"]`) as HTMLInputElement;
-      if (cb) cb.checked = true;
-      renderFiltered();
-    }
+  // Limpiar filtros
+  document.getElementById('clear-filters')?.addEventListener('click', () => {
+    document.querySelectorAll<HTMLInputElement>('.filter-check').forEach(cb => cb.checked = false);
+    applyFilters();
   });
 </script>
 
