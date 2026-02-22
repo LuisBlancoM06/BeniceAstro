@@ -10,7 +10,7 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { items, promoCode } = await request.json();
+    const { items, promoCode, shipping } = await request.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'El carrito está vacío' }), {

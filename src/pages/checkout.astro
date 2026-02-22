@@ -650,12 +650,28 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
           headers['Authorization'] = `Bearer ${session.access_token}`;
         }
 
+        // Recoger datos del formulario de envío para pre-rellenar en Stripe
+        const shippingData = {
+          name: (document.getElementById('ship-name') as HTMLInputElement)?.value?.trim() || '',
+          email: (document.getElementById('ship-email') as HTMLInputElement)?.value?.trim() || '',
+          phone: (document.getElementById('ship-phone') as HTMLInputElement)?.value?.trim() || '',
+          address: {
+            line1: (document.getElementById('ship-line1') as HTMLInputElement)?.value?.trim() || '',
+            line2: (document.getElementById('ship-line2') as HTMLInputElement)?.value?.trim() || '',
+            city: (document.getElementById('ship-city') as HTMLInputElement)?.value?.trim() || '',
+            state: (document.getElementById('ship-state') as HTMLInputElement)?.value?.trim() || '',
+            postal_code: (document.getElementById('ship-postal') as HTMLInputElement)?.value?.trim() || '',
+            country: (document.getElementById('ship-country') as HTMLSelectElement)?.value || 'ES',
+          },
+        };
+
         const response = await fetch('/api/stripe/create-checkout-session', {
           method: 'POST',
           headers,
           body: JSON.stringify({
             items: items,
-            promoCode: appliedPromoCode
+            promoCode: appliedPromoCode,
+            shipping: shippingData,
           })
         });
 
