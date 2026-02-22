@@ -103,10 +103,6 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
                 <label for="reg-country" class="block text-xs font-medium text-gray-600 mb-1">País</label>
                 <select id="reg-country" class="input text-sm">
                   <option value="ES" selected>España</option>
-                  <option value="PT">Portugal</option>
-                  <option value="FR">Francia</option>
-                  <option value="DE">Alemania</option>
-                  <option value="IT">Italia</option>
                 </select>
               </div>
             </div>
@@ -232,8 +228,6 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      console.log('🟢 [REGISTRO] ══════════════════════════════════════');
-      console.log('🟢 [REGISTRO] Botón "Crear Cuenta" pulsado');
 
       const fullName = (document.getElementById('full-name') as HTMLInputElement).value;
       const email = (document.getElementById('email') as HTMLInputElement).value;
@@ -252,26 +246,8 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
       const latitude = parseFloat((document.getElementById('reg-lat') as HTMLInputElement)?.value) || null;
       const longitude = parseFloat((document.getElementById('reg-lng') as HTMLInputElement)?.value) || null;
 
-      console.log('🟢 [REGISTRO] Datos del formulario:');
-      console.log('  - fullName:', fullName);
-      console.log('  - email:', email);
-      console.log('  - phone:', phone);
-      console.log('  - address (autocomplete):', address);
-      console.log('  - addressLine1:', addressLine1);
-      console.log('  - addressLine2:', addressLine2);
-      console.log('  - city:', city);
-      console.log('  - state:', state);
-      console.log('  - postalCode:', postalCode);
-      console.log('  - country:', country);
-      console.log('  - latitude:', latitude);
-      console.log('  - longitude:', longitude);
-      console.log('  - password length:', password.length, 'chars');
-      console.log('  - confirmPassword length:', confirmPassword.length, 'chars');
-      console.log('  - passwords match:', password === confirmPassword);
-
       // Validar contraseñas
       if (password !== confirmPassword) {
-        console.warn('⚠️ [REGISTRO] Las contraseñas NO coinciden');
         errorMessage!.textContent = 'Las contraseñas no coinciden';
         errorMessage!.classList.remove('hidden');
         successMessage!.classList.add('hidden');
@@ -279,7 +255,6 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
       }
 
       try {
-        console.log('🟢 [REGISTRO] Paso 1: Llamando supabase.auth.signUp...');
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -291,21 +266,11 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
           }
         });
 
-        if (error) {
-          console.error('❌ [REGISTRO] Paso 1 FALLÓ — Supabase signUp error:', error.message, error);
-          throw error;
-        }
-
-        console.log('✅ [REGISTRO] Paso 1 OK — signUp exitoso');
-        console.log('🟢 [REGISTRO] User ID:', data.user?.id);
-        console.log('🟢 [REGISTRO] User email:', data.user?.email);
-        console.log('🟢 [REGISTRO] Identities:', data.user?.identities?.length);
-        console.log('🟢 [REGISTRO] Session existe?', !!data.session);
+        if (error) throw error;
 
         // Supabase v2: si el email ya existe y no está confirmado,
         // devuelve user con identities vacío (sin error) para evitar enumeración.
         if (data.user && data.user.identities && data.user.identities.length === 0) {
-          console.warn('⚠️ [REGISTRO] Email ya registrado (identities vacío)');
           errorMessage!.textContent = 'Este email ya está registrado. Revisa tu correo o inicia sesión.';
           errorMessage!.classList.remove('hidden');
           successMessage!.classList.add('hidden');
@@ -314,7 +279,6 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 
         // Crear perfil de usuario (rol 'user' por defecto)
         if (data.user) {
-          console.log('🟢 [REGISTRO] Paso 2: Insertando perfil en tabla users...');
           const profileData = {
             id: data.user.id,
             email: email,
@@ -331,24 +295,25 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
             longitude: longitude,
             role: 'user'
           };
-          console.log('🟢 [REGISTRO] Datos a insertar:', JSON.stringify(profileData, null, 2));
 
           const { error: insertError } = await supabase.from('users').insert(profileData);
 
           if (insertError) {
-            console.error('❌ [REGISTRO] Paso 2 FALLÓ — Error insertando perfil:', insertError.message, insertError.code, insertError.details, insertError.hint);
-            // No bloquear el registro si el perfil falla — el usuario puede completarlo después
-          } else {
-            console.log('✅ [REGISTRO] Paso 2 OK — Perfil creado en tabla users');
+            console.error('[REGISTRO] Error insertando perfil:', insertError.message);
+            // Fallback: crear perfil via ensure-profile (usa service_role, no tiene restricciones RLS)
+            if (data.session) {
+              try {
+                await fetch('/api/auth/ensure-profile', {
+                  method: 'POST',
+                  headers: { 'Authorization': `Bearer ${data.session.access_token}` },
+                });
+              } catch {}
+            }
           }
-        } else {
-          console.warn('⚠️ [REGISTRO] No hay data.user — no se puede crear perfil');
         }
 
         // Si hay sesion, el usuario ya esta autenticado
         if (data.session) {
-          console.log('🟢 [REGISTRO] Paso 3: Sesión activa — guardando cookies...');
-          console.log('🟢 [REGISTRO] Access token (primeros 20):', data.session.access_token?.substring(0, 20) + '...');
           // Guardar tokens en cookies HttpOnly vía servidor (igual que login)
           try {
             const res = await fetch('/api/auth/session', {
@@ -359,18 +324,13 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
                 refresh_token: data.session.refresh_token,
               }),
             });
-            console.log('🟢 [REGISTRO] Paso 3: Response status:', res.status);
             if (!res.ok) {
-              const body = await res.json().catch(() => ({}));
-              console.error('❌ [REGISTRO] Paso 3 FALLÓ — Error guardando sesión:', res.status, body);
-            } else {
-              console.log('✅ [REGISTRO] Paso 3 OK — Cookies guardadas');
+              console.error('[REGISTRO] Error guardando sesión:', res.status);
             }
           } catch (e) {
-            console.error('❌ [REGISTRO] Paso 3 EXCEPCIÓN:', e);
+            console.error('[REGISTRO] Error guardando sesión:', e);
           }
 
-          console.log('✅ [REGISTRO] Paso 4: Redirigiendo a / en 1.5s...');
           successMessage!.textContent = 'Cuenta creada. Redirigiendo...';
           successMessage!.classList.remove('hidden');
           errorMessage!.classList.add('hidden');
@@ -379,16 +339,11 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
           }, 1500);
         } else {
           // Si no hay sesion, requiere verificacion (mostrar mensaje)
-          console.log('🟡 [REGISTRO] No hay sesión — requiere verificación por email');
           successMessage!.innerHTML = 'Cuenta creada. <strong>Revisa tu correo</strong> para activarla.';
           successMessage!.classList.remove('hidden');
           errorMessage!.classList.add('hidden');
         }
       } catch (error: any) {
-        console.error('❌ [REGISTRO] ERROR FINAL:', error);
-        console.error('❌ [REGISTRO] Error message:', error?.message);
-        console.error('❌ [REGISTRO] Error status:', error?.status);
-        console.error('❌ [REGISTRO] Error completo:', JSON.stringify(error, null, 2));
         // Mapear mensajes de Supabase a mensajes amigables
         const msg = (error?.message || '').toLowerCase();
         let userMsg = 'Error al crear la cuenta. Inténtalo de nuevo.';
@@ -403,7 +358,6 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
         } else if (msg.includes('network') || msg.includes('fetch')) {
           userMsg = 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.';
         }
-        console.log('🔴 [REGISTRO] Mostrando al usuario:', userMsg);
         errorMessage!.textContent = userMsg;
         errorMessage!.classList.remove('hidden');
         successMessage!.classList.add('hidden');

@@ -172,7 +172,7 @@ export const POST: APIRoute = async ({ request }) => {
         discount_percent: discountPercent.toString()
       },
       shipping_address_collection: {
-        allowed_countries: ['ES', 'PT', 'FR', 'DE', 'IT']
+        allowed_countries: ['ES']
       },
       billing_address_collection: 'required',
       locale: 'es',

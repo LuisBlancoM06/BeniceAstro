@@ -1042,11 +1042,28 @@ const breadcrumbLD =
           if (userEmail) userEmail.textContent = session.user.email || "";
 
           // Verificar rol de admin desde la base de datos
-          const { data: userData } = await supabase
+          let { data: userData, error: userError } = await supabase
             .from("users")
             .select("role")
             .eq("id", session.user.id)
             .single();
+
+          // Si no existe perfil en users, auto-crearlo via API (self-healing)
+          if (userError && userError.code === "PGRST116") {
+            try {
+              const ensureRes = await fetch("/api/auth/ensure-profile", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${session.access_token}` },
+              });
+              if (ensureRes.ok) {
+                const profile = await ensureRes.json();
+                userData = { role: profile.role };
+                userError = null;
+              }
+            } catch (e) {
+              console.error("[AUTH] Error auto-creando perfil:", e);
+            }
+          }
 
           if (userData && userData.role === "admin") {
             adminLink?.classList.remove("hidden");
