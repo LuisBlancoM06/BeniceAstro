@@ -28,12 +28,20 @@ COPY --from=build /app/package-lock.json* ./
 # SEGURIDAD: Instalar solo dependencias de producción (excluir devDependencies)
 RUN npm ci --omit=dev && npm cache clean --force
 
+# SEGURIDAD: Crear usuario sin privilegios para ejecutar la aplicación
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 astro && \
+    chown -R astro:nodejs /app
+
 # Variables de entorno
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=4321
 
 EXPOSE 4321
+
+# Ejecutar como usuario sin privilegios (no root)
+USER astro
 
 # Healthcheck para Coolify / Traefik
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

@@ -7,7 +7,8 @@ const securityHeaders: Record<string, string> = {
   'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
-  'X-XSS-Protection': '1; mode=block',
+  // X-XSS-Protection omitido intencionalmente: obsoleto y puede causar side-channel leaks.
+  // Los navegadores modernos usan CSP en su lugar.
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self), payment=(self)',
   'X-DNS-Prefetch-Control': 'on',
@@ -19,11 +20,11 @@ const securityHeaders: Record<string, string> = {
   'Cross-Origin-Embedder-Policy': 'unsafe-none',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://cdn.jsdelivr.net",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https://fonts.gstatic.com data:",
-    "connect-src 'self' https://*.supabase.co https://api.stripe.com https://res.cloudinary.com",
+    "connect-src 'self' https://*.supabase.co https://api.stripe.com https://res.cloudinary.com https://fonts.googleapis.com https://fonts.gstatic.com",
     "frame-src 'self' https://js.stripe.com",
     "frame-ancestors 'self'",
     "object-src 'none'",
@@ -89,10 +90,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
   // Excepto la raíz "/" y rutas de API
   if (path !== '/' && path.endsWith('/') && !path.startsWith('/api/')) {
     const cleanUrl = path.replace(/\/+$/, '') + context.url.search;
-    return new Response(null, {
+    return addSecurityHeaders(new Response(null, {
       status: 301,
       headers: { 'Location': cleanUrl },
-    });
+    }));
   }
 
   // --- Rate Limiting ---

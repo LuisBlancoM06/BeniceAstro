@@ -163,8 +163,8 @@ const { count: totalUsers } = await supabase
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    import Chart from 'chart.js/auto';
     // Cargar datos de analytics
     async function loadAnalytics() {
       try {
@@ -203,7 +203,7 @@ const { count: totalUsers } = await supabase
 
         // Crear gráfico
         const ctx = document.getElementById('salesChart') as HTMLCanvasElement;
-        new (window as any).Chart(ctx, {
+        new Chart(ctx, {
           type: 'bar',
           data: {
             labels: data.chart.labels,
@@ -226,7 +226,7 @@ const { count: totalUsers } = await supabase
               y: {
                 beginAtZero: true,
                 ticks: {
-                  callback: function(value: number) {
+                  callback: function(value: string | number) {
                     return value + '€';
                   }
                 }
