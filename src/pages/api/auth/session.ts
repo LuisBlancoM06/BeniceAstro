@@ -24,14 +24,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // Validar formato básico de JWT (3 partes base64url separadas por punto)
+    // Validar formato básico de JWT para access_token (3 partes base64url separadas por punto)
     const jwtRegex = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
     const accessValid = jwtRegex.test(access_token);
-    const refreshValid = jwtRegex.test(refresh_token);
-    console.log('🟣 [SESSION] JWT format valid — access:', accessValid, 'refresh:', refreshValid);
+    // El refresh_token puede ser JWT o un token opaco (Supabase v2.x+ usa formatos variables)
+    // Solo validamos que sea un string no vacío con caracteres seguros
+    const refreshValid = typeof refresh_token === 'string' && refresh_token.length >= 10 && /^[A-Za-z0-9_\-\.+/=]+$/.test(refresh_token);
+    console.log('🟣 [SESSION] Token format valid — access (JWT):', accessValid, 'refresh:', refreshValid);
 
     if (!accessValid || !refreshValid) {
-      console.error('❌ [SESSION] Formato JWT inválido');
+      console.error('❌ [SESSION] Formato de token inválido — access JWT:', accessValid, 'refresh:', refreshValid);
+      console.error('❌ [SESSION] access_token (primeros 30):', String(access_token).substring(0, 30));
+      console.error('❌ [SESSION] refresh_token (primeros 30):', String(refresh_token).substring(0, 30));
       return new Response(JSON.stringify({ error: 'Formato de token inválido' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
