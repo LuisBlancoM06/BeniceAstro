@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 import { createServerClient } from '../../lib/supabase';
 
-const supabase = createServerClient(Astro.cookies);
+const supabase = await createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {

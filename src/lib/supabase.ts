@@ -41,7 +41,10 @@ export const supabaseAdmin = createClient(
 );
 
 // ── Cliente SSR (lee cookies de Astro) ──────────────────────────────────
-export function createServerClient(cookies: AstroCookies) {
+// IMPORTANTE: esta función es ASYNC porque setSession() necesita completarse
+// antes de que el cliente sea utilizable (en Node.js no hay navigator.locks,
+// así que la sincronización interna de Supabase no funciona bien sin await).
+export async function createServerClient(cookies: AstroCookies) {
   const accessToken  = cookies.get('sb-access-token')?.value;
   const refreshToken = cookies.get('sb-refresh-token')?.value;
 
@@ -53,10 +56,15 @@ export function createServerClient(cookies: AstroCookies) {
   });
 
   if (accessToken && refreshToken) {
-    client.auth.setSession({
+    // Await obligatorio: sin esto, getSession()/getUser() devuelven null
+    // porque la sesión no se ha establecido aún en el cliente.
+    const { error } = await client.auth.setSession({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
+    if (error) {
+      console.warn('[SSR] setSession failed:', error.message);
+    }
   }
 
   return client;

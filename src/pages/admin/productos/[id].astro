@@ -4,7 +4,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../../lib/supabase';
 import RichTextEditor from '../../../components/RichTextEditor';
 
-const supabase = createServerClient(Astro.cookies);
+const supabase = await createServerClient(Astro.cookies);
 
 // Verificar autenticación y rol admin
 const { data: { session } } = await supabase.auth.getSession();

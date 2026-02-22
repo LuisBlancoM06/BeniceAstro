@@ -9,7 +9,7 @@ interface Props {
 const { title, currentPage = 'dashboard' } = Astro.props;
 
 // Proteger ruta - solo admins
-const supabase = createServerClient(Astro.cookies);
+const supabase = await createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {

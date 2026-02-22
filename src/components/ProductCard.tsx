@@ -118,7 +118,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <article 
-      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-purple-200"
+      className="group relative bg-white rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-purple-200/50"
       itemScope
       itemType="https://schema.org/Product"
     >
@@ -130,7 +130,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Imagen */}
         <div className="relative aspect-square overflow-hidden bg-gray-50">
           {showPlaceholder ? (
-            <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-4 group-hover:scale-110 transition-transform duration-700 ease-out`}>
+            <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-4 group-hover:scale-105 transition-transform duration-700 ease-out`}>
               <AnimalIcon animal={product.animal_type} />
               <span className="text-white font-bold text-sm text-center mt-3 line-clamp-2 drop-shadow-md">
                 {product.brand || product.name}
@@ -143,7 +143,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
               loading="lazy"
               decoding="async"
               itemProp="image"
@@ -151,19 +151,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             />
           )}
           
-          {/* Overlay con acciones al hover */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Overlay sutil al hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Badges superiores */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {discount > 0 && (
-              <span className="bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg animate-fade-in flex items-center gap-1">
+              <span className="bg-red-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg shadow-red-500/30 flex items-center gap-1">
                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
                 -{discount}%
               </span>
             )}
             {isLowStock && (
-              <span className="bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
+              <span className="bg-amber-500 text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg shadow-amber-500/30">
                 ¡Últimas {product.stock}!
               </span>
             )}
@@ -175,21 +175,21 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Badge tipo animal */}
-          <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-gray-700 px-2 py-1 rounded-lg text-xs font-medium shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          <span className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm text-gray-700 px-2.5 py-1 rounded-lg text-xs font-medium shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
             {getAnimalEmoji(product.animal_type)} {animalLabel}
           </span>
         </div>
 
         {/* Info del producto */}
-        <div className="p-3.5">
+        <div className="p-4">
           {/* Categoría */}
-          <span className="text-xs font-medium text-purple-600 uppercase tracking-wider">
+          <span className="text-[11px] font-bold text-purple-600 uppercase tracking-widest">
             {product.category}
           </span>
 
           {/* Nombre */}
           <h3 
-            className="font-semibold text-sm text-gray-900 line-clamp-2 mt-1 mb-2 group-hover:text-purple-700 transition-colors min-h-[2.5rem] leading-tight"
+            className="font-bold text-sm text-gray-900 line-clamp-2 mt-1.5 mb-2.5 group-hover:text-purple-700 transition-colors min-h-[2.5rem] leading-snug"
             itemProp="name"
           >
             {product.name}
@@ -199,14 +199,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-baseline gap-2" itemProp="offers" itemScope itemType="https://schema.org/Offer">
             <meta itemProp="priceCurrency" content="EUR" />
             <span 
-              className={`text-lg font-bold ${isOnSale ? 'text-red-600' : 'text-gray-900'}`}
+              className={`text-xl font-extrabold ${isOnSale ? 'text-red-600' : 'text-gray-900'}`}
               itemProp="price"
               content={finalPrice.toFixed(2)}
             >
               {finalPrice.toFixed(2)}€
             </span>
             {isOnSale && salePrice && (
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-sm text-gray-400 line-through">
                 {regularPrice.toFixed(2)}€
               </span>
             )}
@@ -215,7 +215,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Barra de stock bajo */}
           {isLowStock && (
-            <div className="mt-2">
+            <div className="mt-2.5">
               <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-amber-500 to-red-500 rounded-full transition-all duration-1000"
@@ -227,16 +227,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
       </a>
 
-      {/* Botón favorito (fuera del <a> para accesibilidad) */}
+      {/* Botón favorito */}
       <button
         onClick={toggleFavorite}
         aria-label={isFavorite ? `Quitar ${product.name} de favoritos` : `Añadir ${product.name} a favoritos`}
         aria-pressed={isFavorite}
         className={`
-          absolute top-3 right-3 p-2 rounded-full shadow-lg transition-all duration-300 z-10
+          absolute top-3 right-3 p-2.5 rounded-xl shadow-lg transition-all duration-300 z-10
           ${isFavorite 
-            ? 'bg-red-500 text-white scale-100' 
-            : 'bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0'
+            ? 'bg-red-500 text-white scale-100 shadow-red-500/30' 
+            : 'bg-white/95 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-white opacity-100 sm:opacity-0 sm:group-hover:opacity-100 translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0'
           }
           ${justToggled ? 'animate-heartbeat' : ''}
           ${isFavorite ? 'opacity-100' : ''}

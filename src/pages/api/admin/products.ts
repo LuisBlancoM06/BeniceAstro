@@ -5,8 +5,8 @@ import type { AstroCookies } from 'astro';
 export const prerender = false;
 
 // Función helper para verificar si es admin usando cookies (validando JWT server-side)
-async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supabaseClient: ReturnType<typeof createServerClient> }> {
-  const supabaseClient = createServerClient(cookies);
+async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supabaseClient: Awaited<ReturnType<typeof createServerClient>> }> {
+  const supabaseClient = await createServerClient(cookies);
   // Usar getUser() que valida el JWT contra el servidor de Supabase (no getSession)
   const { data: { user }, error } = await supabaseClient.auth.getUser();
 

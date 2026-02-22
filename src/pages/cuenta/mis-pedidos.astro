@@ -4,7 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import { createServerClient } from '../../lib/supabase';
 
 // Proteger la ruta - verificar autenticacion
-const supabase = createServerClient(Astro.cookies);
+const supabase = await createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 
 if (!session) {
