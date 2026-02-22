@@ -61,7 +61,8 @@ export const PUT: APIRoute = async ({ request }) => {
     if (address_line1 !== undefined) dbUpdates.address_line1 = address_line1;
     if (address_line2 !== undefined) dbUpdates.address_line2 = address_line2;
     if (city !== undefined) dbUpdates.city = city;
-    if (state !== undefined) dbUpdates.state = state;
+    // NOTA: 'state' no existe como columna en la tabla users.
+    // Se usa solo para Stripe (ver sincronización abajo).
     if (postal_code !== undefined) dbUpdates.postal_code = postal_code;
     if (country !== undefined) dbUpdates.country = country;
 

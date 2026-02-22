@@ -70,15 +70,18 @@ export const GET: APIRoute = async ({ request }) => {
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startOfMonth);
 
-    // 5. Producto más vendido (del mes)
+    // 5. Producto más vendido (del mes) — order_items no tiene created_at,
+    //    se filtra vía JOIN con orders usando !inner
     const { data: orderItems } = await supabaseAdmin
       .from('order_items')
       .select(`
         product_id,
         quantity,
-        products (name)
+        products (name),
+        orders!inner (created_at)
       `)
-      .gte('created_at', startOfMonth);
+      .gte('orders.created_at', startOfMonth)
+      .in('orders.status', ['pagado', 'enviado', 'entregado']);
 
     // Agrupar por producto
     const productSales: Record<string, { name: string; quantity: number }> = {};

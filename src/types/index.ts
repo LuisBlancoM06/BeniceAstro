@@ -14,6 +14,8 @@ export interface Product {
   on_sale?: boolean;
   sale_price?: number;
   slug?: string;
+  rating?: number;
+  reviews_count?: number;
   created_at: string;
 }
 
@@ -26,7 +28,6 @@ export interface User {
   address_line1?: string;
   address_line2?: string;
   city?: string;
-  state?: string;
   postal_code?: string;
   country?: string;
   avatar_url?: string;
@@ -162,7 +163,7 @@ export interface ContactMessage {
   phone?: string;
   subject: string;
   message: string;
-  read?: boolean;
+  status?: 'pendiente' | 'leido' | 'respondido';
   created_at: string;
 }
 
