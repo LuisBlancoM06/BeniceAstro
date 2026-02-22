@@ -348,27 +348,7 @@ const cancellationStatusColors: Record<string, string> = {
 
             {/* Cambiar estado */}
             {order.status === 'pagado' && (
-              <div class="pt-4 border-t space-y-3">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">N&uacute;mero de seguimiento *</label>
-                  <input
-                    type="text"
-                    id="tracking-number"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm"
-                    placeholder="Ej: ES12345678901"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Transportista</label>
-                  <select id="carrier-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 text-sm">
-                    <option value="Correos Express">Correos Express</option>
-                    <option value="SEUR">SEUR</option>
-                    <option value="MRW">MRW</option>
-                    <option value="GLS">GLS</option>
-                    <option value="DHL">DHL</option>
-                    <option value="UPS">UPS</option>
-                  </select>
-                </div>
+              <div class="pt-4 border-t">
                 <button
                   id="mark-shipped-btn"
                   data-order-id={order.id}
@@ -380,13 +360,7 @@ const cancellationStatusColors: Record<string, string> = {
             )}
 
             {order.status === 'enviado' && (
-              <div class="pt-4 border-t space-y-3">
-                {order.tracking_number && (
-                  <div class="text-sm">
-                    <span class="text-gray-500">Seguimiento:</span>
-                    <span class="font-mono font-medium ml-1">{order.tracking_number}</span>
-                  </div>
-                )}
+              <div class="pt-4 border-t">
                 <button
                   id="mark-delivered-btn"
                   data-order-id={order.id}
@@ -447,13 +421,6 @@ const cancellationStatusColors: Record<string, string> = {
     document.getElementById('mark-shipped-btn')?.addEventListener('click', async (e) => {
       const btn = e.target as HTMLButtonElement;
       const orderId = btn.dataset.orderId;
-      const trackingNumber = (document.getElementById('tracking-number') as HTMLInputElement)?.value.trim();
-      const carrier = (document.getElementById('carrier-select') as HTMLSelectElement)?.value;
-
-      if (!trackingNumber) {
-        showToast('Introduce el numero de seguimiento', 'error');
-        return;
-      }
 
       if (!confirm('¿Marcar este pedido como enviado? Se notificara al cliente por email.')) return;
 
@@ -470,9 +437,7 @@ const cancellationStatusColors: Record<string, string> = {
           },
           body: JSON.stringify({
             order_id: orderId,
-            new_status: 'enviado',
-            tracking_number: trackingNumber,
-            carrier: carrier
+            new_status: 'enviado'
           })
         });
 

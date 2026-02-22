@@ -71,7 +71,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Validar longitud de tracking y carrier
+    // tracking_number y carrier son opcionales
     if (tracking_number && (typeof tracking_number !== 'string' || tracking_number.length > 100)) {
       return new Response(JSON.stringify({ error: 'Número de seguimiento inválido (máx 100 caracteres)' }), {
         status: 400,
@@ -80,14 +80,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
     if (carrier && (typeof carrier !== 'string' || carrier.length > 50)) {
       return new Response(JSON.stringify({ error: 'Transportista inválido (máx 50 caracteres)' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Si cambia a enviado, requiere tracking_number
-    if (new_status === 'enviado' && !tracking_number) {
-      return new Response(JSON.stringify({ error: 'Se requiere numero de seguimiento para marcar como enviado' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -170,8 +162,8 @@ export const POST: APIRoute = async ({ request }) => {
             to: customerEmail,
             customerName,
             orderId: order.id,
-            trackingNumber: tracking_number,
-            carrier: carrier || 'Correos Express'
+            trackingNumber: tracking_number || 'Pendiente',
+            carrier: carrier || 'Pendiente'
           });
         } else if (new_status === 'entregado') {
           await sendDeliveryConfirmation(customerEmail, order.id, customerName);

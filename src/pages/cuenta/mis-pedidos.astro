@@ -54,16 +54,6 @@ const getCancellation = (orderId: string) => {
   return cancellationRequests.find((c: any) => c.order_id === orderId);
 };
 
-const getTrackingUrl = (carrier: string, trackingNumber: string) => {
-  const urls: Record<string, string> = {
-    'Correos Express': `https://www.correosexpress.com/web/seguimiento-online#localizador=${trackingNumber}`,
-    'SEUR': `https://www.seur.com/livetracking/?segOnlineIdentificador=${trackingNumber}`,
-    'MRW': `https://www.mrw.es/seguimiento_envios/MRW_seguimiento_envios.asp?consulta=${trackingNumber}`,
-    'GLS': `https://www.gls-spain.es/es/ayuda/seguimiento/${trackingNumber}`,
-  };
-  return urls[carrier] || urls['Correos Express'];
-};
-
 // Pre-compute timeline steps for each order
 const TIMELINE_STATUSES = ['pagado', 'enviado', 'entregado'] as const;
 const TIMELINE_LABELS = { pagado: 'Confirmado', enviado: 'Enviado', entregado: 'Entregado' };
@@ -181,27 +171,6 @@ const getTimelineSteps = (orderStatus: string) => {
                 </div>
               )}
             </div>
-
-            <!-- Tracking -->
-            {order.status === 'enviado' && order.tracking_number && (
-              <div class="mt-2 p-3 bg-blue-50 rounded-lg">
-                <p class="text-sm text-blue-800">
-                  <span class="font-semibold">Transportista:</span> {order.carrier || 'Correos Express'}
-                </p>
-                <p class="text-sm text-blue-800 mt-1">
-                  <span class="font-semibold">N.º seguimiento:</span> {order.tracking_number}
-                </p>
-                <a
-                  href={getTrackingUrl(order.carrier || 'Correos Express', order.tracking_number)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 mt-2 text-sm font-semibold text-purple-700 hover:text-purple-900 underline"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                  Seguir en {order.carrier || 'Correos Express'}
-                </a>
-              </div>
-            )}
 
             <!-- Estado de cancelacion -->
             {cancellation && cancellation.status === 'pendiente' && (
