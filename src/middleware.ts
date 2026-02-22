@@ -143,7 +143,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const authHeader = context.request.headers.get('authorization');
       const expectedOrigin = context.url.origin;
 
-      if (origin && origin !== expectedOrigin) {
+      // Detrás de un reverse proxy (Coolify/Traefik/Docker), context.url.origin
+      // puede ser interno (http://0.0.0.0:4321) mientras el navegador envía el
+      // Origin público (https://dominio.com). Aceptamos ambos.
+      const publicSiteUrl = (import.meta.env.PUBLIC_SITE_URL || '').replace(/\/$/, '');
+      const allowedOrigins = new Set<string>([expectedOrigin]);
+      if (publicSiteUrl) {
+        allowedOrigins.add(publicSiteUrl);
+        // Aceptar también con/sin www
+        try {
+          const parsed = new URL(publicSiteUrl);
+          if (parsed.hostname.startsWith('www.')) {
+            allowedOrigins.add(publicSiteUrl.replace('://www.', '://'));
+          } else {
+            allowedOrigins.add(publicSiteUrl.replace('://', '://www.'));
+          }
+        } catch { /* URL inválida, ignorar */ }
+      }
+
+      if (origin && !allowedOrigins.has(origin)) {
+        console.warn(`[CSRF] Origin bloqueado: ${origin} (esperados: ${[...allowedOrigins].join(', ')})`);
         return addSecurityHeaders(new Response(JSON.stringify({ error: 'CSRF blocked: origin inválido' }), {
           status: 403,
           headers: { 'Content-Type': 'application/json; charset=utf-8' },
