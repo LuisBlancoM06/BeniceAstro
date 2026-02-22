@@ -129,7 +129,7 @@ export default function CookieBanner(_props: Props) {
                   </div>
                   <p className="text-xs text-gray-500 mt-4">
                     Al hacer clic en "Aceptar todas", aceptas el almacenamiento de cookies en tu dispositivo. 
-                    <a href="/cookies" className="text-purple-600 hover:underline ml-1">Más información</a>
+                    <a href="/legal/cookies" className="text-purple-600 hover:underline ml-1">Más información</a>
                   </p>
                 </div>
               </div>
