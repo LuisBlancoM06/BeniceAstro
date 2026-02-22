@@ -10,13 +10,6 @@ const { data: products } = await supabase
 
 const totalProducts = products?.length || 0;
 
-const categories = [
-  { id: 'alimentacion', name: 'Alimentación', description: 'Piensos, húmedos y snacks', iconPath: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
-  { id: 'salud', name: 'Salud', description: 'Antiparasitarios y vitaminas', iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
-  { id: 'accesorios', name: 'Accesorios', description: 'Collares, correas y camas', iconPath: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z' },
-  { id: 'juguetes', name: 'Juguetes', description: 'Pelotas, mordedores y más', iconPath: 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-];
-
 const sizes = [
   { id: 'mini', name: 'Mini / Toy', description: 'Hasta 5kg', emoji: '🐕' },
   { id: 'mediano', name: 'Mediano', description: '5-25kg', emoji: '🦮' },
@@ -31,119 +24,62 @@ const ages = [
 ---
 
 <Layout title="Productos para Perros" description="Encuentra los mejores productos para perros: alimentación premium, juguetes, correas y más. Envío gratis en pedidos +49€.">
-  <!-- Hero Premium -->
-  <section class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500"></div>
-    <div class="absolute inset-0 opacity-[0.07]">
-      <div class="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full"></div>
-      <div class="absolute top-32 right-16 w-48 h-48 border-2 border-white rounded-full"></div>
-      <div class="absolute bottom-10 left-1/3 w-24 h-24 border-2 border-white rounded-full"></div>
-    </div>
-    <div class="absolute inset-0 bg-gradient-to-t from-orange-700/40 to-transparent"></div>
+  <!-- Hero con imagen -->
+  <section class="relative overflow-hidden min-h-[420px] md:min-h-[500px]">
+    <img 
+      src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=1600&h=700&fit=crop&q=80" 
+      alt="Grupo de perros corriendo juntos" 
+      class="absolute inset-0 w-full h-full object-cover"
+      loading="eager"
+    />
+    <div class="absolute inset-0 bg-gradient-to-r from-gray-900/85 via-gray-900/60 to-gray-900/30"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent"></div>
 
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
       <nav class="text-sm mb-8" aria-label="Breadcrumb">
-        <ol class="flex items-center gap-2 text-orange-100">
+        <ol class="flex items-center gap-2 text-gray-300">
           <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
           <li><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
           <li class="text-white font-medium">Perros</li>
         </ol>
       </nav>
 
-      <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
-        <div class="flex-1">
-          <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-orange-50 mb-4">
-            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            {totalProducts} productos disponibles
-          </div>
-          <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
-            Todo para tu
-            <span class="bg-gradient-to-r from-purple-300 to-purple-200 bg-clip-text text-transparent"> Perro</span>
-          </h1>
-          <p class="text-orange-50 text-lg md:text-xl max-w-lg leading-relaxed">
-            Los mejores productos para el cuidado, alimentación y diversión de tu mejor amigo.
-          </p>
-          <div class="flex flex-wrap gap-3 mt-8">
-            <a href="#productos" class="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 px-8 rounded-full transition-all shadow-lg shadow-purple-700/25 hover:shadow-purple-700/40 hover:-translate-y-0.5">
-              Ver productos
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
-            </a>
-            <a href="/ofertas" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/20">
-              Ver ofertas
-            </a>
-          </div>
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-1.5 text-sm text-white/90 mb-4 border border-white/10">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          {totalProducts} productos disponibles
         </div>
-        <div class="hidden md:flex items-center justify-center w-52 h-52 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 shadow-2xl">
-          <svg class="w-24 h-24 text-white/70" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+          Todo para tu
+          <span class="bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent"> Perro</span>
+        </h1>
+        <p class="text-gray-200 text-lg md:text-xl max-w-lg leading-relaxed">
+          Los mejores productos para el cuidado, alimentación y diversión de tu mejor amigo.
+        </p>
+        <div class="flex flex-wrap gap-3 mt-8">
+          <a href="#productos" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-full transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5">
+            Ver productos
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+          <a href="/ofertas" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/20">
+            Ver ofertas
+          </a>
         </div>
       </div>
 
       <div class="grid grid-cols-3 gap-4 mt-12 max-w-xl">
-        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center">
           <p class="text-2xl md:text-3xl font-bold text-white">{totalProducts}</p>
-          <p class="text-orange-100 text-sm mt-1">Productos</p>
+          <p class="text-gray-300 text-sm mt-1">Productos</p>
         </div>
-        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center">
           <p class="text-2xl md:text-3xl font-bold text-white">Gratis</p>
-          <p class="text-orange-100 text-sm mt-1">Envío +49€</p>
+          <p class="text-gray-300 text-sm mt-1">Envío +49€</p>
         </div>
-        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 text-center">
           <p class="text-2xl md:text-3xl font-bold text-white">24-48h</p>
-          <p class="text-orange-100 text-sm mt-1">Entrega</p>
+          <p class="text-gray-300 text-sm mt-1">Entrega</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Categorías -->
-  <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10">
-        <h2 class="text-3xl font-bold text-gray-900">Explora por categoría</h2>
-        <p class="text-gray-500 mt-2">Encuentra exactamente lo que tu perro necesita</p>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {categories.map((cat) => (
-          <a
-            href={`/animales/perros?categoria=${cat.id}`}
-            class="group relative bg-white rounded-2xl p-6 md:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden"
-          >
-            <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div class="relative">
-              <div class="w-14 h-14 mx-auto mb-4 bg-orange-100 group-hover:bg-orange-200 rounded-2xl flex items-center justify-center transition-colors duration-300">
-                <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={cat.iconPath} />
-                </svg>
-              </div>
-              <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{cat.name}</h3>
-              <p class="text-sm text-gray-500 mt-1">{cat.description}</p>
-            </div>
-          </a>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Por tamaño -->
-  <section class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold text-gray-900 mb-6">Según el tamaño de tu perro</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {sizes.map((size) => (
-          <a
-            href={`/animales/perros?tamano=${size.id}`}
-            class="group flex items-center gap-4 bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300"
-          >
-            <span class="text-4xl">{size.emoji}</span>
-            <div>
-              <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{size.name}</h3>
-              <p class="text-sm text-gray-500">{size.description}</p>
-            </div>
-            <svg class="w-5 h-5 text-gray-300 group-hover:text-orange-500 ml-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-          </a>
-        ))}
       </div>
     </div>
   </section>
@@ -414,15 +350,7 @@ const ages = [
     });
 
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('categoria');
     const sizeParam = urlParams.get('tamano');
-    if (categoryParam) {
-      allProducts.forEach(({ product, container }) => {
-        if (product.category !== categoryParam) (container as HTMLElement).style.display = 'none';
-      });
-      const visible = allProducts.filter(({ product }) => product.category === categoryParam);
-      if (countText) countText.textContent = `${visible.length} productos`;
-    }
     if (sizeParam) {
       const cb = document.querySelector(`input[name="size"][value="${sizeParam}"]`) as HTMLInputElement;
       if (cb) cb.checked = true;
