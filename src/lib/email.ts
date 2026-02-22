@@ -4,7 +4,7 @@ import { Resend } from 'resend';
 const resend = new Resend(import.meta.env.RESEND_API_KEY || '');
 
 const FROM_NAME = 'Benice';
-const FROM_EMAIL = 'onboarding@resend.dev';
+const FROM_EMAIL = import.meta.env.FROM_EMAIL || 'onboarding@resend.dev';
 const SUPPORT_EMAIL = 'lblancom06@gmail.com';
 
 // Helper para escapar HTML y prevenir XSS
