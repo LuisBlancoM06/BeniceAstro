@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { createServerClient } from '../../lib/supabase';
+import { createServerClient, supabaseAdmin } from '../../lib/supabase';
 
 const supabase = await createServerClient(Astro.cookies);
 
@@ -9,7 +9,7 @@ const supabase = await createServerClient(Astro.cookies);
 const { data: { session } } = await supabase.auth.getSession();
 if (!session) return Astro.redirect('/auth/login');
 
-const { data: userData } = await supabase
+const { data: userData } = await supabaseAdmin
   .from('users')
   .select('role')
   .eq('id', session.user.id)
@@ -29,7 +29,7 @@ function safeHostname(url: string | null): string {
 const perPage = 50;
 
 // Consultar visitas (sin ip_address por privacidad/RGPD)
-let query = supabase
+let query = supabaseAdmin
   .from('visits')
   .select('id, page, user_agent, referer, user_id, created_at', { count: 'exact' })
   .order('created_at', { ascending: false })
@@ -51,14 +51,14 @@ const totalPages = Math.ceil((totalVisitas || 0) / perPage);
 // Stats rápidos
 const hoy = new Date().toISOString().split('T')[0];
 
-const { count: visitasHoy } = await supabase
+const { count: visitasHoy } = await supabaseAdmin
   .from('visits')
   .select('*', { count: 'exact', head: true })
   .gte('created_at', `${hoy}T00:00:00`)
   .lte('created_at', `${hoy}T23:59:59`);
 
 // Usuarios registrados activos hoy
-const { data: usersHoyData } = await supabase
+const { data: usersHoyData } = await supabaseAdmin
   .from('visits')
   .select('user_id')
   .not('user_id', 'is', null)
@@ -69,7 +69,7 @@ const usuariosActivosHoy = new Set(usersHoyData?.map((v: any) => v.user_id)).siz
 
 // Top usuarios registrados (últimos 7 días)
 const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-const { data: visitasSemana } = await supabase
+const { data: visitasSemana } = await supabaseAdmin
   .from('visits')
   .select('user_id, page')
   .not('user_id', 'is', null)
@@ -93,7 +93,7 @@ const topUserIds = Object.entries(userCounts)
 // Obtener emails de los top usuarios
 const topUserIdsArray = topUserIds.map(([id]) => id);
 const { data: topUsersData } = topUserIdsArray.length > 0
-  ? await supabase.from('users').select('id, email, full_name').in('id', topUserIdsArray)
+  ? await supabaseAdmin.from('users').select('id, email, full_name').in('id', topUserIdsArray)
   : { data: [] };
 
 const usersMap: Record<string, { email: string; full_name?: string }> = {};
@@ -104,14 +104,14 @@ topUsersData?.forEach((u: any) => {
 // También obtener info de los usuarios de las visitas en la tabla actual
 const visitaUserIds = [...new Set(visitas?.filter((v: any) => v.user_id).map((v: any) => v.user_id) || [])];
 if (visitaUserIds.length > 0) {
-  const { data: visitaUsersData } = await supabase.from('users').select('id, email, full_name').in('id', visitaUserIds);
+  const { data: visitaUsersData } = await supabaseAdmin.from('users').select('id, email, full_name').in('id', visitaUserIds);
   visitaUsersData?.forEach((u: any) => {
     usersMap[u.id] = { email: u.email, full_name: u.full_name };
   });
 }
 
 // Páginas más visitadas (últimos 7 días)
-const { data: allVisitasSemana } = await supabase
+const { data: allVisitasSemana } = await supabaseAdmin
   .from('visits')
   .select('page')
   .gte('created_at', hace7dias);
