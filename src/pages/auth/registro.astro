@@ -255,6 +255,21 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 
         // Si hay sesion, el usuario ya esta autenticado
         if (data.session) {
+          // Guardar tokens en cookies HttpOnly vía servidor (igual que login)
+          try {
+            const res = await fetch('/api/auth/session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                access_token: data.session.access_token,
+                refresh_token: data.session.refresh_token,
+              }),
+            });
+            if (!res.ok) console.error('Error al guardar sesión');
+          } catch (e) {
+            console.error('Error al guardar sesión:', e);
+          }
+
           successMessage!.textContent = 'Cuenta creada. Redirigiendo...';
           successMessage!.classList.remove('hidden');
           errorMessage!.classList.add('hidden');
