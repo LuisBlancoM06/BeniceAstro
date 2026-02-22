@@ -21,6 +21,11 @@ if (!userData || userData.role !== 'admin') return Astro.redirect('/');
 const filtroFecha = Astro.url.searchParams.get('fecha') || '';
 const filtroUsuario = Astro.url.searchParams.get('usuario') || '';
 const page = parseInt(Astro.url.searchParams.get('page') || '1');
+
+function safeHostname(url: string | null): string {
+  if (!url) return '-';
+  try { return new URL(url).hostname; } catch { return url; }
+}
 const perPage = 50;
 
 // Consultar visitas (sin ip_address por privacidad/RGPD)
@@ -316,7 +321,7 @@ const topPages = Object.entries(pageCounts)
                     </td>
                     <td class="px-4 py-3 text-gray-500">{browser}</td>
                     <td class="px-4 py-3 text-gray-400 max-w-[150px] truncate" title={v.referer || ''}>
-                      {v.referer ? new URL(v.referer).hostname : '-'}
+                      {safeHostname(v.referer)}
                     </td>
                     <td class="px-4 py-3 text-gray-500 whitespace-nowrap">
                       <span class="font-medium">{fechaStr}</span> <span class="text-gray-400">{horaStr}</span>

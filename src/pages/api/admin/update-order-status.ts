@@ -9,20 +9,20 @@ const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 const VALID_STATUSES = ['pagado', 'enviado', 'entregado', 'cancelado'];
 
+// Máquina de estados: transiciones permitidas
+const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+  pendiente: ['pagado', 'cancelado'],
+  pagado: ['enviado', 'cancelado'],
+  enviado: ['entregado'],
+  entregado: [],
+  cancelado: [],
+};
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { order_id, new_status, tracking_number, carrier } = await request.json();
-
-    if (!order_id || !new_status || !VALID_STATUSES.includes(new_status)) {
-      return new Response(JSON.stringify({ error: 'Datos invalidos' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Verificar admin
+    // 1. Autenticación PRIMERO
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
@@ -52,6 +52,39 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // 2. Parsear y validar body
+    const { order_id, new_status, tracking_number, carrier } = await request.json();
+
+    if (!order_id || !new_status || !VALID_STATUSES.includes(new_status)) {
+      return new Response(JSON.stringify({ error: 'Datos invalidos' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar UUID
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof order_id !== 'string' || !UUID_RE.test(order_id)) {
+      return new Response(JSON.stringify({ error: 'ID de pedido inválido' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar longitud de tracking y carrier
+    if (tracking_number && (typeof tracking_number !== 'string' || tracking_number.length > 100)) {
+      return new Response(JSON.stringify({ error: 'Número de seguimiento inválido (máx 100 caracteres)' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    if (carrier && (typeof carrier !== 'string' || carrier.length > 50)) {
+      return new Response(JSON.stringify({ error: 'Transportista inválido (máx 50 caracteres)' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Si cambia a enviado, requiere tracking_number
     if (new_status === 'enviado' && !tracking_number) {
       return new Response(JSON.stringify({ error: 'Se requiere numero de seguimiento para marcar como enviado' }), {
@@ -74,6 +107,17 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Validar transición de estado permitida
+    const allowedNext = ALLOWED_TRANSITIONS[order.status] || [];
+    if (!allowedNext.includes(new_status)) {
+      return new Response(JSON.stringify({ 
+        error: `No se puede cambiar de "${order.status}" a "${new_status}". Transiciones permitidas: ${allowedNext.join(', ') || 'ninguna'}` 
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Actualizar estado
     const updateData: any = {
       status: new_status,
@@ -83,6 +127,9 @@ export const POST: APIRoute = async ({ request }) => {
     if (tracking_number) {
       updateData.tracking_number = tracking_number;
     }
+    if (carrier) {
+      updateData.carrier = carrier;
+    }
 
     const { error: updateError } = await supabaseAdmin
       .from('orders')
@@ -90,6 +137,15 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', order_id);
 
     if (updateError) throw updateError;
+
+    // Registrar en historial de estados
+    await supabaseAdmin.from('order_status_history').insert({
+      order_id,
+      old_status: order.status,
+      new_status,
+      changed_by: user.id,
+      notes: tracking_number ? `Tracking: ${tracking_number}` : null,
+    });
 
     // Obtener email del cliente
     let customerEmail: string | null = order.users?.email || null;

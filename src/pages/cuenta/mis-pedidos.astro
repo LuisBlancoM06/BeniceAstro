@@ -39,6 +39,31 @@ if (orderIds.length > 0) {
 const getCancellation = (orderId: string) => {
   return cancellationRequests.find((c: any) => c.order_id === orderId);
 };
+
+const getTrackingUrl = (carrier: string, trackingNumber: string) => {
+  const urls: Record<string, string> = {
+    'Correos Express': `https://www.correosexpress.com/web/seguimiento-online#localizador=${trackingNumber}`,
+    'SEUR': `https://www.seur.com/livetracking/?segOnlineIdentificador=${trackingNumber}`,
+    'MRW': `https://www.mrw.es/seguimiento_envios/MRW_seguimiento_envios.asp?consulta=${trackingNumber}`,
+    'GLS': `https://www.gls-spain.es/es/ayuda/seguimiento/${trackingNumber}`,
+  };
+  return urls[carrier] || urls['Correos Express'];
+};
+
+// Pre-compute timeline steps for each order
+const TIMELINE_STATUSES = ['pagado', 'enviado', 'entregado'] as const;
+const TIMELINE_LABELS = { pagado: 'Confirmado', enviado: 'Enviado', entregado: 'Entregado' };
+const getTimelineSteps = (orderStatus: string) => {
+  const idx = TIMELINE_STATUSES.indexOf(orderStatus as any);
+  return TIMELINE_STATUSES.map((s, i) => ({
+    key: s,
+    label: TIMELINE_LABELS[s],
+    done: idx >= i,
+    connectorDone: idx > i,
+    isLast: i === TIMELINE_STATUSES.length - 1,
+    number: i + 1,
+  }));
+};
 ---
 
 <Layout title="Mis Pedidos">
@@ -117,12 +142,50 @@ const getCancellation = (orderId: string) => {
               </div>
             </div>
 
+            <!-- Timeline de estado -->
+            <div class="mt-4 mb-2">
+              {order.status === 'cancelado' ? (
+                <div class="flex items-center gap-2 text-red-600 text-sm font-medium">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                  Pedido cancelado
+                </div>
+              ) : (
+                <div class="flex items-center gap-0">
+                  {getTimelineSteps(order.status).map((step) => (
+                    <div class="flex items-center">
+                      <div class={`flex flex-col items-center ${step.done ? 'text-purple-600' : 'text-gray-300'}`}>
+                        <div class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step.done ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                          {step.done ? '✓' : step.number}
+                        </div>
+                        <span class="text-[10px] mt-0.5 font-medium">{step.label}</span>
+                      </div>
+                      {!step.isLast && (
+                        <div class={`w-10 sm:w-16 h-0.5 mb-4 mx-1 ${step.connectorDone ? 'bg-purple-600' : 'bg-gray-200'}`}></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <!-- Tracking -->
             {order.status === 'enviado' && order.tracking_number && (
-              <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+              <div class="mt-2 p-3 bg-blue-50 rounded-lg">
                 <p class="text-sm text-blue-800">
-                  <span class="font-semibold">Numero de seguimiento:</span> {order.tracking_number}
+                  <span class="font-semibold">Transportista:</span> {order.carrier || 'Correos Express'}
                 </p>
+                <p class="text-sm text-blue-800 mt-1">
+                  <span class="font-semibold">N.º seguimiento:</span> {order.tracking_number}
+                </p>
+                <a
+                  href={getTrackingUrl(order.carrier || 'Correos Express', order.tracking_number)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1 mt-2 text-sm font-semibold text-purple-700 hover:text-purple-900 underline"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                  Seguir en {order.carrier || 'Correos Express'}
+                </a>
               </div>
             )}
 
@@ -163,11 +226,6 @@ const getCancellation = (orderId: string) => {
                 </button>
               )}
 
-              {['enviado', 'entregado'].includes(order.status) && order.tracking_number && (
-                <button class="btn bg-purple-100 text-purple-800 hover:bg-purple-200">
-                  Seguir Pedido
-                </button>
-              )}
             </div>
           </div>
           );

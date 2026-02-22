@@ -83,9 +83,15 @@ const { data: products } = await supabase
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-12 w-12">
-                    <img class="h-12 w-12 rounded-lg object-cover" 
-                         src={product.image_url || 'https://via.placeholder.com/100?text=Sin+imagen'} 
-                         alt={product.name} />
+                    {product.image_url ? (
+                      <img class="h-12 w-12 rounded-lg object-cover" 
+                           src={product.image_url} 
+                           alt={product.name} />
+                    ) : (
+                      <div class="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                        <span class="text-white text-[8px] font-bold">Sin img</span>
+                      </div>
+                    )}
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">{product.name}</div>

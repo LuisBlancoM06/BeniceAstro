@@ -989,5 +989,71 @@ ON CONFLICT (code) DO NOTHING;
 --    - DELETE:  Permitir para authenticated
 
 -- =============================================
+-- MIGRACIÓN v2: Tracking de pedidos + Geocoding de dirección
+-- =============================================
+
+-- 1) Añadir columnas de geolocalización y estado a users
+ALTER TABLE public.users
+  ADD COLUMN IF NOT EXISTS latitude  DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS state     TEXT;  -- Provincia/Comunidad Autónoma
+
+-- Índice espacial simplificado (para futuras búsquedas por proximidad)
+CREATE INDEX IF NOT EXISTS idx_users_geo
+  ON public.users(latitude, longitude)
+  WHERE latitude IS NOT NULL AND longitude IS NOT NULL;
+
+-- 2) Añadir columna carrier a orders (transportista)
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS carrier TEXT;
+
+-- 3) Tabla de historial de estados de pedido (auditoría completa)
+CREATE TABLE IF NOT EXISTS public.order_status_history (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id   UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+  old_status TEXT,
+  new_status TEXT NOT NULL,
+  changed_by UUID REFERENCES public.users(id),  -- admin que hizo el cambio (NULL = sistema)
+  notes      TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_status_history_order
+  ON public.order_status_history(order_id, created_at DESC);
+
+-- RLS order_status_history
+ALTER TABLE public.order_status_history ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users pueden ver historial de sus pedidos"
+  ON public.order_status_history FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.orders
+      WHERE orders.id = order_status_history.order_id
+      AND orders.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Admins pueden ver todo el historial"
+  ON public.order_status_history FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
+  );
+
+CREATE POLICY "Admins pueden insertar historial"
+  ON public.order_status_history FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin')
+  );
+
+-- Service role puede insertar (para webhook de Stripe)
+CREATE POLICY "Service role puede insertar historial"
+  ON public.order_status_history FOR INSERT
+  TO service_role
+  WITH CHECK (true);
+
+-- =============================================
 -- FIN DEL SCHEMA
 -- =============================================

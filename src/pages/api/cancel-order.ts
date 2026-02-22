@@ -5,26 +5,9 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { order_id, reason } = await request.json();
-
-    if (!order_id || !reason || reason.trim() === '') {
-      return new Response(JSON.stringify({ error: 'Debes indicar el pedido y el motivo de cancelacion' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Validar longitud del motivo
-    if (typeof reason !== 'string' || reason.trim().length > 1000) {
-      return new Response(JSON.stringify({ error: 'El motivo no puede superar los 1000 caracteres' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Verificar autenticacion con JWT
+    // 1. Autenticación PRIMERO (antes de parsear body)
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
@@ -37,6 +20,33 @@ export const POST: APIRoute = async ({ request }) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
         status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 2. Parsear y validar body
+    const { order_id, reason } = await request.json();
+
+    if (!order_id || !reason || (typeof reason === 'string' && reason.trim() === '')) {
+      return new Response(JSON.stringify({ error: 'Debes indicar el pedido y el motivo de cancelacion' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar tipo y longitud
+    if (typeof reason !== 'string' || reason.trim().length > 1000) {
+      return new Response(JSON.stringify({ error: 'El motivo no puede superar los 1000 caracteres' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar formato UUID
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof order_id !== 'string' || !UUID_RE.test(order_id)) {
+      return new Response(JSON.stringify({ error: 'ID de pedido inválido' }), {
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }

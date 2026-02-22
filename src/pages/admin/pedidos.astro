@@ -167,11 +167,17 @@ const statusIcons: Record<string, string> = {
                     <div class="flex gap-2 mt-3">
                       {order.order_items?.slice(0, 4).map((item: any) => (
                         <div class="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden" title={item.products?.name}>
-                          <img 
-                            src={item.products?.image_url || 'https://via.placeholder.com/50'} 
-                            alt={item.products?.name}
-                            class="w-full h-full object-cover"
-                          />
+                          {item.products?.image_url ? (
+                            <img 
+                              src={item.products.image_url}
+                              alt={item.products?.name}
+                              class="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                              <span class="text-white text-[8px] font-bold">IMG</span>
+                            </div>
+                          )}
                         </div>
                       ))}
                       {order.order_items?.length > 4 && (

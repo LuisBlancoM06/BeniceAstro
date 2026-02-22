@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 import { getOrCreateStripeCustomer } from '../../../lib/stripe-customer';
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST_CENTS } from '../../../lib/constants';
 
 export const prerender = false;
 
@@ -141,15 +142,15 @@ export const POST: APIRoute = async ({ request }) => {
       return sum + (price * (item.quantity || 1));
     }, 0);
 
-    // Añadir envío si subtotal < 49€
-    if (subtotal < 49) {
+    // Añadir envío si subtotal < umbral
+    if (subtotal < FREE_SHIPPING_THRESHOLD) {
       lineItems.push({
         price_data: {
           currency: 'eur',
           product_data: {
             name: 'Gastos de envío'
           },
-          unit_amount: 499 // 4.99€
+          unit_amount: SHIPPING_COST_CENTS
         },
         quantity: 1
       });

@@ -9,9 +9,16 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     const { name, email, phone, subject, message } = body;
 
-    // Validación básica
+    // Validación básica de presencia y tipo
     if (!name || !email || !subject || !message) {
       return new Response(JSON.stringify({ error: 'Faltan campos requeridos' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof subject !== 'string' || typeof message !== 'string') {
+      return new Response(JSON.stringify({ error: 'Tipo de datos inválido' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });

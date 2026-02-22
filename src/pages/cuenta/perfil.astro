@@ -1,6 +1,7 @@
 ---
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
+import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 import { createServerClient } from '../../lib/supabase';
 
 const supabase = createServerClient(Astro.cookies);
@@ -100,13 +101,60 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Dirección de envío</label>
-              <textarea
+              <AddressAutocomplete
+                client:load
                 id="address"
-                rows="3"
-                class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                placeholder="Calle, número, piso, ciudad, CP"
-              >{user?.address || ''}</textarea>
+                label="Dirección de envío"
+                sublabel={null}
+                labelClassName="block text-sm font-medium text-gray-700 mb-1"
+                placeholder="Busca tu dirección para autocompletar..."
+                className=""
+                fieldIds={{
+                  line1: 'prof-line1',
+                  line2: 'prof-line2',
+                  city: 'prof-city',
+                  state: 'prof-state',
+                  postalCode: 'prof-postal',
+                  country: 'prof-country',
+                  lat: 'prof-lat',
+                  lng: 'prof-lng',
+                }}
+              />
+              <!-- Campos estructurados editables -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Calle y número</label>
+                  <input type="text" id="prof-line1" value={user?.address_line1 || ''} class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500" placeholder="Calle, 123" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Piso / Puerta</label>
+                  <input type="text" id="prof-line2" value={user?.address_line2 || ''} class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500" placeholder="2ºA" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Ciudad</label>
+                  <input type="text" id="prof-city" value={user?.city || ''} class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500" placeholder="Madrid" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Provincia</label>
+                  <input type="text" id="prof-state" value={user?.state || ''} class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500" placeholder="Madrid" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">Código postal</label>
+                  <input type="text" id="prof-postal" value={user?.postal_code || ''} class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500" placeholder="28001" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-500 mb-1">País</label>
+                  <select id="prof-country" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500">
+                    <option value="ES" selected={user?.country === 'ES' || !user?.country}>España</option>
+                    <option value="PT" selected={user?.country === 'PT'}>Portugal</option>
+                    <option value="FR" selected={user?.country === 'FR'}>Francia</option>
+                    <option value="DE" selected={user?.country === 'DE'}>Alemania</option>
+                    <option value="IT" selected={user?.country === 'IT'}>Italia</option>
+                  </select>
+                </div>
+              </div>
+              <input type="hidden" id="prof-lat" value={user?.latitude || ''} />
+              <input type="hidden" id="prof-lng" value={user?.longitude || ''} />
             </div>
 
             <div id="profile-message" class="hidden p-3 rounded-lg text-sm"></div>
@@ -131,9 +179,9 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
                 <input
                   type="password"
                   id="new-password"
-                  minlength="6"
+                  minlength="8"
                   class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder="Mínimo 8 caracteres"
                 />
               </div>
 
@@ -201,7 +249,17 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
 
       const fullName = (document.getElementById('full-name') as HTMLInputElement).value;
       const phone = (document.getElementById('phone') as HTMLInputElement).value;
-      const address = (document.getElementById('address') as HTMLTextAreaElement).value;
+      const address = (document.getElementById('address') as HTMLInputElement)?.value || '';
+
+      // Campos estructurados
+      const address_line1 = (document.getElementById('prof-line1') as HTMLInputElement)?.value || '';
+      const address_line2 = (document.getElementById('prof-line2') as HTMLInputElement)?.value || '';
+      const city = (document.getElementById('prof-city') as HTMLInputElement)?.value || '';
+      const state = (document.getElementById('prof-state') as HTMLInputElement)?.value || '';
+      const postal_code = (document.getElementById('prof-postal') as HTMLInputElement)?.value || '';
+      const country = (document.getElementById('prof-country') as HTMLSelectElement)?.value || 'ES';
+      const latitude = parseFloat((document.getElementById('prof-lat') as HTMLInputElement)?.value) || null;
+      const longitude = parseFloat((document.getElementById('prof-lng') as HTMLInputElement)?.value) || null;
       
       const { data: { session } } = await supabase.auth.getSession();
 
@@ -213,7 +271,19 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session!.access_token}`,
           },
-          body: JSON.stringify({ full_name: fullName, phone, address }),
+          body: JSON.stringify({
+            full_name: fullName,
+            phone,
+            address: address || `${address_line1}, ${city}, ${postal_code}`,
+            address_line1,
+            address_line2,
+            city,
+            state,
+            postal_code,
+            country,
+            latitude,
+            longitude,
+          }),
         });
 
         if (!res.ok) {
@@ -243,8 +313,8 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
       const newPassword = (document.getElementById('new-password') as HTMLInputElement).value;
       const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement).value;
 
-      if (newPassword.length < 6) {
-        passwordMessage!.textContent = 'La contraseña debe tener al menos 6 caracteres';
+      if (newPassword.length < 8) {
+        passwordMessage!.textContent = 'La contraseña debe tener al menos 8 caracteres';
         passwordMessage!.className = 'p-3 rounded-lg text-sm bg-red-100 text-red-700';
         passwordMessage!.classList.remove('hidden');
         return;

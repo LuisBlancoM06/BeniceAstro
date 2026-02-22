@@ -62,7 +62,26 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
             labelClassName="block text-sm font-medium mb-2"
             placeholder="Calle, número, ciudad, CP"
             className=""
+            fieldIds={{
+              line1: 'reg-line1',
+              line2: 'reg-line2',
+              city: 'reg-city',
+              state: 'reg-state',
+              postalCode: 'reg-postal',
+              country: 'reg-country',
+              lat: 'reg-lat',
+              lng: 'reg-lng',
+            }}
           />
+          <!-- Campos ocultos que AddressAutocomplete rellena automáticamente -->
+          <input type="hidden" id="reg-line1" />
+          <input type="hidden" id="reg-line2" />
+          <input type="hidden" id="reg-city" />
+          <input type="hidden" id="reg-state" />
+          <input type="hidden" id="reg-postal" />
+          <input type="hidden" id="reg-country" />
+          <input type="hidden" id="reg-lat" />
+          <input type="hidden" id="reg-lng" />
         </div>
         
         <div class="mb-4">
@@ -182,6 +201,16 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
       const password = (document.getElementById('password') as HTMLInputElement).value;
       const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement).value;
 
+      // Campos estructurados rellenados por AddressAutocomplete
+      const addressLine1 = (document.getElementById('reg-line1') as HTMLInputElement)?.value || '';
+      const addressLine2 = (document.getElementById('reg-line2') as HTMLInputElement)?.value || '';
+      const city = (document.getElementById('reg-city') as HTMLInputElement)?.value || '';
+      const state = (document.getElementById('reg-state') as HTMLInputElement)?.value || '';
+      const postalCode = (document.getElementById('reg-postal') as HTMLInputElement)?.value || '';
+      const country = (document.getElementById('reg-country') as HTMLInputElement)?.value || 'ES';
+      const latitude = parseFloat((document.getElementById('reg-lat') as HTMLInputElement)?.value) || null;
+      const longitude = parseFloat((document.getElementById('reg-lng') as HTMLInputElement)?.value) || null;
+
       // Validar contraseñas
       if (password !== confirmPassword) {
         errorMessage!.textContent = 'Las contraseñas no coinciden';
@@ -212,6 +241,14 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
             full_name: fullName,
             phone: phone || null,
             address: address || null,
+            address_line1: addressLine1 || null,
+            address_line2: addressLine2 || null,
+            city: city || null,
+            state: state || null,
+            postal_code: postalCode || null,
+            country: country || 'ES',
+            latitude: latitude,
+            longitude: longitude,
             role: 'user'
           });
         }
@@ -231,7 +268,16 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
           errorMessage!.classList.add('hidden');
         }
       } catch (error: any) {
-        errorMessage!.textContent = error.message || 'Error al crear la cuenta';
+        // No exponer mensajes internos de Supabase al usuario
+        const msg = error?.message || '';
+        const userMsg = msg.includes('already registered')
+          ? 'Este email ya está registrado'
+          : msg.includes('valid email')
+            ? 'Introduce un email válido'
+            : msg.includes('password')
+              ? 'La contraseña debe tener al menos 8 caracteres'
+              : 'Error al crear la cuenta. Inténtalo de nuevo.';
+        errorMessage!.textContent = userMsg;
         errorMessage!.classList.remove('hidden');
         successMessage!.classList.add('hidden');
       }

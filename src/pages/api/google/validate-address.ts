@@ -151,9 +151,12 @@ function validateAddressLocally(addr: AddressInput): ValidationResult {
 async function validateWithGoogle(addr: AddressInput): Promise<ValidationResult | null> {
   const googleUrl = 'https://addressvalidation.googleapis.com/v1:validateAddress';
 
-  const res = await fetch(`${googleUrl}?key=${GOOGLE_PLACES_API_KEY}`, {
+  const res = await fetch(googleUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+    },
     body: JSON.stringify({
       address: {
         regionCode: addr.country || 'ES',

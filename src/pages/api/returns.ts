@@ -5,26 +5,9 @@ export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { orderId, reason } = await request.json();
-
-    if (!orderId || !reason) {
-      return new Response(JSON.stringify({ error: 'Faltan datos requeridos' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Validar longitud del motivo
-    if (typeof reason !== 'string' || reason.trim().length > 2000) {
-      return new Response(JSON.stringify({ error: 'El motivo no puede superar los 2000 caracteres' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Verificar autenticación
+    // 1. Autenticación PRIMERO (antes de parsear body)
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }
@@ -37,6 +20,33 @@ export const POST: APIRoute = async ({ request }) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
         status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 2. Parsear y validar body
+    const { orderId, reason } = await request.json();
+
+    if (!orderId || !reason) {
+      return new Response(JSON.stringify({ error: 'Faltan datos requeridos' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar tipo y longitud del motivo
+    if (typeof reason !== 'string' || reason.trim().length > 2000) {
+      return new Response(JSON.stringify({ error: 'El motivo no puede superar los 2000 caracteres' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar formato UUID del orderId
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (typeof orderId !== 'string' || !UUID_RE.test(orderId)) {
+      return new Response(JSON.stringify({ error: 'ID de pedido inválido' }), {
+        status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
     }
@@ -99,7 +109,7 @@ export const POST: APIRoute = async ({ request }) => {
       success: true,
       return: returnData
     }), {
-      status: 200,
+      status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
 

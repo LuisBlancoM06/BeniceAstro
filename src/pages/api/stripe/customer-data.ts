@@ -57,7 +57,7 @@ export const GET: APIRoute = async ({ request }) => {
     // 4. Si Stripe no tiene datos completos, complementar con BD local
     const { data: profile } = await supabaseAdmin
       .from('users')
-      .select('full_name, email, phone, address_line1, address_line2, city, postal_code, country')
+      .select('full_name, email, phone, address_line1, address_line2, city, state, postal_code, country')
       .eq('id', user.id)
       .single();
 
@@ -70,6 +70,7 @@ export const GET: APIRoute = async ({ request }) => {
         line1: customerData.address?.line1 || profile?.address_line1 || null,
         line2: customerData.address?.line2 || profile?.address_line2 || null,
         city: customerData.address?.city || profile?.city || null,
+        state: customerData.address?.state || profile?.state || null,
         postal_code: customerData.address?.postal_code || profile?.postal_code || null,
         country: customerData.address?.country || profile?.country || 'ES',
       },

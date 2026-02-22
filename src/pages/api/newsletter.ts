@@ -21,7 +21,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || typeof email !== 'string' || email.length > 254 || !emailRegex.test(email)) {
-      return new Response(JSON.stringify({ error: 'Email inválido' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Email inválido' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // SEGURIDAD: Usar supabaseAdmin para verificar existencia (RLS bloquea SELECT para anon)
@@ -32,7 +35,10 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (existing) {
-      return new Response(JSON.stringify({ error: 'Email ya suscrito' }), { status: 400 });
+      return new Response(JSON.stringify({ error: 'Email ya suscrito' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const promoCode = generatePromoCode();
@@ -52,10 +58,16 @@ export const POST: APIRoute = async ({ request }) => {
     // Enviar email con Resend
     await sendNewsletterWelcome(email, promoCode);
 
-    return new Response(JSON.stringify({ success: true, message: 'Suscripción completada. Revisa tu email para tu código de descuento.' }), { status: 200 });
+    return new Response(JSON.stringify({ success: true, promoCode, message: 'Suscripción completada. Revisa tu email para tu código de descuento.' }), { 
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: 'Error al procesar' }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Error al procesar' }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 };

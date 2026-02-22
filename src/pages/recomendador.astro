@@ -175,6 +175,16 @@ import Layout from '../layouts/Layout.astro';
   <script>
     import { supabase } from '../lib/supabase';
 
+    // Sanitizar texto para evitar XSS
+    function esc(s: any): string {
+      const div = document.createElement('div');
+      div.textContent = String(s ?? '');
+      return div.innerHTML;
+    }
+    function escAttr(s: any): string {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     // Estado del wizard
     let currentStep = 1;
     const totalSteps = 4;
@@ -309,19 +319,24 @@ import Layout from '../layouts/Layout.astro';
         } else {
           resultsGrid!.innerHTML = products.map((product: any) => {
             const imgUrl = product.image_url || '';
+            const safeName = esc(product.name);
+            const safeNameAttr = escAttr(product.name);
+            const safeImgUrl = escAttr(imgUrl);
+            const safeSlug = escAttr(product.slug || product.id);
             const imageHtml = `<img 
-                  src="${imgUrl}" 
-                  alt="${product.name}"
+                  src="${safeImgUrl}" 
+                  alt="${safeNameAttr}"
                   class="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                  onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 font-bold text-sm text-center px-3\\'>${product.name.replace(/'/g, "\\'")}</span></div>'"
+                  loading="lazy"
+                  onerror="this.onerror=null;this.parentElement.innerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 font-bold text-sm text-center px-3\\'>${safeNameAttr}</span></div>'"
                 />`;
             return `
-            <a href="/producto/${product.slug || product.id}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group">
+            <a href="/producto/${safeSlug}" class="block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group">
               <div class="aspect-square bg-gray-100 p-4">
                 ${imageHtml}
               </div>
               <div class="p-4">
-                <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">${product.name}</h3>
+                <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">${safeName}</h3>
                 <div class="flex items-baseline gap-2">
                   ${product.on_sale && product.sale_price 
                     ? `<span class="text-xl font-bold text-red-500">${product.sale_price.toFixed(2)}€</span>

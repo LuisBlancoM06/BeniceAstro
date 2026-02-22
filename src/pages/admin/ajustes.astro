@@ -166,6 +166,13 @@ const getSettingValue = (key: string, defaultValue: string = '') => {
   <script>
     import { supabase } from '../../lib/supabase';
 
+    // Sanitizar texto para evitar XSS en innerHTML
+    function esc(s: any): string {
+      const div = document.createElement('div');
+      div.textContent = String(s ?? '');
+      return div.innerHTML;
+    }
+
     // Función para guardar setting
     async function saveSetting(key: string, value: string) {
       const { error } = await supabase
@@ -223,11 +230,11 @@ const getSettingValue = (key: string, defaultValue: string = '') => {
         list.innerHTML = data.map((code: any) => `
           <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div>
-              <span class="font-mono font-bold text-purple-700">${code.code}</span>
-              <span class="text-gray-500 ml-2">${code.discount}% dto</span>
+              <span class="font-mono font-bold text-purple-700">${esc(code.code)}</span>
+              <span class="text-gray-500 ml-2">${esc(code.discount)}% dto</span>
               ${code.active ? '<span class="ml-2 px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded">Activo</span>' : '<span class="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">Inactivo</span>'}
             </div>
-            <button class="delete-code-btn text-red-600 hover:text-red-800 text-sm" data-id="${code.id}">
+            <button class="delete-code-btn text-red-600 hover:text-red-800 text-sm" data-id="${esc(code.id)}">
               Eliminar
             </button>
           </div>

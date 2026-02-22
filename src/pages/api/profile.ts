@@ -39,18 +39,49 @@ export const PUT: APIRoute = async ({ request }) => {
 
     // 2. Validar body
     const body = await request.json();
-    const { full_name, phone, address, address_line1, address_line2, city, state, postal_code, country } = body;
+    const { full_name, phone, address, address_line1, address_line2, city, state, postal_code, country, latitude, longitude } = body;
 
-    // Validaciones de longitud
-    if (full_name && typeof full_name === 'string' && full_name.length > 100) {
-      return new Response(JSON.stringify({ error: 'Nombre demasiado largo (máx 100 caracteres)' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
-      });
+    // Validaciones de tipo y longitud
+    const stringFields: [string, any, number][] = [
+      ['full_name', full_name, 100],
+      ['phone', phone, 20],
+      ['address', address, 500],
+      ['address_line1', address_line1, 200],
+      ['address_line2', address_line2, 100],
+      ['city', city, 100],
+      ['state', state, 100],
+      ['postal_code', postal_code, 20],
+      ['country', country, 5],
+    ];
+    for (const [fieldName, value, maxLen] of stringFields) {
+      if (value !== undefined && value !== null) {
+        if (typeof value !== 'string') {
+          return new Response(JSON.stringify({ error: `${fieldName} debe ser texto` }), {
+            status: 400, headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        if (value.length > maxLen) {
+          return new Response(JSON.stringify({ error: `${fieldName} demasiado largo (máx ${maxLen} caracteres)` }), {
+            status: 400, headers: { 'Content-Type': 'application/json' },
+          });
+        }
+      }
     }
-    if (phone && typeof phone === 'string' && phone.length > 20) {
-      return new Response(JSON.stringify({ error: 'Teléfono demasiado largo (máx 20 caracteres)' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
-      });
+
+    // Validar coordenadas
+    if (latitude !== undefined && latitude !== null) {
+      if (typeof latitude !== 'number' || !isFinite(latitude) || latitude < -90 || latitude > 90) {
+        return new Response(JSON.stringify({ error: 'Latitud inválida (debe ser entre -90 y 90)' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    }
+    if (longitude !== undefined && longitude !== null) {
+      if (typeof longitude !== 'number' || !isFinite(longitude) || longitude < -180 || longitude > 180) {
+        return new Response(JSON.stringify({ error: 'Longitud inválida (debe ser entre -180 y 180)' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // 3. Actualizar en Supabase
@@ -61,10 +92,11 @@ export const PUT: APIRoute = async ({ request }) => {
     if (address_line1 !== undefined) dbUpdates.address_line1 = address_line1;
     if (address_line2 !== undefined) dbUpdates.address_line2 = address_line2;
     if (city !== undefined) dbUpdates.city = city;
-    // NOTA: 'state' no existe como columna en la tabla users.
-    // Se usa solo para Stripe (ver sincronización abajo).
+    if (state !== undefined) dbUpdates.state = state;
     if (postal_code !== undefined) dbUpdates.postal_code = postal_code;
     if (country !== undefined) dbUpdates.country = country;
+    if (latitude !== undefined) dbUpdates.latitude = latitude;
+    if (longitude !== undefined) dbUpdates.longitude = longitude;
 
     const { error: updateError } = await supabaseAdmin
       .from('users')

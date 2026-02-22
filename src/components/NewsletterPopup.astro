@@ -132,8 +132,6 @@
 </style>
 
 <script>
-  import { supabase } from '../lib/supabase';
-
   const popup = document.getElementById('newsletter-popup');
   const closeBtn = document.getElementById('close-popup');
   const form = document.getElementById('newsletter-popup-form') as HTMLFormElement;
@@ -172,16 +170,6 @@
     localStorage.setItem('newsletter_dismissed', 'true');
   }
 
-  // Generar código promocional
-  function generatePromoCode(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = 'WELCOME';
-    for (let i = 0; i < 4; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  }
-
   // Event listeners
   closeBtn?.addEventListener('click', dismissPopup);
 
@@ -200,31 +188,27 @@
     if (!email) return;
 
     try {
-      // Generar código
-      const promoCode = generatePromoCode();
+      // Usar endpoint API (promo code se genera server-side con crypto seguro)
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
 
-      // Guardar en Supabase
-      const { error } = await supabase
-        .from('newsletters')
-        .insert([{ 
-          email, 
-          promo_code: promoCode,
-          source: 'popup'
-        }]);
+      const data = await res.json();
 
-      if (error) {
-        if (error.code === '23505') { // Duplicate key
-          errorDiv!.textContent = 'Este email ya está suscrito.';
-          errorDiv?.classList.remove('hidden');
-        } else {
-          throw error;
-        }
+      if (!res.ok) {
+        errorDiv!.textContent = data.error || 'Error al suscribirse.';
+        errorDiv?.classList.remove('hidden');
         return;
       }
 
       // Guardar en localStorage
       localStorage.setItem('newsletter_subscribed', 'true');
-      localStorage.setItem('newsletter_promo_code', promoCode);
+      const promoCode = data.promoCode || '';
+      if (promoCode) {
+        localStorage.setItem('newsletter_promo_code', promoCode);
+      }
 
       // Mostrar éxito
       promoCodeSpan!.textContent = promoCode;

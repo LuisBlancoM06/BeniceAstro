@@ -10,8 +10,7 @@ import {
   removeFromCart,
   clearCart
 } from '../stores/cart';
-
-const FREE_SHIPPING_THRESHOLD = 49;
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '../lib/constants';
 
 interface Props {
   'client:load'?: boolean;
@@ -99,7 +98,7 @@ export default function CartSlideOver(_props: Props) {
 
   const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
   const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const total = subtotal + (freeShipping ? 0 : 4.99);
+  const total = subtotal + (freeShipping ? 0 : SHIPPING_COST);
 
   return (
     <>
@@ -359,7 +358,7 @@ export default function CartSlideOver(_props: Props) {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-gray-500">Envío</span>
                 <span className={`font-semibold ${freeShipping ? 'text-green-600' : 'text-gray-700'}`}>
-                  {freeShipping ? '¡GRATIS! 🎉' : '4.99€'}
+                  {freeShipping ? '¡GRATIS! 🎉' : `${SHIPPING_COST.toFixed(2)}€`}
                 </span>
               </div>
             </div>

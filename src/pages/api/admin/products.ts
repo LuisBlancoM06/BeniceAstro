@@ -23,13 +23,21 @@ async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supab
   return { isAdmin: userData?.role === 'admin', supabaseClient };
 }
 
-// GET: Obtener todos los productos o uno específico
-export const GET: APIRoute = async ({ url }) => {
+// GET: Obtener todos los productos o uno específico (requiere admin)
+export const GET: APIRoute = async ({ url, cookies }) => {
+  const { isAdmin: isAdminUser, supabaseClient } = await isAdmin(cookies);
+  if (!isAdminUser) {
+    return new Response(JSON.stringify({ error: 'No autorizado' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const id = url.searchParams.get('id');
 
   try {
     if (id) {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('products')
         .select('*')
         .eq('id', id)
@@ -42,7 +50,7 @@ export const GET: APIRoute = async ({ url }) => {
       });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('products')
       .select('*')
       .order('created_at', { ascending: false });

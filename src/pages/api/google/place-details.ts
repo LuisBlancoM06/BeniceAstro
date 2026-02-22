@@ -27,6 +27,8 @@ interface ParsedAddress {
   country: string;
   country_code: string;
   formatted_address: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -83,8 +85,12 @@ export const POST: APIRoute = async ({ request }) => {
 
     const data = await googleRes.json();
 
-    // Parsear componentes de dirección
-    const parsed = parseAddressComponents(data.addressComponents || [], data.formattedAddress || '');
+    // Parsear componentes de dirección + coordenadas
+    const parsed = parseAddressComponents(
+      data.addressComponents || [],
+      data.formattedAddress || '',
+      data.location || null
+    );
 
     return new Response(
       JSON.stringify({ address: parsed }),
@@ -113,7 +119,7 @@ export const POST: APIRoute = async ({ request }) => {
  * - "country" → País
  * - "subpremise" → Piso, puerta, etc.
  */
-function parseAddressComponents(components: any[], formattedAddress: string): ParsedAddress {
+function parseAddressComponents(components: any[], formattedAddress: string, location: { latitude?: number; longitude?: number } | null): ParsedAddress {
   const get = (type: string): { long: string; short: string } => {
     const comp = components.find((c: any) => 
       c.types?.includes(type)
@@ -162,5 +168,7 @@ function parseAddressComponents(components: any[], formattedAddress: string): Pa
     country: country.long,
     country_code: country.short, // "ES", "PT", "FR", etc.
     formatted_address: formattedAddress,
+    latitude: location?.latitude ?? null,
+    longitude: location?.longitude ?? null,
   };
 }

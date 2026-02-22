@@ -31,6 +31,8 @@ interface ParsedAddress {
   country: string;
   country_code: string;
   formatted_address: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface AddressAutocompleteProps {
@@ -42,6 +44,8 @@ interface AddressAutocompleteProps {
     state?: string;
     postalCode?: string;
     country?: string;
+    lat?: string;
+    lng?: string;
   };
   /** Callback cuando se selecciona una dirección */
   onAddressSelected?: (address: ParsedAddress) => void;
@@ -259,6 +263,22 @@ export default function AddressAutocomplete({
             countryEl.classList.remove('ring-2', 'ring-green-400', 'bg-green-50');
           }, 1500);
         }
+      }
+    }
+
+    // Rellenar coordenadas (lat/lng) en hidden inputs si se proporcionaron IDs
+    if (fieldIds.lat && addr.latitude != null) {
+      const latEl = document.getElementById(fieldIds.lat) as HTMLInputElement | null;
+      if (latEl) {
+        latEl.value = String(addr.latitude);
+        latEl.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    if (fieldIds.lng && addr.longitude != null) {
+      const lngEl = document.getElementById(fieldIds.lng) as HTMLInputElement | null;
+      if (lngEl) {
+        lngEl.value = String(addr.longitude);
+        lngEl.dispatchEvent(new Event('change', { bubbles: true }));
       }
     }
   };

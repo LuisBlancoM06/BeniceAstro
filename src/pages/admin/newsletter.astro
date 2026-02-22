@@ -121,7 +121,7 @@ const { data: subscribers, count } = await supabase
           .order('created_at', { ascending: false });
 
         if (data && data.length > 0) {
-          const csv = 'Email,Fecha\n' + data.map((s: any) => `${s.email},${s.created_at}`).join('\n');
+          const csvEscape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;          const csv = 'Email,Fecha\n' + data.map((s: any) => `${csvEscape(s.email)},${csvEscape(s.created_at)}`).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');

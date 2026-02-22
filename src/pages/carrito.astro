@@ -66,6 +66,16 @@ import Layout from '../layouts/Layout.astro';
     import { supabase } from '../lib/supabase';
     import { $cartItems, $cartSubtotal, $cartCount, updateQuantity, removeFromCart, clearCart } from '../stores/cart';
 
+    // Sanitizar texto para evitar XSS
+    function esc(s: any): string {
+      const div = document.createElement('div');
+      div.textContent = String(s ?? '');
+      return div.innerHTML;
+    }
+    function escAttr(s: any): string {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     let appliedPromo: any = null;
 
     function renderCart() {
@@ -85,15 +95,19 @@ import Layout from '../layouts/Layout.astro';
 
       cartItemsEl!.innerHTML = cart.map((item) => {
         const imgSrc = item.image || '';
+        const safeName = esc(item.name);
+        const safeNameAttr = escAttr(item.name);
+        const safeId = escAttr(item.id);
+        const safeImgSrc = escAttr(imgSrc);
         const isPlaceholderImg = imgSrc.includes('placehold.co') || imgSrc.includes('via.placeholder') || !imgSrc;
         const imageHtml = isPlaceholderImg
-          ? `<div class="w-24 h-24 rounded bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center"><span class="text-white/80 text-xs font-semibold text-center px-1">${item.name}</span></div>`
-          : `<img src="${imgSrc}" alt="${item.name}" class="w-24 h-24 object-cover rounded" onerror="this.outerHTML='<div class=\\'w-24 h-24 rounded bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center\\'><span class=\\'text-white/80 text-xs font-semibold text-center px-1\\'>${item.name.replace(/'/g, "\\'")}</span></div>'">`;
+          ? `<div class="w-24 h-24 rounded bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center"><span class="text-white/80 text-xs font-semibold text-center px-1">${safeName}</span></div>`
+          : `<img src="${safeImgSrc}" alt="${safeNameAttr}" class="w-24 h-24 object-cover rounded" onerror="this.outerHTML='<div class=\\'w-24 h-24 rounded bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center\\'><span class=\\'text-white/80 text-xs font-semibold text-center px-1\\'>${safeNameAttr}</span></div>'">`;
         return `
         <div class="card flex items-center gap-4">
           ${imageHtml}
           <div class="flex-1">
-            <h3 class="font-bold">${item.name}</h3>
+            <h3 class="font-bold">${safeName}</h3>
             <p class="text-gray-600">${(item.salePrice || item.price).toFixed(2)}€</p>
           </div>
           <div class="flex items-center gap-2">

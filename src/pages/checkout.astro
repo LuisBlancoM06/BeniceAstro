@@ -433,6 +433,18 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
   <script>
     import { $cartItems, $cartSubtotal, updateQuantity, removeFromCart, clearCart } from '../stores/cart';
     import { supabase } from '../lib/supabase';
+    import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from '../lib/constants';
+
+    // Sanitizar texto para evitar XSS en innerHTML
+    function esc(s: any): string {
+      const div = document.createElement('div');
+      div.textContent = String(s ?? '');
+      return div.innerHTML;
+    }
+    // Sanitizar para uso en atributos HTML (comillas)
+    function escAttr(s: any): string {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
 
     let appliedPromoCode = '';
     let discountPercent = 0;
@@ -468,17 +480,21 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
         const lineTotal = (unitPrice * item.quantity).toFixed(2);
         const hasDiscount = item.salePrice && item.salePrice < item.price;
         const imgSrc = item.image || '';
+        const safeName = esc(item.name);
+        const safeNameAttr = escAttr(item.name);
+        const safeId = escAttr(item.id);
+        const safeImgSrc = escAttr(imgSrc);
         const isPlaceholderImg = imgSrc.includes('placehold.co') || imgSrc.includes('via.placeholder') || !imgSrc;
         const checkoutImageHtml = isPlaceholderImg
-          ? `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg"><span class="text-white/80 text-[10px] font-semibold text-center px-1">${item.name}</span></div>`
-          : `<img src="${imgSrc}" alt="${item.name}" class="w-full h-full object-contain p-1.5" onerror="this.outerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 text-[10px] font-semibold text-center px-1\\'>${item.name.replace(/'/g, "\\'")}</span></div>'" />`;
+          ? `<div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg"><span class="text-white/80 text-[10px] font-semibold text-center px-1">${safeName}</span></div>`
+          : `<img src="${safeImgSrc}" alt="${safeNameAttr}" class="w-full h-full object-contain p-1.5" onerror="this.outerHTML='<div class=\\'w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center rounded-lg\\'><span class=\\'text-white/80 text-[10px] font-semibold text-center px-1\\'>${safeNameAttr}</span></div>'" />`;
         return `
         <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50/80 rounded-xl border border-gray-100 hover:border-purple-200/60 hover:shadow-sm transition-all group">
           <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 group-hover:border-purple-100">
             ${checkoutImageHtml}
           </div>
           <div class="flex-1 min-w-0">
-            <h3 class="font-bold text-sm text-gray-800 truncate">${item.name}</h3>
+            <h3 class="font-bold text-sm text-gray-800 truncate">${safeName}</h3>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-xs font-semibold ${hasDiscount ? 'text-green-600' : 'text-gray-500'}">${unitPrice.toFixed(2)}€/ud</span>
               ${hasDiscount ? `<span class="text-[10px] text-gray-400 line-through">${item.price.toFixed(2)}€</span>` : ''}
@@ -486,19 +502,19 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button 
-              onclick="window.__changeQty('${item.id}', ${item.quantity - 1})"
+              onclick="window.__changeQty('${safeId}', ${item.quantity - 1})"
               class="w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 flex items-center justify-center transition-all text-sm font-bold shadow-sm"
               ${item.quantity <= 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}
             >−</button>
             <span class="w-8 text-center text-sm font-extrabold text-gray-800">${item.quantity}</span>
             <button 
-              onclick="window.__changeQty('${item.id}', ${item.quantity + 1})"
+              onclick="window.__changeQty('${safeId}', ${item.quantity + 1})"
               class="w-8 h-8 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 flex items-center justify-center transition-all text-sm font-bold shadow-sm"
             >+</button>
           </div>
           <span class="text-sm font-extrabold text-purple-700 w-16 text-right shrink-0">${lineTotal}€</span>
           <button 
-            onclick="window.__removeItem('${item.id}')"
+            onclick="window.__removeItem('${safeId}')"
             class="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all shrink-0" 
             title="Eliminar"
           >
@@ -528,7 +544,7 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
       const discount = discountPercent > 0 ? subtotal * (discountPercent / 100) : 0;
       const afterDiscount = subtotal - discount;
       // Envío gratis basado en subtotal PRE-descuento (consistente con Flutter y backend Stripe)
-      const shipping = subtotal >= 49 ? 0 : 4.99;
+      const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
       const total = afterDiscount + shipping;
 
       document.getElementById('subtotal')!.textContent = `${subtotal.toFixed(2)}€`;
@@ -556,14 +572,14 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
       const freeShippingInfo = document.getElementById('free-shipping-info') as HTMLElement;
       const freeShippingAchieved = document.getElementById('free-shipping-achieved') as HTMLElement;
       
-      if (subtotal >= 49) {
+      if (subtotal >= FREE_SHIPPING_THRESHOLD) {
         freeShippingInfo.classList.add('hidden');
         freeShippingAchieved.classList.remove('hidden');
       } else if (subtotal > 0) {
         freeShippingInfo.classList.remove('hidden');
         freeShippingAchieved.classList.add('hidden');
-        document.getElementById('remaining-for-free')!.textContent = `${(49 - subtotal).toFixed(2)}€`;
-        const progress = Math.min((subtotal / 49) * 100, 100);
+        document.getElementById('remaining-for-free')!.textContent = `${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)}€`;
+        const progress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
         (document.getElementById('shipping-progress') as HTMLElement).style.width = `${progress}%`;
       } else {
         freeShippingInfo.classList.add('hidden');
@@ -671,7 +687,7 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
           <svg class="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span>${err.message || 'Error al procesar el pago. Inténtalo de nuevo.'}</span>
+          <span>${esc(err.message || 'Error al procesar el pago. Inténtalo de nuevo.')}</span>
         `;
         btn.parentElement?.insertBefore(errorDiv, btn.nextSibling);
         setTimeout(() => errorDiv.remove(), 5000);
