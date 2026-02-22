@@ -34,6 +34,9 @@ const securityHeaders: Record<string, string> = {
   ].join('; '),
 };
 
+/** Rutas exentas de rate-limit (auth: sin límite de intentos) */
+const rateLimitExemptPrefixes = ['/api/auth/'];
+
 /** Mapa de rutas a su configuración de rate-limit */
 const rateLimitMap: Array<{ pattern: string | RegExp; config: typeof RATE_LIMITS[keyof typeof RATE_LIMITS] }> = [
   { pattern: '/api/contact', config: RATE_LIMITS.form },
@@ -114,14 +117,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
       clientAddr = 'unknown';
     }
 
-    // Buscar configuración de rate-limit para esta ruta
-    const rlMatch = rateLimitMap.find(r =>
-      typeof r.pattern === 'string' ? path === r.pattern : r.pattern.test(path)
-    );
-    if (rlMatch) {
-      const key = getRateLimitKey(context.request, path, clientAddr);
-      const blocked = checkRateLimit(key, rlMatch.config);
-      if (blocked) return addSecurityHeaders(blocked);
+    // Rutas exentas de rate-limit (auth: sin límite de intentos)
+    const isRateLimitExempt = rateLimitExemptPrefixes.some(p => path.startsWith(p));
+
+    if (!isRateLimitExempt) {
+      // Buscar configuración de rate-limit para esta ruta
+      const rlMatch = rateLimitMap.find(r =>
+        typeof r.pattern === 'string' ? path === r.pattern : r.pattern.test(path)
+      );
+      if (rlMatch) {
+        const key = getRateLimitKey(context.request, path, clientAddr);
+        const blocked = checkRateLimit(key, rlMatch.config);
+        if (blocked) return addSecurityHeaders(blocked);
+      }
     }
   }
 
@@ -132,10 +140,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
       '/api/auth/session',
     ]);
 
-    // Los proxies de Google Places y auth son endpoints que ya están protegidos
-    // por sus propios mecanismos. Exentos de CSRF para evitar falsos positivos
-    // por mismatch de Origin detrás de reverse proxies (Coolify/Traefik/Docker).
-    const csrfExemptPrefixes = ['/api/google/', '/api/auth/'];
+    // Los proxies de Google Places, auth y Stripe son endpoints que ya están protegidos
+    // por sus propios mecanismos (JWT, firma Stripe, API keys). Exentos de CSRF para
+    // evitar falsos positivos por mismatch de Origin detrás de reverse proxies (Coolify/Traefik/Docker).
+    const csrfExemptPrefixes = ['/api/google/', '/api/auth/', '/api/stripe/'];
     const isCsrfExemptByPrefix = csrfExemptPrefixes.some(p => path.startsWith(p));
 
     if (!csrfExemptPaths.has(path) && !isCsrfExemptByPrefix) {
