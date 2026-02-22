@@ -40,7 +40,6 @@ const rateLimitMap: Array<{ pattern: string | RegExp; config: typeof RATE_LIMITS
   { pattern: '/api/newsletter', config: RATE_LIMITS.form },
   { pattern: '/api/returns', config: RATE_LIMITS.form },
   { pattern: '/api/cancel-order', config: RATE_LIMITS.form },
-  { pattern: '/api/auth/session', config: RATE_LIMITS.auth },
   { pattern: '/api/search', config: RATE_LIMITS.search },
   { pattern: '/api/stripe/webhook', config: RATE_LIMITS.webhook },
   { pattern: /^\/api\//, config: RATE_LIMITS.api },
