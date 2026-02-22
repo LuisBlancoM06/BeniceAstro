@@ -20,6 +20,7 @@ export interface StripeCustomerData {
     line1: string | null;
     line2: string | null;
     city: string | null;
+    state: string | null;
     postal_code: string | null;
     country: string | null;
   } | null;
@@ -114,6 +115,7 @@ export async function getStripeCustomerData(stripeCustomerId: string): Promise<S
       line1: c.address.line1 || null,
       line2: c.address.line2 || null,
       city: c.address.city || null,
+      state: c.address.state || null,
       postal_code: c.address.postal_code || null,
       country: c.address.country || null,
     } : null,
@@ -139,6 +141,7 @@ export async function syncUserToStripeCustomer(
       line1?: string;
       line2?: string;
       city?: string;
+      state?: string;
       postal_code?: string;
       country?: string;
     };
@@ -162,6 +165,7 @@ export async function syncUserToStripeCustomer(
       line1: updates.address.line1 || '',
       line2: updates.address.line2 || undefined,
       city: updates.address.city || undefined,
+      state: updates.address.state || undefined,
       postal_code: updates.address.postal_code || undefined,
       country: updates.address.country || 'ES',
     };

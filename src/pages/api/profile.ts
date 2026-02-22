@@ -37,7 +37,7 @@ export const PUT: APIRoute = async ({ request }) => {
 
     // 2. Validar body
     const body = await request.json();
-    const { full_name, phone, address, address_line1, address_line2, city, postal_code, country } = body;
+    const { full_name, phone, address, address_line1, address_line2, city, state, postal_code, country } = body;
 
     // Validaciones de longitud
     if (full_name && typeof full_name === 'string' && full_name.length > 100) {
@@ -59,6 +59,7 @@ export const PUT: APIRoute = async ({ request }) => {
     if (address_line1 !== undefined) dbUpdates.address_line1 = address_line1;
     if (address_line2 !== undefined) dbUpdates.address_line2 = address_line2;
     if (city !== undefined) dbUpdates.city = city;
+    if (state !== undefined) dbUpdates.state = state;
     if (postal_code !== undefined) dbUpdates.postal_code = postal_code;
     if (country !== undefined) dbUpdates.country = country;
 
@@ -80,6 +81,7 @@ export const PUT: APIRoute = async ({ request }) => {
           line1: address_line1,
           line2: address_line2,
           city: city,
+          state: state,
           postal_code: postal_code,
           country: country || 'ES',
         } : undefined,

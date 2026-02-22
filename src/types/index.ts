@@ -26,6 +26,7 @@ export interface User {
   address_line1?: string;
   address_line2?: string;
   city?: string;
+  state?: string;
   postal_code?: string;
   country?: string;
   avatar_url?: string;

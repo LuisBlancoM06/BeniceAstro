@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
 ---
 
 <Layout title="Finalizar Compra - Benice Pet Shop" hideNewsletterPopup={true}>
@@ -132,9 +133,24 @@ import Layout from '../layouts/Layout.astro';
                   </div>
                 </div>
 
+                <!-- Buscador de dirección con autocompletado -->
+                <AddressAutocomplete
+                  client:load
+                  id="ship-address-search"
+                  placeholder="Escribe tu dirección para autocompletar..."
+                  fieldIds={{
+                    line1: 'ship-line1',
+                    line2: 'ship-line2',
+                    city: 'ship-city',
+                    state: 'ship-state',
+                    postalCode: 'ship-postal',
+                    country: 'ship-country',
+                  }}
+                />
+
                 <!-- Dirección línea 1 -->
                 <div>
-                  <label for="ship-line1" class="block text-xs font-semibold text-gray-600 mb-1.5">Dirección</label>
+                  <label for="ship-line1" class="block text-xs font-semibold text-gray-600 mb-1.5">Calle y número</label>
                   <input
                     type="text"
                     id="ship-line1"
@@ -156,13 +172,23 @@ import Layout from '../layouts/Layout.astro';
                   />
                 </div>
 
-                <!-- Ciudad, CP, País -->
-                <div class="grid grid-cols-3 gap-3">
+                <!-- Ciudad, Provincia, CP, País -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <label for="ship-city" class="block text-xs font-semibold text-gray-600 mb-1.5">Ciudad</label>
                     <input
                       type="text"
                       id="ship-city"
+                      placeholder="Madrid"
+                      maxlength="100"
+                      class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow bg-gray-50 focus:bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label for="ship-state" class="block text-xs font-semibold text-gray-600 mb-1.5">Provincia</label>
+                    <input
+                      type="text"
+                      id="ship-state"
                       placeholder="Madrid"
                       maxlength="100"
                       class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow bg-gray-50 focus:bg-white"
@@ -189,6 +215,11 @@ import Layout from '../layouts/Layout.astro';
                       <option value="FR">Francia</option>
                       <option value="DE">Alemania</option>
                       <option value="IT">Italia</option>
+                      <option value="GB">Reino Unido</option>
+                      <option value="NL">Países Bajos</option>
+                      <option value="BE">Bélgica</option>
+                      <option value="AT">Austria</option>
+                      <option value="CH">Suiza</option>
                     </select>
                   </div>
                 </div>
@@ -718,6 +749,7 @@ import Layout from '../layouts/Layout.astro';
         setField('ship-line1', data.address?.line1);
         setField('ship-line2', data.address?.line2);
         setField('ship-city', data.address?.city);
+        setField('ship-state', data.address?.state);
         setField('ship-postal', data.address?.postal_code);
         setField('ship-country', data.address?.country);
 
