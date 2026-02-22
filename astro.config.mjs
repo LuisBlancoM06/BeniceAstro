@@ -10,10 +10,9 @@ export default defineConfig({
   // Modo híbrido: SSG por defecto, SSR opt-in con prerender = false
   // En Astro 5.x, output:'static' = antiguo 'hybrid' (SSG default + SSR selectivo)
   output: 'static',
-  // Evitar redirect loop entre middleware y node adapter:
-  // 'never' genera ficheros como productos.html en vez de productos/index.html
+  // trailingSlash: el middleware ya redirige con 301 las URLs con trailing slash
+  // No usar build.format: 'file' — incompatible con el node adapter para páginas prerendered
   trailingSlash: 'never',
-  build: { format: 'file' },
   adapter: node({
     mode: 'standalone',
     // Coolify usa Traefik como proxy — necesario para obtener la IP real del visitante
