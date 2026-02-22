@@ -2,74 +2,140 @@
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../lib/supabase';
 
-// Obtener productos de gatos
 const { data: products } = await supabase
   .from('products')
   .select('*')
   .eq('animal_type', 'gato')
   .order('created_at', { ascending: false });
 
+const totalProducts = products?.length || 0;
+
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos y húmedos' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🛏️', description: 'Camas y rascadores' },
-  { id: 'juguetes', name: 'Juguetes', icon: '🧶', description: 'Ratones y cañas' },
+  { id: 'alimentacion', name: 'Alimentación', description: 'Piensos y húmedos premium', iconPath: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
+  { id: 'salud', name: 'Salud', description: 'Antiparasitarios y vitaminas', iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
+  { id: 'accesorios', name: 'Accesorios', description: 'Camas, rascadores y más', iconPath: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z' },
+  { id: 'juguetes', name: 'Juguetes', description: 'Ratones, cañas y peluches', iconPath: 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
 ];
 
 const ages = [
-  { id: 'cachorro', name: 'Gatito', description: '0-12 meses' },
-  { id: 'adulto', name: 'Adulto', description: '1-7 años' },
-  { id: 'senior', name: 'Senior', description: '+7 años' },
+  { id: 'cachorro', name: 'Gatito', description: '0-12 meses', emoji: '🐱' },
+  { id: 'adulto', name: 'Adulto', description: '1-7 años', emoji: '🐈' },
+  { id: 'senior', name: 'Senior', description: '+7 años', emoji: '🐈‍⬛' },
 ];
 ---
 
-<Layout title="Productos para Gatos">
-  <!-- Hero Section -->
-  <section class="relative bg-orange-500 text-white py-16">
-    <div class="absolute inset-0 bg-black/10"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-      <nav class="text-sm mb-4 opacity-80">
-        <a href="/" class="hover:underline">Inicio</a>
-        <span class="mx-2">›</span>
-        <span>Gatos</span>
+<Layout title="Productos para Gatos" description="Encuentra los mejores productos para gatos: alimentación premium, rascadores, juguetes y más. Envío gratis en pedidos +49€.">
+  <!-- Hero Premium -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-purple-700"></div>
+    <div class="absolute inset-0 opacity-[0.07]">
+      <div class="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full"></div>
+      <div class="absolute top-32 right-16 w-48 h-48 border-2 border-white rounded-full"></div>
+      <div class="absolute bottom-10 left-1/3 w-24 h-24 border-2 border-white rounded-full"></div>
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-purple-900/40 to-transparent"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <nav class="text-sm mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-purple-200">
+          <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
+          <li><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
+          <li class="text-white font-medium">Gatos</li>
+        </ol>
       </nav>
-      <div class="flex items-center gap-4">
-        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9 2 7 4 7 7v1.5C5.5 9 4 10.5 4 12.5c0 1.5.5 3 2 4v5.5c0 .5.5 1 1 1h2c.5 0 1-.5 1-1V20h4v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-5.5c1.5-1 2-2.5 2-4 0-2-1.5-3.5-3-4V7c0-3-2-5-5-5z"/></svg>
-        <div>
-          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tu Gato</h1>
-          <p class="text-xl opacity-90">Los mejores productos para consentir a tu felino</p>
+
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div class="flex-1">
+          <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-purple-100 mb-4">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            {totalProducts} productos disponibles
+          </div>
+          <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+            Todo para tu
+            <span class="bg-gradient-to-r from-orange-400 to-orange-300 bg-clip-text text-transparent"> Gato</span>
+          </h1>
+          <p class="text-purple-100 text-lg md:text-xl max-w-lg leading-relaxed">
+            Alimentación premium, accesorios de calidad y todo lo que tu felino necesita para ser feliz.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-8">
+            <a href="#productos" class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-full transition-all shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5">
+              Ver productos
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="/ofertas" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/20">
+              Ver ofertas
+            </a>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center justify-center w-52 h-52 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 shadow-2xl">
+          <svg class="w-24 h-24 text-white/70" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C9 2 7 4 7 7v1.5C5.5 9 4 10.5 4 12.5c0 1.5.5 3 2 4v5.5c0 .5.5 1 1 1h2c.5 0 1-.5 1-1V20h4v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-5.5c1.5-1 2-2.5 2-4 0-2-1.5-3.5-3-4V7c0-3-2-5-5-5z"/></svg>
         </div>
       </div>
-      <div class="mt-8 flex flex-wrap gap-4">
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">{products?.length || 0}</span>
-          <span class="ml-2">Productos</span>
+
+      <div class="grid grid-cols-3 gap-4 mt-12 max-w-xl">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">{totalProducts}</p>
+          <p class="text-purple-200 text-sm mt-1">Productos</p>
         </div>
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">Envío</span>
-          <span class="ml-2">gratis +49€</span>
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">Gratis</p>
+          <p class="text-purple-200 text-sm mt-1">Envío +49€</p>
         </div>
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">100%</span>
-          <span class="ml-2">Michi approved</span>
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">24-48h</p>
+          <p class="text-purple-200 text-sm mt-1">Entrega</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Categorías -->
-  <section class="py-12 bg-gray-50">
+  <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold mb-6">Categorías</h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900">Explora por categoría</h2>
+        <p class="text-gray-500 mt-2">Encuentra exactamente lo que tu gato necesita</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {categories.map((cat) => (
-          <a 
+          <a
             href={`/animales/gatos?categoria=${cat.id}`}
-            class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
+            class="group relative bg-white rounded-2xl p-6 md:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden"
           >
-            <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
-            <h3 class="font-semibold text-gray-900">{cat.name}</h3>
-            <p class="text-sm text-gray-500 mt-1">{cat.description}</p>
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative">
+              <div class="w-14 h-14 mx-auto mb-4 bg-purple-100 group-hover:bg-purple-200 rounded-2xl flex items-center justify-center transition-colors duration-300">
+                <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={cat.iconPath} />
+                </svg>
+              </div>
+              <h3 class="font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{cat.name}</h3>
+              <p class="text-sm text-gray-500 mt-1">{cat.description}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Por edad -->
+  <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Según la edad de tu gato</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {ages.map((age) => (
+          <a
+            href={`/animales/gatos?edad=${age.id}`}
+            class="group flex items-center gap-4 bg-white rounded-2xl p-6 border border-gray-100 hover:border-purple-200 hover:shadow-lg transition-all duration-300"
+          >
+            <span class="text-4xl">{age.emoji}</span>
+            <div>
+              <h3 class="font-bold text-gray-900 group-hover:text-purple-700 transition-colors">{age.name}</h3>
+              <p class="text-sm text-gray-500">{age.description}</p>
+            </div>
+            <svg class="w-5 h-5 text-gray-300 group-hover:text-purple-500 ml-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
           </a>
         ))}
       </div>
@@ -77,44 +143,58 @@ const ages = [
   </section>
 
   <!-- Productos -->
-  <section class="py-12">
+  <section id="productos" class="py-12 scroll-mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row gap-8">
         <!-- Sidebar Filtros -->
-        <aside class="lg:w-64 flex-shrink-0">
-          <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-            <h3 class="font-bold text-lg mb-4">Filtros</h3>
-
-            <div class="mb-6">
-              <h4 class="font-medium text-gray-700 mb-3">Edad</h4>
-              <div class="space-y-2">
-                {ages.map((age) => (
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="age" value={age.id} class="rounded text-orange-500 focus:ring-orange-500" />
-                    <span>{age.name}</span>
-                  </label>
-                ))}
-              </div>
+        <aside class="lg:w-72 flex-shrink-0">
+          <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-24 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="font-bold text-lg flex items-center gap-2">
+                <svg class="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                Filtros
+              </h3>
+              <button id="clear-filters" class="text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors">Limpiar</button>
             </div>
 
             <div class="mb-6">
-              <h4 class="font-medium text-gray-700 mb-3">Categoría</h4>
-              <div class="space-y-2">
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Categoría</h4>
+              <div class="space-y-2.5">
                 {categories.map((cat) => (
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="category" value={cat.id} class="rounded text-orange-500 focus:ring-orange-500" />
-                    <span>{cat.name}</span>
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="category" value={cat.id} class="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 transition" />
+                    <span class="text-gray-600 group-hover:text-purple-600 transition-colors text-sm">{cat.name}</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <label class="flex items-center gap-2 cursor-pointer mb-6">
-              <input type="checkbox" name="on_sale" class="rounded text-orange-500" />
-              <span class="font-medium">Solo ofertas</span>
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <div class="mb-6">
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Edad</h4>
+              <div class="space-y-2.5">
+                {ages.map((age) => (
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="age" value={age.id} class="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 transition" />
+                    <span class="text-gray-600 group-hover:text-purple-600 transition-colors text-sm">{age.name}</span>
+                    <span class="text-xs text-gray-400">({age.description})</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <label class="flex items-center gap-3 cursor-pointer mb-6">
+              <input type="checkbox" name="on_sale" class="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 transition" />
+              <span class="font-medium text-gray-700 text-sm">Solo ofertas</span>
+              <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-semibold">HOT</span>
             </label>
 
-            <button class="w-full bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600 transition-colors">
+            <button id="apply-filters" class="w-full bg-purple-600 text-white py-2.5 rounded-xl hover:bg-purple-700 transition-all font-medium shadow-sm hover:shadow-md">
               Aplicar filtros
             </button>
           </div>
@@ -122,28 +202,56 @@ const ages = [
 
         <!-- Grid de productos -->
         <div class="flex-1">
-          <div class="flex justify-between items-center mb-6">
-            <p class="text-gray-600">{products?.length || 0} productos</p>
-            <select class="border rounded-lg px-4 py-2">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <p id="product-count" class="text-gray-500 text-sm font-medium">{totalProducts} productos</p>
+            <select id="sort-select" class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white">
               <option>Más relevantes</option>
               <option>Precio: menor a mayor</option>
               <option>Precio: mayor a menor</option>
             </select>
           </div>
 
-          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {products?.map((product: any) => (
               <div class="product-card" data-product={JSON.stringify(product)}></div>
             ))}
           </div>
 
           {(!products || products.length === 0) && (
-            <div class="text-center py-16">
-              <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9 2 7 4 7 7v1.5C5.5 9 4 10.5 4 12.5c0 1.5.5 3 2 4v5.5c0 .5.5 1 1 1h2c.5 0 1-.5 1-1V20h4v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-5.5c1.5-1 2-2.5 2-4 0-2-1.5-3.5-3-4V7c0-3-2-5-5-5z"/></svg>
-              <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
-              <p class="text-gray-500">Pronto añadiremos más productos para gatos</p>
+            <div class="text-center py-20">
+              <div class="w-20 h-20 mx-auto mb-6 bg-purple-50 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-700 mb-2">No hay productos disponibles</h3>
+              <p class="text-gray-500 max-w-sm mx-auto">Pronto añadiremos más productos para gatos. ¡Vuelve pronto!</p>
+              <a href="/productos" class="inline-flex items-center gap-2 mt-6 text-purple-600 font-medium hover:text-purple-800 transition-colors">
+                Ver todos los productos
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </a>
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Banner CTA -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-gradient-to-br from-purple-700 to-purple-900 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-orange-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/30 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+        <div class="relative flex flex-col md:flex-row items-center gap-8">
+          <div class="flex-1">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3">¿No encuentras lo que buscas?</h2>
+            <p class="text-purple-200 text-lg">Consulta nuestro catálogo completo o escríbenos y te ayudamos a encontrar el producto perfecto para tu gato.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="/productos" class="bg-white text-purple-700 font-semibold py-3 px-8 rounded-full hover:bg-gray-100 transition-all shadow-lg whitespace-nowrap">Ver catálogo</a>
+            <a href="/info/contacto" class="border border-white/30 text-white font-semibold py-3 px-8 rounded-full hover:bg-white/10 transition-all whitespace-nowrap">Contactar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -171,10 +279,10 @@ const ages = [
       }
     });
 
-    const grid = document.getElementById('products-grid');
-    const applyBtn = document.querySelector('button.bg-orange-500') as HTMLButtonElement;
-    const sortSelect = document.querySelector('select') as HTMLSelectElement;
-    const countText = document.querySelector('.text-gray-600') as HTMLElement;
+    const applyBtn = document.getElementById('apply-filters');
+    const clearBtn = document.getElementById('clear-filters');
+    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+    const countText = document.getElementById('product-count');
 
     function getFilteredProducts() {
       const selectedCategories = Array.from(document.querySelectorAll('input[name="category"]:checked')).map((el) => (el as HTMLInputElement).value);
@@ -192,25 +300,36 @@ const ages = [
     function renderFiltered() {
       const filtered = getFilteredProducts();
       const sortValue = sortSelect?.value || '';
-      if (sortValue.includes('menor a mayor')) filtered.sort((a, b) => a.product.price - b.product.price);
-      else if (sortValue.includes('mayor a menor')) filtered.sort((a, b) => b.product.price - a.product.price);
+      if (sortValue.includes('menor a mayor')) filtered.sort((a: any, b: any) => a.product.price - b.product.price);
+      else if (sortValue.includes('mayor a menor')) filtered.sort((a: any, b: any) => b.product.price - a.product.price);
 
       allProducts.forEach(({ container }) => (container as HTMLElement).style.display = 'none');
       filtered.forEach(({ container }) => (container as HTMLElement).style.display = '');
-      if (countText) countText.textContent = `${filtered.length} productos encontrados`;
+      if (countText) countText.textContent = `${filtered.length} productos`;
     }
 
     applyBtn?.addEventListener('click', renderFiltered);
     sortSelect?.addEventListener('change', renderFiltered);
 
+    clearBtn?.addEventListener('click', () => {
+      document.querySelectorAll('input[name="category"]:checked, input[name="age"]:checked, input[name="on_sale"]:checked').forEach((el) => {
+        (el as HTMLInputElement).checked = false;
+      });
+      renderFiltered();
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = urlParams.get('categoria');
+    const ageParam = urlParams.get('edad');
     if (categoryParam) {
-      allProducts.forEach(({ product, container }) => {
-        if (product.category !== categoryParam) (container as HTMLElement).style.display = 'none';
-      });
-      const visible = allProducts.filter(({ product }) => product.category === categoryParam);
-      if (countText) countText.textContent = `${visible.length} productos encontrados`;
+      const cb = document.querySelector(`input[name="category"][value="${categoryParam}"]`) as HTMLInputElement;
+      if (cb) cb.checked = true;
+      renderFiltered();
+    }
+    if (ageParam) {
+      const cb = document.querySelector(`input[name="age"][value="${ageParam}"]`) as HTMLInputElement;
+      if (cb) cb.checked = true;
+      renderFiltered();
     }
   });
 </script>

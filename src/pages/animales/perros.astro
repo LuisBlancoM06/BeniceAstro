@@ -2,192 +2,265 @@
 import Layout from '../../layouts/Layout.astro';
 import { supabase } from '../../lib/supabase';
 
-// Obtener productos de perros
 const { data: products } = await supabase
   .from('products')
   .select('*')
   .eq('animal_type', 'perro')
   .order('created_at', { ascending: false });
 
-// Categorías específicas para perros
+const totalProducts = products?.length || 0;
+
 const categories = [
-  { id: 'alimentacion', name: 'Alimentación', icon: '🍖', description: 'Piensos, húmedos y snacks' },
-  { id: 'salud', name: 'Salud', icon: '💊', description: 'Antiparasitarios y vitaminas' },
-  { id: 'accesorios', name: 'Accesorios', icon: '🎀', description: 'Collares, correas y camas' },
-  { id: 'juguetes', name: 'Juguetes', icon: '🎾', description: 'Pelotas, mordedores y más' },
+  { id: 'alimentacion', name: 'Alimentación', description: 'Piensos, húmedos y snacks', iconPath: 'M12 6v6m0 0v6m0-6h6m-6 0H6' },
+  { id: 'salud', name: 'Salud', description: 'Antiparasitarios y vitaminas', iconPath: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' },
+  { id: 'accesorios', name: 'Accesorios', description: 'Collares, correas y camas', iconPath: 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z' },
+  { id: 'juguetes', name: 'Juguetes', description: 'Pelotas, mordedores y más', iconPath: 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
 ];
 
 const sizes = [
-  { id: 'mini', name: 'Mini/Toy', description: 'Hasta 5kg' },
-  { id: 'mediano', name: 'Mediano', description: '5-25kg' },
-  { id: 'grande', name: 'Grande', description: '+25kg' },
+  { id: 'mini', name: 'Mini / Toy', description: 'Hasta 5kg', emoji: '🐕' },
+  { id: 'mediano', name: 'Mediano', description: '5-25kg', emoji: '🦮' },
+  { id: 'grande', name: 'Grande', description: '+25kg', emoji: '🐕‍🦺' },
 ];
 
 const ages = [
-  { id: 'cachorro', name: 'Cachorro', description: '0-12 meses' },
-  { id: 'adulto', name: 'Adulto', description: '1-7 años' },
-  { id: 'senior', name: 'Senior', description: '+7 años' },
+  { id: 'cachorro', name: 'Cachorro', description: '0-12 meses', emoji: '🐶' },
+  { id: 'adulto', name: 'Adulto', description: '1-7 años', emoji: '🐕' },
+  { id: 'senior', name: 'Senior', description: '+7 años', emoji: '🦴' },
 ];
 ---
 
-<Layout title="Productos para Perros">
-  <!-- Hero Section -->
-  <section class="relative bg-purple-700 text-white py-16">
-    <div class="absolute inset-0 bg-black/10"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-      <nav class="text-sm mb-4 opacity-80">
-        <a href="/" class="hover:underline">Inicio</a>
-        <span class="mx-2">›</span>
-        <span>Perros</span>
+<Layout title="Productos para Perros" description="Encuentra los mejores productos para perros: alimentación premium, juguetes, correas y más. Envío gratis en pedidos +49€.">
+  <!-- Hero Premium -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-br from-orange-600 via-orange-500 to-amber-500"></div>
+    <div class="absolute inset-0 opacity-[0.07]">
+      <div class="absolute top-10 left-10 w-32 h-32 border-2 border-white rounded-full"></div>
+      <div class="absolute top-32 right-16 w-48 h-48 border-2 border-white rounded-full"></div>
+      <div class="absolute bottom-10 left-1/3 w-24 h-24 border-2 border-white rounded-full"></div>
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-orange-700/40 to-transparent"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <nav class="text-sm mb-8" aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-orange-100">
+          <li><a href="/" class="hover:text-white transition-colors">Inicio</a></li>
+          <li><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></li>
+          <li class="text-white font-medium">Perros</li>
+        </ol>
       </nav>
-      <div class="flex items-center gap-4">
-        <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
-        <div>
-          <h1 class="text-4xl md:text-5xl font-bold mb-2">Todo para tu Perro</h1>
-          <p class="text-xl opacity-90">Encuentra los mejores productos para el cuidado de tu mejor amigo</p>
+
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-8">
+        <div class="flex-1">
+          <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm text-orange-50 mb-4">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            {totalProducts} productos disponibles
+          </div>
+          <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
+            Todo para tu
+            <span class="bg-gradient-to-r from-purple-300 to-purple-200 bg-clip-text text-transparent"> Perro</span>
+          </h1>
+          <p class="text-orange-50 text-lg md:text-xl max-w-lg leading-relaxed">
+            Los mejores productos para el cuidado, alimentación y diversión de tu mejor amigo.
+          </p>
+          <div class="flex flex-wrap gap-3 mt-8">
+            <a href="#productos" class="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-800 text-white font-semibold py-3 px-8 rounded-full transition-all shadow-lg shadow-purple-700/25 hover:shadow-purple-700/40 hover:-translate-y-0.5">
+              Ver productos
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <a href="/ofertas" class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold py-3 px-8 rounded-full transition-all border border-white/20">
+              Ver ofertas
+            </a>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center justify-center w-52 h-52 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 shadow-2xl">
+          <svg class="w-24 h-24 text-white/70" viewBox="0 0 24 24" fill="currentColor"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
         </div>
       </div>
-      <div class="mt-8 flex flex-wrap gap-4">
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">{products?.length || 0}</span>
-          <span class="ml-2">Productos</span>
+
+      <div class="grid grid-cols-3 gap-4 mt-12 max-w-xl">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">{totalProducts}</p>
+          <p class="text-orange-100 text-sm mt-1">Productos</p>
         </div>
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <svg class="w-8 h-8 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"></path></svg>
-          <span class="ml-2">Envío gratis +49€</span>
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">Gratis</p>
+          <p class="text-orange-100 text-sm mt-1">Envío +49€</p>
         </div>
-        <div class="bg-white/20 backdrop-blur rounded-lg px-6 py-3">
-          <span class="font-bold text-2xl">24h</span>
-          <span class="ml-2">Entrega rápida</span>
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/10 text-center">
+          <p class="text-2xl md:text-3xl font-bold text-white">24-48h</p>
+          <p class="text-orange-100 text-sm mt-1">Entrega</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Categorías -->
-  <section class="py-12 bg-gray-50">
+  <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold mb-6">Categorías</h2>
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900">Explora por categoría</h2>
+        <p class="text-gray-500 mt-2">Encuentra exactamente lo que tu perro necesita</p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {categories.map((cat) => (
-          <a 
+          <a
             href={`/animales/perros?categoria=${cat.id}`}
-            class="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all hover:-translate-y-1 border border-gray-100 group"
+            class="group relative bg-white rounded-2xl p-6 md:p-8 text-center hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden"
           >
-            <span class="text-4xl block mb-3 group-hover:scale-110 transition-transform">{cat.icon}</span>
-            <h3 class="font-semibold text-gray-900">{cat.name}</h3>
-            <p class="text-sm text-gray-500 mt-1">{cat.description}</p>
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-50 to-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="relative">
+              <div class="w-14 h-14 mx-auto mb-4 bg-orange-100 group-hover:bg-orange-200 rounded-2xl flex items-center justify-center transition-colors duration-300">
+                <svg class="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={cat.iconPath} />
+                </svg>
+              </div>
+              <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{cat.name}</h3>
+              <p class="text-sm text-gray-500 mt-1">{cat.description}</p>
+            </div>
           </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- Filtros y Productos -->
+  <!-- Por tamaño -->
   <section class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Según el tamaño de tu perro</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {sizes.map((size) => (
+          <a
+            href={`/animales/perros?tamano=${size.id}`}
+            class="group flex items-center gap-4 bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-200 hover:shadow-lg transition-all duration-300"
+          >
+            <span class="text-4xl">{size.emoji}</span>
+            <div>
+              <h3 class="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{size.name}</h3>
+              <p class="text-sm text-gray-500">{size.description}</p>
+            </div>
+            <svg class="w-5 h-5 text-gray-300 group-hover:text-orange-500 ml-auto transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Productos -->
+  <section id="productos" class="py-12 scroll-mt-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col lg:flex-row gap-8">
         <!-- Sidebar Filtros -->
-        <aside class="lg:w-64 flex-shrink-0">
-          <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filtros
-            </h3>
+        <aside class="lg:w-72 flex-shrink-0">
+          <div class="bg-white rounded-2xl shadow-sm p-6 sticky top-24 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="font-bold text-lg flex items-center gap-2">
+                <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                </svg>
+                Filtros
+              </h3>
+              <button id="clear-filters" class="text-sm text-orange-500 hover:text-orange-700 font-medium transition-colors">Limpiar</button>
+            </div>
 
-            <!-- Por tamaño -->
+            <!-- Tamaño -->
             <div class="mb-6">
-              <h4 class="font-medium text-gray-700 mb-3">Tamaño del perro</h4>
-              <div class="space-y-2">
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Tamaño</h4>
+              <div class="space-y-2.5">
                 {sizes.map((size) => (
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input type="checkbox" name="size" value={size.id} class="rounded text-purple-600 focus:ring-purple-500" />
-                    <span class="group-hover:text-purple-600 transition-colors">{size.name}</span>
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="size" value={size.id} class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
+                    <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">{size.name}</span>
                     <span class="text-xs text-gray-400">({size.description})</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <!-- Por edad -->
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <!-- Edad -->
             <div class="mb-6">
-              <h4 class="font-medium text-gray-700 mb-3">Edad</h4>
-              <div class="space-y-2">
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Edad</h4>
+              <div class="space-y-2.5">
                 {ages.map((age) => (
-                  <label class="flex items-center gap-2 cursor-pointer group">
-                    <input type="checkbox" name="age" value={age.id} class="rounded text-purple-600 focus:ring-purple-500" />
-                    <span class="group-hover:text-purple-600 transition-colors">{age.name}</span>
+                  <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="age" value={age.id} class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
+                    <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">{age.name}</span>
                     <span class="text-xs text-gray-400">({age.description})</span>
                   </label>
                 ))}
               </div>
             </div>
 
-            <!-- Por precio -->
+            <div class="border-t border-gray-100 my-4"></div>
+
+            <!-- Precio -->
             <div class="mb-6">
-              <h4 class="font-medium text-gray-700 mb-3">Precio</h4>
-              <div class="space-y-2">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="price" value="0-20" class="text-purple-600 focus:ring-purple-500" />
-                  <span>Hasta 20€</span>
+              <h4 class="font-semibold text-gray-800 mb-3 text-sm uppercase tracking-wider">Precio</h4>
+              <div class="space-y-2.5">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <input type="radio" name="price" value="0-20" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
+                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">Hasta 20€</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="price" value="20-50" class="text-purple-600 focus:ring-purple-500" />
-                  <span>20€ - 50€</span>
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <input type="radio" name="price" value="20-50" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
+                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">20€ - 50€</span>
                 </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="price" value="50+" class="text-purple-600 focus:ring-purple-500" />
-                  <span>Más de 50€</span>
+                <label class="flex items-center gap-3 cursor-pointer group">
+                  <input type="radio" name="price" value="50+" class="w-4 h-4 text-orange-500 focus:ring-orange-500" />
+                  <span class="text-gray-600 group-hover:text-orange-600 transition-colors text-sm">Más de 50€</span>
                 </label>
               </div>
             </div>
 
-            <!-- Solo ofertas -->
-            <div class="mb-6">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" name="on_sale" class="rounded text-purple-600 focus:ring-purple-500" />
-                <span class="font-medium">Solo ofertas</span>
-                <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">HOT</span>
-              </label>
-            </div>
+            <div class="border-t border-gray-100 my-4"></div>
 
-            <button class="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors">
+            <!-- Solo ofertas -->
+            <label class="flex items-center gap-3 cursor-pointer mb-6">
+              <input type="checkbox" name="on_sale" class="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500 transition" />
+              <span class="font-medium text-gray-700 text-sm">Solo ofertas</span>
+              <span class="bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full font-semibold">HOT</span>
+            </label>
+
+            <button id="apply-filters" class="w-full bg-orange-500 text-white py-2.5 rounded-xl hover:bg-orange-600 transition-all font-medium shadow-sm hover:shadow-md">
               Aplicar filtros
-            </button>
-            <button class="w-full mt-2 text-gray-500 hover:text-gray-700 transition-colors text-sm">
-              Limpiar filtros
             </button>
           </div>
         </aside>
 
         <!-- Grid de productos -->
         <div class="flex-1">
-          <div class="flex justify-between items-center mb-6">
-            <p class="text-gray-600">{products?.length || 0} productos encontrados</p>
-            <select class="border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
-              <option>Ordenar por relevancia</option>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <p id="product-count" class="text-gray-500 text-sm font-medium">{totalProducts} productos</p>
+            <select id="sort-select" class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white">
+              <option>Más relevantes</option>
               <option>Precio: menor a mayor</option>
               <option>Precio: mayor a menor</option>
-              <option>Más vendidos</option>
-              <option>Novedades</option>
             </select>
           </div>
 
-          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {products?.map((product: any) => (
-              <div class="product-card" data-product={JSON.stringify(product)}>
-                <!-- Renderizado por React -->
-              </div>
+              <div class="product-card" data-product={JSON.stringify(product)}></div>
             ))}
           </div>
 
           {(!products || products.length === 0) && (
-            <div class="text-center py-16">
-              <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4c-1 0-2 .5-3 1-.5-1-1.5-2-3-2s-2.5 1-3 2c-1-.5-2-1-3-1-2.5 0-4 2-4 4 0 1.5.5 3 2 4v7c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-2h8v2c0 .5.5 1 1 1h2c.5 0 1-.5 1-1v-7c1.5-1 2-2.5 2-4 0-2-1.5-4-4-4z"/></svg>
-              <h3 class="text-xl font-semibold text-gray-700 mb-2">No hay productos disponibles</h3>
-              <p class="text-gray-500">Pronto añadiremos más productos para perros</p>
+            <div class="text-center py-20">
+              <div class="w-20 h-20 mx-auto mb-6 bg-orange-50 rounded-full flex items-center justify-center">
+                <svg class="w-10 h-10 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-700 mb-2">No hay productos disponibles</h3>
+              <p class="text-gray-500 max-w-sm mx-auto">Pronto añadiremos más productos para perros. ¡Vuelve pronto!</p>
+              <a href="/productos" class="inline-flex items-center gap-2 mt-6 text-orange-500 font-medium hover:text-orange-700 transition-colors">
+                Ver todos los productos
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+              </a>
             </div>
           )}
         </div>
@@ -195,50 +268,79 @@ const ages = [
     </div>
   </section>
 
-  <!-- Sección de consejos -->
-  <section class="py-12 bg-purple-50">
+  <!-- Consejos -->
+  <section class="py-16 bg-gray-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold mb-6">Consejos para tu perro</h2>
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900">Consejos para tu perro</h2>
+        <p class="text-gray-500 mt-2">Artículos útiles para cuidar mejor a tu mejor amigo</p>
+      </div>
       <div class="grid md:grid-cols-3 gap-6">
-        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-          <div class="w-full h-48 bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center">
-            <span class="text-white text-2xl font-bold">Alimentación</span>
+        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="w-full h-48 bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
           </div>
           <div class="p-6">
-            <span class="text-purple-600 text-sm font-medium">Alimentación</span>
-            <h3 class="font-bold text-lg mt-2">¿Cómo elegir el mejor pienso?</h3>
-            <p class="text-gray-600 mt-2 text-sm">Descubre los factores clave para elegir la alimentación perfecta...</p>
-            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
-              Leer más →
+            <span class="text-purple-600 text-xs font-bold uppercase tracking-wider">Alimentación</span>
+            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-purple-700 transition-colors">¿Cómo elegir el mejor pienso?</h3>
+            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Descubre los factores clave para elegir la alimentación perfecta para tu perro.</p>
+            <a href="/blog" class="inline-flex items-center gap-1 text-purple-600 font-medium mt-4 text-sm hover:gap-2 transition-all">
+              Leer más
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
           </div>
         </article>
-        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-          <div class="w-full h-48 bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
-            <span class="text-white text-2xl font-bold">Higiene</span>
+        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="w-full h-48 bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           </div>
           <div class="p-6">
-            <span class="text-orange-500 text-sm font-medium">Higiene</span>
-            <h3 class="font-bold text-lg mt-2">Baño perfecto en casa</h3>
-            <p class="text-gray-600 mt-2 text-sm">Guía completa para bañar a tu perro como un profesional...</p>
-            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
-              Leer más →
+            <span class="text-orange-500 text-xs font-bold uppercase tracking-wider">Higiene</span>
+            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-orange-600 transition-colors">Baño perfecto en casa</h3>
+            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Guía completa para bañar a tu perro como un profesional sin salir de casa.</p>
+            <a href="/blog" class="inline-flex items-center gap-1 text-orange-500 font-medium mt-4 text-sm hover:gap-2 transition-all">
+              Leer más
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
           </div>
         </article>
-        <article class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-          <div class="w-full h-48 bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center">
-            <span class="text-white text-2xl font-bold">Salud</span>
+        <article class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="w-full h-48 bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+            <svg class="w-16 h-16 text-white/80 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <div class="p-6">
-            <span class="text-green-600 text-sm font-medium">Salud</span>
-            <h3 class="font-bold text-lg mt-2">Calendario de vacunas</h3>
-            <p class="text-gray-600 mt-2 text-sm">Todo lo que necesitas saber sobre las vacunas de tu perro...</p>
-            <a href="/blog" class="text-purple-600 font-medium mt-4 inline-block hover:underline">
-              Leer más →
+            <span class="text-emerald-600 text-xs font-bold uppercase tracking-wider">Salud</span>
+            <h3 class="font-bold text-lg mt-2 text-gray-900 group-hover:text-emerald-600 transition-colors">Calendario de vacunas</h3>
+            <p class="text-gray-500 mt-2 text-sm leading-relaxed">Todo lo que necesitas saber sobre las vacunas esenciales de tu perro.</p>
+            <a href="/blog" class="inline-flex items-center gap-1 text-emerald-600 font-medium mt-4 text-sm hover:gap-2 transition-all">
+              Leer más
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
             </a>
           </div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Banner CTA -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-gradient-to-br from-orange-500 to-orange-700 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-orange-400/30 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+        <div class="relative flex flex-col md:flex-row items-center gap-8">
+          <div class="flex-1">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3">¿No encuentras lo que buscas?</h2>
+            <p class="text-orange-100 text-lg">Consulta nuestro catálogo completo o escríbenos y te ayudamos a encontrar el producto perfecto para tu perro.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a href="/productos" class="bg-white text-orange-600 font-semibold py-3 px-8 rounded-full hover:bg-gray-100 transition-all shadow-lg whitespace-nowrap">Ver catálogo</a>
+            <a href="/info/contacto" class="border border-white/30 text-white font-semibold py-3 px-8 rounded-full hover:bg-white/10 transition-all whitespace-nowrap">Contactar</a>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -249,7 +351,6 @@ const ages = [
   import { createRoot } from 'react-dom/client';
   import ProductCard from '../../components/ProductCard.tsx';
   
-  // Renderizar las tarjetas de producto con React
   document.addEventListener('DOMContentLoaded', () => {
     const productCards = document.querySelectorAll('.product-card');
     const allProducts: any[] = [];
@@ -266,12 +367,10 @@ const ages = [
       }
     });
 
-    // Filter logic
-    const grid = document.getElementById('products-grid');
-    const applyBtn = document.querySelector('button.bg-purple-600') as HTMLButtonElement;
-    const clearBtn = applyBtn?.nextElementSibling as HTMLButtonElement;
-    const sortSelect = document.querySelector('select') as HTMLSelectElement;
-    const countText = document.querySelector('.flex-1 .text-gray-600') as HTMLElement;
+    const applyBtn = document.getElementById('apply-filters');
+    const clearBtn = document.getElementById('clear-filters');
+    const sortSelect = document.getElementById('sort-select') as HTMLSelectElement;
+    const countText = document.getElementById('product-count');
 
     function getFilteredProducts() {
       const selectedSizes = Array.from(document.querySelectorAll('input[name="size"]:checked')).map((el) => (el as HTMLInputElement).value);
@@ -295,25 +394,18 @@ const ages = [
 
     function renderFiltered() {
       const filtered = getFilteredProducts();
-      
-      // Sort
       const sortValue = sortSelect?.value || '';
-      if (sortValue.includes('menor a mayor')) {
-        filtered.sort((a, b) => (a.product.price) - (b.product.price));
-      } else if (sortValue.includes('mayor a menor')) {
-        filtered.sort((a, b) => (b.product.price) - (a.product.price));
-      }
+      if (sortValue.includes('menor a mayor')) filtered.sort((a: any, b: any) => a.product.price - b.product.price);
+      else if (sortValue.includes('mayor a menor')) filtered.sort((a: any, b: any) => b.product.price - a.product.price);
 
-      // Hide all, show filtered
       allProducts.forEach(({ container }) => (container as HTMLElement).style.display = 'none');
       filtered.forEach(({ container }) => (container as HTMLElement).style.display = '');
-      
-      if (countText) countText.textContent = `${filtered.length} productos encontrados`;
+      if (countText) countText.textContent = `${filtered.length} productos`;
     }
 
     applyBtn?.addEventListener('click', renderFiltered);
     sortSelect?.addEventListener('change', renderFiltered);
-    
+
     clearBtn?.addEventListener('click', () => {
       document.querySelectorAll('input[name="size"]:checked, input[name="age"]:checked, input[name="price"]:checked, input[name="on_sale"]:checked').forEach((el) => {
         (el as HTMLInputElement).checked = false;
@@ -321,17 +413,20 @@ const ages = [
       renderFiltered();
     });
 
-    // Apply URL-based category filter
     const urlParams = new URLSearchParams(window.location.search);
     const categoryParam = urlParams.get('categoria');
+    const sizeParam = urlParams.get('tamano');
     if (categoryParam) {
       allProducts.forEach(({ product, container }) => {
-        if (product.category !== categoryParam) {
-          (container as HTMLElement).style.display = 'none';
-        }
+        if (product.category !== categoryParam) (container as HTMLElement).style.display = 'none';
       });
       const visible = allProducts.filter(({ product }) => product.category === categoryParam);
-      if (countText) countText.textContent = `${visible.length} productos encontrados`;
+      if (countText) countText.textContent = `${visible.length} productos`;
+    }
+    if (sizeParam) {
+      const cb = document.querySelector(`input[name="size"][value="${sizeParam}"]`) as HTMLInputElement;
+      if (cb) cb.checked = true;
+      renderFiltered();
     }
   });
 </script>
