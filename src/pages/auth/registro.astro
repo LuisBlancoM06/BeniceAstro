@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 ---
 
 <Layout title="Registro">
@@ -53,12 +54,14 @@ import Layout from '../../layouts/Layout.astro';
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">Dirección</label>
-          <input
-            type="text"
+          <AddressAutocomplete
+            client:load
             id="address"
-            class="input"
+            label="Dirección"
+            sublabel={null}
+            labelClassName="block text-sm font-medium mb-2"
             placeholder="Calle, número, ciudad, CP"
+            className=""
           />
         </div>
         

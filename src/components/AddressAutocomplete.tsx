@@ -51,6 +51,12 @@ interface AddressAutocompleteProps {
   className?: string;
   /** ID del input */
   id?: string;
+  /** Texto principal del label (por defecto: "Buscar dirección") */
+  label?: string;
+  /** Texto secundario del label (por defecto: "— autocompletado"). Pasar null para ocultar */
+  sublabel?: string | null;
+  /** Clases CSS del label (por defecto: "block text-xs font-semibold text-gray-600 mb-1.5") */
+  labelClassName?: string;
 }
 
 /** Genera un UUID v4 para session tokens de Google */
@@ -70,6 +76,9 @@ export default function AddressAutocomplete({
   placeholder = 'Escribe tu dirección...',
   className = '',
   id = 'address-autocomplete',
+  label = 'Buscar dirección',
+  sublabel = '— autocompletado',
+  labelClassName = 'block text-xs font-semibold text-gray-600 mb-1.5',
 }: AddressAutocompleteProps) {
   const [query, setQuery] = useState('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
@@ -290,10 +299,10 @@ export default function AddressAutocomplete({
     <div ref={wrapperRef} className="relative">
       <label
         htmlFor={id}
-        className="block text-xs font-semibold text-gray-600 mb-1.5"
+        className={labelClassName}
       >
-        Buscar dirección
-        <span className="text-gray-400 font-normal ml-1">— autocompletado</span>
+        {label}
+        {sublabel && <span className="text-gray-400 font-normal ml-1">{sublabel}</span>}
       </label>
 
       <div className="relative">
