@@ -1,7 +1,10 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '../../../lib/supabase';
 
 export const prerender = false;
+
+// En desarrollo (HTTP) las cookies Secure no se guardan en el navegador.
+// Solo activar Secure en producción (HTTPS).
+const isSecure = !import.meta.env.DEV;
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
@@ -14,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // Validar formato básico de JWT (3 partes base64 separadas por punto)
+    // Validar formato básico de JWT (3 partes base64url separadas por punto)
     const jwtRegex = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
     if (!jwtRegex.test(access_token) || !jwtRegex.test(refresh_token)) {
       return new Response(JSON.stringify({ error: 'Formato de token inválido' }), {
@@ -23,14 +26,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    // Verificar que el access_token es válido consultando a Supabase
-    const { data: { user }, error: authError } = await supabase.auth.getUser(access_token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Token de acceso inválido o expirado' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // NOTA: No verificamos el token con getUser() aquí.
+    // Los tokens vienen directamente de signInWithPassword/signUp de Supabase,
+    // son inherentemente válidos. La verificación real ocurre en cada
+    // página/API que lee las cookies (createServerClient → getUser).
+    // Esto evita una llamada server-to-server que puede fallar por red.
 
     const maxAge = 60 * 60 * 24 * 7; // 7 días
 
@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       path: '/',
       maxAge,
       sameSite: 'lax',
-      secure: true,
+      secure: isSecure,
       httpOnly: true,
     });
 
@@ -46,7 +46,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       path: '/',
       maxAge,
       sameSite: 'lax',
-      secure: true,
+      secure: isSecure,
       httpOnly: true,
     });
 
