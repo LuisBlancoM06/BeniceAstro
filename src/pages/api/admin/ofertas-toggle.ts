@@ -3,16 +3,44 @@ import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
 export const prerender = false;
 
-// GET: Obtener estado actual de las ofertas flash
-export const GET: APIRoute = async () => {
+// GET: Obtener estado actual de las ofertas flash (requiere admin)
+export const GET: APIRoute = async ({ request }) => {
   try {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const { data: userData } = await supabaseAdmin
+      .from('users').select('role').eq('id', user.id).single();
+
+    if (!userData || userData.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Solo administradores' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     const { data, error } = await supabase
       .from('site_settings')
       .select('value')
       .eq('key', 'ofertas_flash_active')
       .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+    if (error && error.code !== 'PGRST116') {
       throw error;
     }
 

@@ -58,8 +58,12 @@ export async function getOrCreateStripeCustomer(userId: string): Promise<string>
         return user.stripe_customer_id;
       }
     } catch {
-      // Customer eliminado o inválido — recrear
+      // Customer eliminado o inválido — limpiar referencia y recrear
       console.warn(`Stripe Customer ${user.stripe_customer_id} no encontrado, recreando...`);
+      await supabaseAdmin
+        .from('users')
+        .update({ stripe_customer_id: null })
+        .eq('id', userId);
     }
   }
 

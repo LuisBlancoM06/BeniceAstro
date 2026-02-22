@@ -5,7 +5,7 @@ const resend = new Resend(import.meta.env.RESEND_API_KEY || '');
 
 const FROM_NAME = 'Benice';
 const FROM_EMAIL = import.meta.env.FROM_EMAIL || 'onboarding@resend.dev';
-const SUPPORT_EMAIL = 'lblancom06@gmail.com';
+const SUPPORT_EMAIL = import.meta.env.FROM_EMAIL || 'benice@victoriafp.online';
 
 // Helper para escapar HTML y prevenir XSS
 function escapeHtml(str: string): string {
@@ -318,7 +318,7 @@ export async function sendNewsletterWelcome(email: string, promoCode: string) {
       <strong>Aqu&iacute; tienes tu c&oacute;digo de descuento</strong><br><br>
       <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
         <span style="font-size: 28px; font-weight: bold; color: #7e22ce; letter-spacing: 3px;">
-          ${promoCode}
+          ${escapeHtml(promoCode)}
         </span>
         <p style="margin: 10px 0 0; color: #6b7280; font-size: 14px;">15% de descuento en tu pr&oacute;xima compra</p>
       </div>
