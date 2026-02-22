@@ -129,12 +129,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (path.startsWith('/api/') && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
     const csrfExemptPaths = new Set<string>([
       '/api/stripe/webhook',
+      '/api/auth/session',
     ]);
 
-    // Los proxies de Google Places son endpoints de solo lectura (no modifican estado).
-    // Ya están protegidos por rate-limiting. Exentos de CSRF para evitar
-    // falsos positivos por mismatch de Origin detrás de reverse proxies.
-    const csrfExemptPrefixes = ['/api/google/'];
+    // Los proxies de Google Places y auth son endpoints que ya están protegidos
+    // por sus propios mecanismos. Exentos de CSRF para evitar falsos positivos
+    // por mismatch de Origin detrás de reverse proxies (Coolify/Traefik/Docker).
+    const csrfExemptPrefixes = ['/api/google/', '/api/auth/'];
     const isCsrfExemptByPrefix = csrfExemptPrefixes.some(p => path.startsWith(p));
 
     if (!csrfExemptPaths.has(path) && !isCsrfExemptByPrefix) {
