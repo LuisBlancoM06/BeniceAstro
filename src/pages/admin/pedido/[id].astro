@@ -5,6 +5,14 @@ import { createServerClient, supabaseAdmin } from '../../../lib/supabase';
 
 const supabase = await createServerClient(Astro.cookies);
 
+// Verificar autenticación y rol admin
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) return Astro.redirect('/auth/login');
+
+const { data: userData } = await supabaseAdmin
+  .from('users').select('role').eq('id', session.user.id).single();
+if (!userData || userData.role !== 'admin') return Astro.redirect('/');
+
 const { id } = Astro.params;
 
 if (!id) {
