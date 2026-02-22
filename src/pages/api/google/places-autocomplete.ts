@@ -53,6 +53,7 @@ export const POST: APIRoute = async ({ request }) => {
     const googleBody: Record<string, any> = {
       input: sanitizedInput,
       includedPrimaryTypes: ['street_address', 'subpremise', 'premise', 'route'],
+      includedRegionCodes: ['es'],
       languageCode: 'es',
     };
 

@@ -145,11 +145,7 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
                 <div>
                   <label class="block text-xs font-medium text-gray-500 mb-1">País</label>
                   <select id="prof-country" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 focus:ring-2 focus:ring-purple-500">
-                    <option value="ES" selected={user?.country === 'ES' || !user?.country}>España</option>
-                    <option value="PT" selected={user?.country === 'PT'}>Portugal</option>
-                    <option value="FR" selected={user?.country === 'FR'}>Francia</option>
-                    <option value="DE" selected={user?.country === 'DE'}>Alemania</option>
-                    <option value="IT" selected={user?.country === 'IT'}>Italia</option>
+                    <option value="ES" selected>España</option>
                   </select>
                 </div>
               </div>
