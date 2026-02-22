@@ -179,18 +179,52 @@ export const POST: APIRoute = async ({ request }) => {
     };
 
     if (stripeCustomerId) {
+      // Actualizar Stripe Customer con los datos del formulario de envío
+      // para que Stripe Checkout los pre-rellene
+      if (shipping?.name || shipping?.address?.line1) {
+        const updateParams: Stripe.CustomerUpdateParams = {};
+        if (shipping.name) updateParams.name = shipping.name;
+        if (shipping.email) updateParams.email = shipping.email;
+        if (shipping.phone) updateParams.phone = shipping.phone;
+        if (shipping.address?.line1) {
+          updateParams.address = {
+            line1: shipping.address.line1,
+            line2: shipping.address.line2 || undefined,
+            city: shipping.address.city || undefined,
+            state: shipping.address.state || undefined,
+            postal_code: shipping.address.postal_code || undefined,
+            country: shipping.address.country || 'ES',
+          };
+          updateParams.shipping = {
+            name: shipping.name || '',
+            phone: shipping.phone || undefined,
+            address: {
+              line1: shipping.address.line1,
+              line2: shipping.address.line2 || undefined,
+              city: shipping.address.city || undefined,
+              state: shipping.address.state || undefined,
+              postal_code: shipping.address.postal_code || undefined,
+              country: shipping.address.country || 'ES',
+            },
+          };
+        }
+        try {
+          await stripe.customers.update(stripeCustomerId, updateParams);
+        } catch {
+          // No bloquear el checkout si falla la actualización
+        }
+      }
+
       // Customer vinculado: Stripe pre-rellena email, nombre, teléfono y dirección
       sessionParams.customer = stripeCustomerId;
       sessionParams.customer_update = {
-        // Permitir que el usuario modifique sus datos en Stripe Checkout
-        // y que se guarden automáticamente en el Customer para futuras compras
         name: 'auto',
         address: 'auto',
         shipping: 'auto',
       };
-    } else if (customerEmail) {
-      // Fallback: solo pre-rellenar email
-      sessionParams.customer_email = customerEmail;
+    } else if (customerEmail || shipping?.email) {
+      // Fallback: pre-rellenar email desde perfil o formulario
+      sessionParams.customer_email = customerEmail || shipping.email;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
