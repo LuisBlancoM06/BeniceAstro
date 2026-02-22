@@ -1,28 +1,37 @@
 import { createClient } from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
 
-const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
+// ── Env vars ────────────────────────────────────────────────────────────
+// En CI / build-time las variables pueden no existir.
+// Usamos placeholders válidos para que createClient no falle en módulo-level
+// (supabase-js valida URL con `new URL()` y key con truthiness check).
+// Las operaciones reales fallarán si se intentan con placeholders, lo cual
+// es el comportamiento deseado: fail-fast en runtime, no en build.
+const PLACEHOLDER_URL = 'https://placeholder.supabase.co';
+const PLACEHOLDER_KEY = 'placeholder-key';
 
-// Cliente básico para uso en cliente
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Cliente admin que bypasea RLS (para webhooks y operaciones de servidor)
+const supabaseUrl  = import.meta.env.PUBLIC_SUPABASE_URL  || PLACEHOLDER_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || PLACEHOLDER_KEY;
 const supabaseServiceRoleKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('CRITICAL: Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables');
-}
+const isMissingCreds = supabaseUrl === PLACEHOLDER_URL || supabaseAnonKey === PLACEHOLDER_KEY;
 
+if (isMissingCreds) {
+  console.warn('[supabase] Using placeholder credentials – OK during build/CI, NOT for runtime.');
+}
 if (!supabaseServiceRoleKey) {
-  console.warn('WARNING: Missing SUPABASE_SERVICE_ROLE_KEY - admin operations will fail');
+  console.warn('[supabase] Missing SUPABASE_SERVICE_ROLE_KEY – admin operations will fail.');
 }
 
-// Cliente admin: FAIL-CLOSED
-// Si falta service role key, NO se hace fallback al cliente anónimo para evitar bypass accidental.
+// ── Cliente básico (browser / anon) ─────────────────────────────────────
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// ── Cliente admin: FAIL-CLOSED ──────────────────────────────────────────
+// Si falta service role key, NO se hace fallback al cliente anónimo
+// para evitar bypass accidental de RLS.
 export const supabaseAdmin = createClient(
   supabaseUrl,
-  supabaseServiceRoleKey || 'MISSING_SUPABASE_SERVICE_ROLE_KEY',
+  supabaseServiceRoleKey || PLACEHOLDER_KEY,
   {
     auth: {
       autoRefreshToken: false,
@@ -31,9 +40,9 @@ export const supabaseAdmin = createClient(
   }
 );
 
-// Cliente para SSR que lee cookies de Astro
+// ── Cliente SSR (lee cookies de Astro) ──────────────────────────────────
 export function createServerClient(cookies: AstroCookies) {
-  const accessToken = cookies.get('sb-access-token')?.value;
+  const accessToken  = cookies.get('sb-access-token')?.value;
   const refreshToken = cookies.get('sb-refresh-token')?.value;
 
   const client = createClient(supabaseUrl, supabaseAnonKey, {
@@ -43,7 +52,6 @@ export function createServerClient(cookies: AstroCookies) {
     }
   });
 
-  // Si hay tokens, establecer la sesión
   if (accessToken && refreshToken) {
     client.auth.setSession({
       access_token: accessToken,
