@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { createServerClient, supabase } from '../../../lib/supabase';
 import type { AstroCookies } from 'astro';
 
+export const prerender = false;
+
 // Función helper para verificar si es admin usando cookies (validando JWT server-side)
 async function isAdmin(cookies: AstroCookies): Promise<{ isAdmin: boolean; supabaseClient: ReturnType<typeof createServerClient> }> {
   const supabaseClient = createServerClient(cookies);
@@ -73,9 +75,47 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   try {
     const body = await request.json();
     
-    // Validaciones
+    // Validaciones de campos obligatorios
     if (!body.name || !body.price || !body.animal_type || !body.category) {
       return new Response(JSON.stringify({ error: 'Faltan campos obligatorios' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar precio
+    const price = parseFloat(body.price);
+    if (isNaN(price) || price <= 0 || price > 99999) {
+      return new Response(JSON.stringify({ error: 'Precio inválido: debe ser un número positivo (máx 99999)' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar stock
+    const stock = parseInt(body.stock) || 0;
+    if (stock < 0 || stock > 999999) {
+      return new Response(JSON.stringify({ error: 'Stock inválido: debe ser un número no negativo' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validar sale_price si existe
+    let salePrice: number | null = null;
+    if (body.sale_price) {
+      salePrice = parseFloat(body.sale_price);
+      if (isNaN(salePrice) || salePrice <= 0 || salePrice >= price) {
+        return new Response(JSON.stringify({ error: 'Precio de oferta inválido: debe ser positivo y menor que el precio original' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Validar name length
+    if (body.name.length > 200) {
+      return new Response(JSON.stringify({ error: 'Nombre demasiado largo (máx 200 caracteres)' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -96,8 +136,8 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       .insert([{
         name: body.name,
         description: body.description || '',
-        price: parseFloat(body.price),
-        stock: parseInt(body.stock) || 0,
+        price,
+        stock,
         image_url: body.image_url || '',
         images: body.images || [],
         animal_type: body.animal_type,
@@ -105,7 +145,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         category: body.category,
         age_range: body.age_range || 'adulto',
         on_sale: body.on_sale || false,
-        sale_price: body.sale_price ? parseFloat(body.sale_price) : null,
+        sale_price: salePrice,
         slug: body.slug
       }])
       .select()
@@ -146,12 +186,38 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
-    if (body.name !== undefined) updateData.name = body.name;
+    if (body.name !== undefined) {
+      if (typeof body.name !== 'string' || body.name.length > 200) {
+        return new Response(JSON.stringify({ error: 'Nombre inválido' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      updateData.name = body.name;
+    }
     if (body.description !== undefined) updateData.description = body.description;
-    if (body.price !== undefined) updateData.price = parseFloat(body.price);
-    if (body.stock !== undefined) updateData.stock = parseInt(body.stock);
+    if (body.price !== undefined) {
+      const price = parseFloat(body.price);
+      if (isNaN(price) || price <= 0 || price > 99999) {
+        return new Response(JSON.stringify({ error: 'Precio inválido' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      updateData.price = price;
+    }
+    if (body.stock !== undefined) {
+      const stock = parseInt(body.stock);
+      if (isNaN(stock) || stock < 0 || stock > 999999) {
+        return new Response(JSON.stringify({ error: 'Stock inválido' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      updateData.stock = stock;
+    }
     if (body.image_url !== undefined) updateData.image_url = body.image_url;
     if (body.images !== undefined) updateData.images = body.images;
     if (body.animal_type !== undefined) updateData.animal_type = body.animal_type;
@@ -159,7 +225,20 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     if (body.category !== undefined) updateData.category = body.category;
     if (body.age_range !== undefined) updateData.age_range = body.age_range;
     if (body.on_sale !== undefined) updateData.on_sale = body.on_sale;
-    if (body.sale_price !== undefined) updateData.sale_price = body.sale_price ? parseFloat(body.sale_price) : null;
+    if (body.sale_price !== undefined) {
+      if (body.sale_price) {
+        const sp = parseFloat(body.sale_price);
+        if (isNaN(sp) || sp <= 0) {
+          return new Response(JSON.stringify({ error: 'Precio de oferta inválido' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        updateData.sale_price = sp;
+      } else {
+        updateData.sale_price = null;
+      }
+    }
     if (body.slug !== undefined) updateData.slug = body.slug;
 
     const { data, error } = await supabaseClient

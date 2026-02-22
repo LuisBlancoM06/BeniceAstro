@@ -5,7 +5,19 @@ import Layout from '../../layouts/Layout.astro';
 <Layout title="Iniciar Sesión">
   <div class="max-w-md mx-auto px-4 py-12">
     <div class="card">
-      <h1 class="text-3xl font-bold mb-6 text-center">Iniciar Sesión</h1>
+      <!-- Branding -->
+      <div class="text-center mb-6">
+        <a href="/" class="inline-flex items-center gap-2 mb-4">
+          <svg class="w-10 h-10 text-purple-700" viewBox="0 0 64 64" fill="currentColor">
+            <path d="M32 8c-4 0-7.5 2-9 5-1.5-3-5-5-9-5-6 0-10 4-10 10 0 8 8 16 19 25 11-9 19-17 19-25 0-6-4-10-10-10z"></path>
+            <ellipse cx="20" cy="28" rx="3" ry="4" fill="white"></ellipse>
+            <ellipse cx="44" cy="28" rx="3" ry="4" fill="white"></ellipse>
+          </svg>
+          <span class="text-2xl font-bold bg-gradient-to-r from-purple-700 to-orange-500 bg-clip-text text-transparent">Benice</span>
+        </a>
+        <h1 class="text-3xl font-bold">Iniciar Sesión</h1>
+        <p class="text-gray-500 mt-1">Accede a tu cuenta para gestionar tus pedidos</p>
+      </div>
       
       <form id="login-form">
         <div class="mb-4">
@@ -19,18 +31,29 @@ import Layout from '../../layouts/Layout.astro';
           />
         </div>
         
-        <div class="mb-6">
+        <div class="mb-4">
           <label class="block text-sm font-medium mb-2">Contraseña</label>
-          <input
-            type="password"
-            id="password"
-            required
-            class="input"
-            placeholder="••••••••"
-          />
+          <div class="relative">
+            <input
+              type="password"
+              id="password"
+              required
+              class="input pr-12"
+              placeholder="••••••••"
+            />
+            <button type="button" id="toggle-password" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors" aria-label="Mostrar contraseña">
+              <svg class="w-5 h-5" id="eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <svg class="w-5 h-5 hidden" id="eye-off-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+            </button>
+          </div>
         </div>
 
-        <div id="error-message" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg"></div>
+        <div id="error-message" class="hidden mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
 
         <button type="submit" class="btn btn-primary w-full mb-4">
           Iniciar Sesión
@@ -38,12 +61,12 @@ import Layout from '../../layouts/Layout.astro';
       </form>
 
       <div class="text-center space-y-2">
-        <a href="/auth/recuperar-contrasena" class="text-purple-600 hover:underline block">
+        <a href="/auth/recuperar-contrasena" class="text-purple-600 hover:underline block text-sm">
           ¿Olvidaste tu contraseña?
         </a>
-        <p class="text-gray-600">
+        <p class="text-gray-600 text-sm">
           ¿No tienes cuenta? 
-          <a href="/auth/registro" class="text-purple-600 hover:underline">Regístrate</a>
+          <a href="/auth/registro" class="text-purple-600 hover:underline font-medium">Regístrate</a>
         </p>
       </div>
     </div>
@@ -51,6 +74,20 @@ import Layout from '../../layouts/Layout.astro';
 
   <script>
     import { supabase } from '../../lib/supabase';
+
+    // Password toggle
+    const toggleBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const eyeIcon = document.getElementById('eye-icon');
+    const eyeOffIcon = document.getElementById('eye-off-icon');
+    
+    toggleBtn?.addEventListener('click', () => {
+      const isPassword = passwordInput?.type === 'password';
+      if (passwordInput) passwordInput.type = isPassword ? 'text' : 'password';
+      eyeIcon?.classList.toggle('hidden');
+      eyeOffIcon?.classList.toggle('hidden');
+      toggleBtn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    });
 
     const form = document.getElementById('login-form');
     const errorMessage = document.getElementById('error-message');

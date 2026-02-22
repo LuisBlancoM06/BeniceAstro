@@ -15,6 +15,8 @@
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
 
+export const prerender = false;
+
 const GOOGLE_PLACES_API_KEY = import.meta.env.GOOGLE_PLACES_API_KEY;
 
 interface AddressInput {

@@ -16,6 +16,8 @@ import type { APIRoute } from 'astro';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 import { getOrCreateStripeCustomer, getStripeCustomerData } from '../../../lib/stripe-customer';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request }) => {
   try {
     // 1. Autenticación obligatoria

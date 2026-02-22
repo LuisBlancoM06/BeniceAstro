@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../lib/supabase';
 
@@ -29,6 +30,23 @@ const { data: invoices } = await supabase
   `)
   .order('created_at', { ascending: false })
   .limit(50);
+
+// Calcular estadísticas del mes actual
+const now = new Date();
+const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+const monthInvoices = (invoices || []).filter(
+  (inv: any) => new Date(inv.created_at) >= new Date(firstDayOfMonth)
+);
+
+const stats = {
+  totalFacturado: monthInvoices
+    .filter((inv: any) => inv.invoice_type === 'factura')
+    .reduce((sum: number, inv: any) => sum + (inv.total || 0), 0),
+  facturas: monthInvoices.filter((inv: any) => inv.invoice_type === 'factura').length,
+  abonos: monthInvoices.filter((inv: any) => inv.invoice_type === 'abono').length,
+  totalIva: monthInvoices.reduce((sum: number, inv: any) => sum + Math.abs(inv.tax_amount || 0), 0),
+};
 ---
 
 <AdminLayout title="Facturas" currentPage="facturas">
@@ -62,19 +80,19 @@ const { data: invoices } = await supabase
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-6">
           <p class="text-sm text-gray-500">Total Facturado (Mes)</p>
-          <p class="text-2xl font-bold text-gray-800" id="stat-total">0€</p>
+          <p class="text-2xl font-bold text-gray-800" id="stat-total">{stats.totalFacturado.toFixed(2)}€</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6">
           <p class="text-sm text-gray-500">Facturas Emitidas</p>
-          <p class="text-2xl font-bold text-green-600" id="stat-facturas">0</p>
+          <p class="text-2xl font-bold text-green-600" id="stat-facturas">{stats.facturas}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6">
           <p class="text-sm text-gray-500">Abonos Emitidos</p>
-          <p class="text-2xl font-bold text-red-600" id="stat-abonos">0</p>
+          <p class="text-2xl font-bold text-red-600" id="stat-abonos">{stats.abonos}</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-6">
           <p class="text-sm text-gray-500">IVA Recaudado</p>
-          <p class="text-2xl font-bold text-blue-600" id="stat-iva">0€</p>
+          <p class="text-2xl font-bold text-blue-600" id="stat-iva">{stats.totalIva.toFixed(2)}€</p>
         </div>
       </div>
 
@@ -161,22 +179,77 @@ const { data: invoices } = await supabase
   </div>
 
   <script>
-    // Calcular estadísticas
-    const invoices = document.querySelectorAll('tbody tr');
-    let totalFacturado = 0;
-    let facturas = 0;
-    let abonos = 0;
-    let totalIva = 0;
+    // Filtrado client-side de la tabla
+    const filterType = document.getElementById('filter-type') as HTMLSelectElement;
+    const filterSearch = document.getElementById('filter-search') as HTMLInputElement;
+    const filterFrom = document.getElementById('filter-from') as HTMLInputElement;
+    const filterTo = document.getElementById('filter-to') as HTMLInputElement;
+    const rows = document.querySelectorAll('tbody tr');
 
-    // TODO: Calcular desde los datos reales
-    document.getElementById('stat-total')!.textContent = `${totalFacturado.toFixed(2)}€`;
-    document.getElementById('stat-facturas')!.textContent = facturas.toString();
-    document.getElementById('stat-abonos')!.textContent = abonos.toString();
-    document.getElementById('stat-iva')!.textContent = `${totalIva.toFixed(2)}€`;
+    function applyFilters() {
+      const type = filterType?.value || '';
+      const search = filterSearch?.value?.toLowerCase() || '';
+      const from = filterFrom?.value ? new Date(filterFrom.value) : null;
+      const to = filterTo?.value ? new Date(filterTo.value + 'T23:59:59') : null;
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 7) return; // skip empty state row
+        
+        const invoiceNum = cells[0]?.textContent?.toLowerCase() || '';
+        const invoiceType = cells[1]?.textContent?.trim().toLowerCase() || '';
+        const client = cells[2]?.textContent?.toLowerCase() || '';
+        const dateStr = cells[6]?.textContent?.trim() || '';
+        
+        let show = true;
+        
+        // Filtro por tipo
+        if (type && !invoiceType.includes(type)) show = false;
+        
+        // Filtro por búsqueda
+        if (search && !invoiceNum.includes(search) && !client.includes(search)) show = false;
+        
+        // Filtro por fecha
+        if (from || to) {
+          const parts = dateStr.split('/');
+          if (parts.length === 3) {
+            const rowDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+            if (from && rowDate < from) show = false;
+            if (to && rowDate > to) show = false;
+          }
+        }
+        
+        (row as HTMLElement).style.display = show ? '' : 'none';
+      });
+    }
+
+    filterType?.addEventListener('change', applyFilters);
+    filterSearch?.addEventListener('input', applyFilters);
+    filterFrom?.addEventListener('change', applyFilters);
+    filterTo?.addEventListener('change', applyFilters);
 
     // Exportar CSV
     document.getElementById('export-btn')?.addEventListener('click', () => {
-      alert('Función de exportación CSV en desarrollo');
+      const csvRows: string[] = ['Nº Factura,Tipo,Cliente,Email,Subtotal,IVA,Total,Fecha'];
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 7) return;
+        csvRows.push([
+          cells[0]?.textContent?.trim() || '',
+          cells[1]?.textContent?.trim() || '',
+          cells[2]?.querySelector('p')?.textContent?.trim() || '',
+          cells[2]?.querySelectorAll('p')[1]?.textContent?.trim() || '',
+          cells[3]?.textContent?.trim() || '',
+          cells[4]?.textContent?.trim() || '',
+          cells[5]?.textContent?.trim() || '',
+          cells[6]?.textContent?.trim() || '',
+        ].map(v => `"${v}"`).join(','));
+      });
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `facturas-${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
     });
   </script>
 </AdminLayout>

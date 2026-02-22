@@ -196,6 +196,9 @@ const icons: Record<string, string> = {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{title} | Benice Admin</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <link href="/styles/global.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
@@ -218,7 +221,7 @@ const icons: Record<string, string> = {
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto" aria-label="Navegación de administración">
         {menuItems.map((item) => (
           item.type === 'divider' ? (
             <div class="pt-4 pb-2">

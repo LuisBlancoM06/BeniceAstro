@@ -4,6 +4,8 @@ import { supabaseAdmin } from '../../../lib/supabase';
 import { sendOrderConfirmation } from '../../../lib/email';
 import { syncCheckoutToCustomer } from '../../../lib/stripe-customer';
 
+export const prerender = false;
+
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 const endpointSecret = import.meta.env.STRIPE_WEBHOOK_SECRET || '';
@@ -46,7 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     default:
-      console.log(`Unhandled event type: ${event.type}`);
+      console.info(`Unhandled event type: ${event.type}`);
   }
 
   return new Response(JSON.stringify({ received: true }), {
@@ -65,7 +67,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
       .limit(1);
 
     if (existingOrder && existingOrder.length > 0) {
-      console.log(`Order for session ${session.id} already exists, skipping (idempotent).`);
+      console.info(`Order for session ${session.id} already exists, skipping (idempotent).`);
       return;
     }
 
@@ -155,6 +157,22 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
       }
     }
 
+    // Validar que hay al menos un item resuelto
+    if (rpcItems.length === 0) {
+      console.error('No se resolvió ningún producto para el pedido. Session:', session.id);
+      // Emitir reembolso automático
+      try {
+        const paymentIntentId = session.payment_intent as string;
+        if (paymentIntentId) {
+          await stripe.refunds.create({ payment_intent: paymentIntentId });
+          console.error(`Refund emitido para ${paymentIntentId}: pedido sin items resueltos.`);
+        }
+      } catch (refundError) {
+        console.error('CRITICAL: No se pudo reembolsar pedido sin items:', refundError);
+      }
+      return;
+    }
+
     // Calcular descuento correcto:
     // session.amount_total ya es el monto DESPUÉS del descuento (Stripe aplicó el descuento en unit_amount)
     // Necesitamos el subtotal original (pre-descuento) para calcular el monto real descontado
@@ -194,7 +212,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
         const paymentIntentId = session.payment_intent as string;
         if (paymentIntentId) {
           await stripe.refunds.create({ payment_intent: paymentIntentId });
-          console.log(`Refund issued for payment_intent ${paymentIntentId} due to order creation failure.`);
+          console.info(`Refund issued for payment_intent ${paymentIntentId} due to order creation failure.`);
         }
       } catch (refundError) {
         console.error('CRITICAL: Failed to issue refund after order creation failure:', refundError);
@@ -226,7 +244,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
         total: total
       });
 
-    console.log(`Order ${orderId} created successfully with invoice ${invoiceNumber}`);
+    console.info(`Order ${orderId} created successfully with invoice ${invoiceNumber}`);
 
     // Incrementar current_uses del código promocional atómicamente
     if (promoCode) {
@@ -254,7 +272,7 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
           total: total,
           shippingAddress: shippingAddress
         });
-        console.log(`Confirmation email sent to ${customerEmail}`);
+        console.info(`Confirmation email sent to ${customerEmail}`);
       } catch (emailError) {
         console.error('Error sending confirmation email:', emailError);
       }
@@ -283,9 +301,8 @@ async function generateInvoiceNumber(): Promise<string> {
   const year = new Date().getFullYear();
   const prefix = 'FAC';
 
-  // Usar un advisory lock via RPC para evitar duplicados concurrentes
-  // Fallback: intentar con retry si hay conflicto
-  for (let attempt = 0; attempt < 3; attempt++) {
+  // Intentar obtener el siguiente número secuencial con reintentos
+  for (let attempt = 0; attempt < 5; attempt++) {
     const { data } = await supabaseAdmin
       .from('invoices')
       .select('invoice_number')
@@ -298,13 +315,25 @@ async function generateInvoiceNumber(): Promise<string> {
       const lastNumber = data[0].invoice_number;
       const match = lastNumber.match(/(\d+)$/);
       if (match) {
-        sequence = parseInt(match[1]) + 1 + attempt;
+        sequence = parseInt(match[1]) + 1;
       }
     }
 
-    return `${prefix}-${year}-${sequence.toString().padStart(6, '0')}`;
+    // Añadir offset por intento para evitar colisiones en concurrencia
+    const candidate = `${prefix}-${year}-${(sequence + attempt).toString().padStart(6, '0')}`;
+
+    // Verificar que no existe ya (protege contra race conditions)
+    const { data: existing } = await supabaseAdmin
+      .from('invoices')
+      .select('invoice_number')
+      .eq('invoice_number', candidate)
+      .limit(1);
+
+    if (!existing || existing.length === 0) {
+      return candidate;
+    }
   }
 
   // Último recurso: usar timestamp para garantizar unicidad
-  return `${prefix}-${year}-${Date.now()}`;
+  return `${prefix}-${year}-T${Date.now()}`;
 }

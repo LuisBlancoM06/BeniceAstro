@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabase';
 
+export const prerender = false;
+
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
 

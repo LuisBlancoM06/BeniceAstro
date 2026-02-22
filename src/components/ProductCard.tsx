@@ -1,5 +1,6 @@
 // Tarjeta de Producto con Favoritos, Quick View y Accesibilidad
 import { useState, useCallback } from 'react';
+import { getCategoryGradient, getAnimalEmoji, isPlaceholder } from '../lib/product-utils';
 
 interface Product {
   id: string;
@@ -17,48 +18,6 @@ interface Product {
   age_range: string;
   slug?: string;
   brand?: string;
-}
-
-// Detectar si una URL es placeholder
-function isPlaceholder(url: string): boolean {
-  return !url || url.includes('placehold') || url.includes('placeholder') || url === '';
-}
-
-// Gradientes por tipo de animal + categoría
-function getCategoryGradient(animal: string, category: string): string {
-  const gradients: Record<string, Record<string, string>> = {
-    perro: {
-      alimentacion: 'from-orange-400 to-amber-600',
-      higiene: 'from-cyan-400 to-blue-500',
-      salud: 'from-green-400 to-emerald-600',
-      accesorios: 'from-blue-400 to-indigo-600',
-      juguetes: 'from-yellow-400 to-orange-500',
-    },
-    gato: {
-      alimentacion: 'from-purple-400 to-violet-600',
-      higiene: 'from-fuchsia-400 to-pink-600',
-      salud: 'from-teal-400 to-cyan-600',
-      accesorios: 'from-rose-400 to-pink-600',
-      juguetes: 'from-indigo-400 to-purple-600',
-    },
-    otros: {
-      alimentacion: 'from-lime-400 to-green-600',
-      higiene: 'from-sky-400 to-blue-600',
-      salud: 'from-emerald-400 to-teal-600',
-      accesorios: 'from-amber-400 to-yellow-600',
-      juguetes: 'from-sky-400 to-indigo-500',
-    },
-  };
-  return gradients[animal]?.[category] || 'from-gray-400 to-gray-600';
-}
-
-// Emoji por tipo de animal
-function getAnimalEmoji(animal: string): string {
-  switch (animal) {
-    case 'perro': return '🐕';
-    case 'gato': return '🐱';
-    default: return '🐾';
-  }
 }
 
 // Icono SVG por tipo de animal
@@ -224,7 +183,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Info del producto */}
         <div className="p-3.5">
           {/* Categoría */}
-          <span className="text-[11px] font-medium text-purple-600 uppercase tracking-wider">
+          <span className="text-xs font-medium text-purple-600 uppercase tracking-wider">
             {product.category}
           </span>
 
@@ -240,7 +199,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-baseline gap-2" itemProp="offers" itemScope itemType="https://schema.org/Offer">
             <meta itemProp="priceCurrency" content="EUR" />
             <span 
-              className={`text-lg font-bold ${isOnSale ? 'text-red-500' : 'text-gray-900'}`}
+              className={`text-lg font-bold ${isOnSale ? 'text-red-600' : 'text-gray-900'}`}
               itemProp="price"
               content={finalPrice.toFixed(2)}
             >
@@ -277,7 +236,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           absolute top-3 right-3 p-2 rounded-full shadow-lg transition-all duration-300 z-10
           ${isFavorite 
             ? 'bg-red-500 text-white scale-100' 
-            : 'bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0'
+            : 'bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 translate-y-0 sm:translate-y-1 sm:group-hover:translate-y-0'
           }
           ${justToggled ? 'animate-heartbeat' : ''}
           ${isFavorite ? 'opacity-100' : ''}

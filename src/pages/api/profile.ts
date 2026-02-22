@@ -14,6 +14,8 @@ import type { APIRoute } from 'astro';
 import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { syncUserToStripeCustomer } from '../../lib/stripe-customer';
 
+export const prerender = false;
+
 export const PUT: APIRoute = async ({ request }) => {
   try {
     // 1. Autenticación

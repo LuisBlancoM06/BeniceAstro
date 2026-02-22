@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
+export const prerender = false;
+
 export const GET: APIRoute = async ({ request }) => {
   try {
     // Verificar autenticación de administrador

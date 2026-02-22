@@ -3,11 +3,13 @@ import Stripe from 'stripe';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 import { getOrCreateStripeCustomer } from '../../../lib/stripe-customer';
 
+export const prerender = false;
+
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const { items, userId, promoCode } = await request.json();
+    const { items, promoCode } = await request.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(JSON.stringify({ error: 'El carrito está vacío' }), {
@@ -16,21 +18,28 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Obtener Stripe Customer vinculado (o crearlo) para usuarios logueados
-    // Esto permite que Stripe pre-rellene nombre, email, teléfono y dirección
+    // SEGURIDAD: Verificar autenticación JWT del usuario (NUNCA confiar en userId del body)
+    let userId: string | null = null;
     let stripeCustomerId: string | undefined;
     let customerEmail: string | undefined;
-    if (userId) {
-      try {
-        stripeCustomerId = await getOrCreateStripeCustomer(userId);
-      } catch {
-        // Fallback: usar solo email si falla la creación del Customer
-        const { data: profile } = await supabaseAdmin
-          .from('users')
-          .select('email')
-          .eq('id', userId)
-          .single();
-        customerEmail = profile?.email || undefined;
+
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (!authError && user) {
+        userId = user.id;
+        try {
+          stripeCustomerId = await getOrCreateStripeCustomer(userId);
+        } catch {
+          // Fallback: usar solo email si falla la creación del Customer
+          const { data: profile } = await supabaseAdmin
+            .from('users')
+            .select('email')
+            .eq('id', userId)
+            .single();
+          customerEmail = profile?.email || undefined;
+        }
       }
     }
 
@@ -60,7 +69,9 @@ export const POST: APIRoute = async ({ request }) => {
           headers: { 'Content-Type': 'application/json' }
         });
       }
-      if (dbProduct.stock < (item.quantity || 1)) {
+      const qty = Math.min(Math.max(Math.floor(item.quantity || 1), 1), 99);
+      item.quantity = qty; // Normalizar cantidad
+      if (dbProduct.stock < qty) {
         return new Response(JSON.stringify({ error: `Stock insuficiente para: ${dbProduct.name}` }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
@@ -152,8 +163,8 @@ export const POST: APIRoute = async ({ request }) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${request.headers.get('origin')}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${request.headers.get('origin')}/checkout/cancel`,
+      success_url: `${import.meta.env.PUBLIC_SITE_URL || request.headers.get('origin') || 'https://benicetiendanimal.victoriafp.online'}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${import.meta.env.PUBLIC_SITE_URL || request.headers.get('origin') || 'https://benicetiendanimal.victoriafp.online'}/checkout/cancel`,
       metadata: {
         user_id: userId || '',
         promo_code: promoCode || '',

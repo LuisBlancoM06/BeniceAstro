@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 import { sendShippingNotification, sendDeliveryConfirmation } from '../../../lib/email';
 
+export const prerender = false;
+
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 const VALID_STATUSES = ['pagado', 'enviado', 'entregado', 'cancelado'];

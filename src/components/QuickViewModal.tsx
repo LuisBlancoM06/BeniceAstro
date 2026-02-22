@@ -209,7 +209,7 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
 
             {/* Precio */}
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl font-bold text-purple-600">
+              <span className={`text-3xl font-bold ${product.on_sale && product.sale_price ? 'text-red-600' : 'text-gray-900'}`}>
                 {finalPrice.toFixed(2)}€
               </span>
               {product.on_sale && product.sale_price && (
@@ -291,7 +291,7 @@ export default function QuickViewModal(_props: QuickViewModalProps) {
                   transition-all duration-300 transform
                   ${product.stock === 0 
                     ? 'bg-gray-300 cursor-not-allowed' 
-                    : 'bg-purple-600 hover:bg-purple-700 hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-orange-500 hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98]'
                   }
                   ${isAdding ? 'animate-pulse' : ''}
                 `}

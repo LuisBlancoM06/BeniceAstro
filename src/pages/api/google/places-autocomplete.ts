@@ -12,6 +12,8 @@
  */
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 const GOOGLE_PLACES_API_KEY = import.meta.env.GOOGLE_PLACES_API_KEY;
 
 export const POST: APIRoute = async ({ request }) => {

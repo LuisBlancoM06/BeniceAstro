@@ -7,7 +7,9 @@ import react from '@astrojs/react';
 export default defineConfig({
   site: process.env.PUBLIC_SITE_URL || 'https://benicetiendanimal.victoriafp.online',
   integrations: [tailwind(), react()],
-  output: 'server',
+  // Modo híbrido: SSG por defecto, SSR opt-in con prerender = false
+  // En Astro 5.x, output:'static' = antiguo 'hybrid' (SSG default + SSR selectivo)
+  output: 'static',
   adapter: node({
     mode: 'standalone',
     // Coolify usa Traefik como proxy — necesario para obtener la IP real del visitante

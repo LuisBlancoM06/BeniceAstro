@@ -11,6 +11,8 @@
  */
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 const GOOGLE_PLACES_API_KEY = import.meta.env.GOOGLE_PLACES_API_KEY;
 
 /** Mapeo de tipos de componente de Google → campos de nuestro formulario */

@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro';
 import { supabase, supabaseAdmin } from '../../../lib/supabase';
 
+export const prerender = false;
+
 // GET: Obtener estado actual de las ofertas flash
 export const GET: APIRoute = async () => {
   try {
@@ -67,6 +69,13 @@ export const POST: APIRoute = async ({ request }) => {
 
     const body = await request.json();
     const { active } = body;
+
+    if (typeof active !== 'boolean') {
+      return new Response(JSON.stringify({ error: 'El campo "active" debe ser un booleano' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     // Upsert la configuración
     const { data, error } = await supabaseAdmin

@@ -1,11 +1,16 @@
 import type { APIRoute } from 'astro';
 import { supabaseAdmin } from '../../lib/supabase';
 import { sendNewsletterWelcome } from '../../lib/email';
+import { randomBytes } from 'node:crypto';
+
+export const prerender = false;
 
 function generatePromoCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const bytes = randomBytes(6);
   let code = 'BIENVENIDO';
   for (let i = 0; i < 6; i++) {
-    code += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.charAt(Math.floor(Math.random() * 36));
+    code += chars[bytes[i] % chars.length];
   }
   return code;
 }

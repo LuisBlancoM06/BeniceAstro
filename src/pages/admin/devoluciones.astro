@@ -1,4 +1,5 @@
 ---
+export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { createServerClient } from '../../lib/supabase';
 
@@ -137,6 +138,12 @@ const statusColors: Record<string, string> = {
   <script>
     import { supabase } from '../../lib/supabase';
 
+    // Obtener token para las llamadas API
+    async function getAuthToken(): Promise<string | null> {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    }
+
     // Ver detalle
     document.querySelectorAll('.view-return').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -181,20 +188,32 @@ const statusColors: Record<string, string> = {
         document.getElementById('save-return')?.addEventListener('click', async () => {
           const refundAmount = (document.getElementById('refund-amount') as HTMLInputElement).value;
           const adminNotes = (document.getElementById('admin-notes') as HTMLTextAreaElement).value;
+          const token = await getAuthToken();
           
-          const { error } = await supabase
-            .from('returns')
-            .update({
-              refund_amount: parseFloat(refundAmount) || null,
-              admin_notes: adminNotes,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', data.id);
+          if (!token) {
+            alert('Sesión expirada. Recarga la página.');
+            return;
+          }
 
-          if (!error) {
+          const res = await fetch('/api/admin/process-return', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              returnId: data.id,
+              newStatus: data.status, // mantener estado actual, solo guardar campos
+              refundAmount,
+              adminNotes,
+            }),
+          });
+
+          if (res.ok) {
             window.location.reload();
           } else {
-            alert('Error al guardar');
+            const err = await res.json();
+            alert(err.error || 'Error al guardar');
           }
         });
       });
@@ -205,7 +224,7 @@ const statusColors: Record<string, string> = {
       document.getElementById('return-modal')?.classList.add('hidden');
     });
 
-    // Cambiar estado
+    // Cambiar estado (usa API server-side)
     document.querySelectorAll('.return-status').forEach(select => {
       select.addEventListener('change', async (e) => {
         const el = e.target as HTMLSelectElement;
@@ -213,58 +232,46 @@ const statusColors: Record<string, string> = {
         const newStatus = el.value;
         const currentStatus = el.dataset.currentStatus;
 
-        // Si cambia a completada, generar factura de abono
+        // Si cambia a completada, confirmar
         if (newStatus === 'completada' && currentStatus !== 'completada') {
           if (!confirm('¿Completar devolución y generar factura de abono?')) {
             el.value = currentStatus || 'solicitada';
             return;
           }
-
-          try {
-            // Obtener datos de la devolución
-            const { data: returnData } = await supabase
-              .from('returns')
-              .select('*, orders(*)')
-              .eq('id', returnId)
-              .single();
-
-            if (returnData && returnData.refund_amount) {
-              // Generar número de factura de abono
-              const { data: invoiceNum } = await supabase.rpc('generate_invoice_number', { inv_type: 'abono' });
-              
-              // Crear factura de abono (importes negativos)
-              const subtotal = -Math.abs(returnData.refund_amount / 1.21);
-              const taxAmount = -Math.abs(returnData.refund_amount - (returnData.refund_amount / 1.21));
-              const total = -Math.abs(returnData.refund_amount);
-
-              await supabase.from('invoices').insert({
-                order_id: returnData.order_id,
-                user_id: returnData.user_id,
-                invoice_number: invoiceNum,
-                invoice_type: 'abono',
-                subtotal: subtotal,
-                tax_amount: taxAmount,
-                total: total
-              });
-            }
-          } catch (err) {
-            console.error('Error generando abono:', err);
-          }
         }
 
-        const { error } = await supabase
-          .from('returns')
-          .update({ status: newStatus, updated_at: new Date().toISOString() })
-          .eq('id', returnId);
+        const token = await getAuthToken();
+        if (!token) {
+          alert('Sesión expirada. Recarga la página.');
+          el.value = currentStatus || 'solicitada';
+          return;
+        }
 
-        if (error) {
-          alert('Error al actualizar estado');
-        } else {
-          el.dataset.currentStatus = newStatus;
-          if (newStatus === 'completada') {
-            alert('Devolución completada y factura de abono generada');
+        try {
+          const res = await fetch('/api/admin/process-return', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ returnId, newStatus }),
+          });
+
+          const result = await res.json();
+
+          if (res.ok) {
+            el.dataset.currentStatus = newStatus;
+            if (newStatus === 'completada') {
+              alert(result.message || 'Devolución completada y factura de abono generada');
+            }
             window.location.reload();
+          } else {
+            alert(result.error || 'Error al actualizar estado');
+            el.value = currentStatus || 'solicitada';
           }
+        } catch (err) {
+          alert('Error de conexión');
+          el.value = currentStatus || 'solicitada';
         }
       });
     });

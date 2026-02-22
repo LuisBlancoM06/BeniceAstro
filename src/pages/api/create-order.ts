@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro';
 import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { sendOrderConfirmation } from '../../lib/email';
 
+export const prerender = false;
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     const { items, promo_code, shipping_address } = await request.json();

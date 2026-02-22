@@ -72,8 +72,7 @@ export default function CookieBanner(_props: Props) {
   }, [preferences, closeBanner]);
 
   const loadAnalytics = () => {
-    // Aquí cargarías Google Analytics u otros scripts
-    console.log('Analytics cargado');
+    // Aquí cargarías Google Analytics u otros scripts de analítica
   };
 
   if (!isVisible) return null;

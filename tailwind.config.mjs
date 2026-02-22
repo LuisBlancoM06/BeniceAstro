@@ -30,7 +30,17 @@ export default {
           900: '#7c2d12',
           DEFAULT: '#f97316',
         },
-        accent: '#f97316',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      borderRadius: {
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'card': '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)',
+        'card-hover': '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
       },
     },
   },
