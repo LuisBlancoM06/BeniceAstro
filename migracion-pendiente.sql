@@ -385,7 +385,18 @@ SELECT page, COUNT(*) AS total_visitas, MAX(created_at) AS ultima_visita,
   COUNT(DISTINCT user_id) AS usuarios_unicos
 FROM public.visits GROUP BY page ORDER BY total_visitas DESC;
 
+-- 9) Función increment_promo_uses (usada por webhook y create-order)
+-- Incrementa atómicamente el campo current_uses de un código promocional.
+CREATE OR REPLACE FUNCTION increment_promo_uses(p_code TEXT)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE public.promo_codes
+  SET current_uses = COALESCE(current_uses, 0) + 1
+  WHERE code = p_code;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
 -- =============================================
--- ✅ MIGRACIÓN COMPLETADA
+-- MIGRACIÓN COMPLETADA
 -- Si no hay errores rojos arriba, tu BD está sincronizada con el código.
 -- =============================================

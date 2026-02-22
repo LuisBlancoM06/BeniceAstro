@@ -2,16 +2,32 @@
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Stripe from 'stripe';
+import { ensureOrderFromStripeSession } from '../../lib/process-order';
 
 const sessionId = Astro.url.searchParams.get('session_id');
 
 // Verificar el pago server-side con Stripe
 let paymentVerified = false;
+let orderId: string | null = null;
+
 if (sessionId && sessionId.startsWith('cs_')) {
   try {
     const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     paymentVerified = session.payment_status === 'paid';
+
+    if (paymentVerified) {
+      // FALLBACK CRITICO: Si el webhook no ha procesado este pago aún,
+      // crear el pedido aquí. Esto garantiza que el pedido SIEMPRE se crea
+      // cuando el pago es exitoso, incluso si el webhook falla o se retrasa.
+      // La función es idempotente: si el webhook ya lo creó, simplemente
+      // devuelve el ID existente sin duplicar.
+      try {
+        orderId = await ensureOrderFromStripeSession(sessionId);
+      } catch (e) {
+        console.error('[SUCCESS] Error asegurando pedido:', e);
+      }
+    }
   } catch {
     paymentVerified = false;
   }
