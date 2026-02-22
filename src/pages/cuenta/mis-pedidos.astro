@@ -27,12 +27,26 @@ const { data: orders } = await supabase
 // Obtener solicitudes de cancelacion del usuario
 const orderIds = orders?.map((o: any) => o.id) || [];
 let cancellationRequests: any[] = [];
+let invoicesMap: Record<string, any> = {};
 if (orderIds.length > 0) {
   const { data } = await supabase
     .from('cancellation_requests')
     .select('*')
     .in('order_id', orderIds);
   cancellationRequests = data || [];
+
+  // Obtener facturas de los pedidos
+  const { data: invoicesData } = await supabase
+    .from('invoices')
+    .select('id, order_id, invoice_number')
+    .in('order_id', orderIds)
+    .eq('invoice_type', 'factura');
+
+  if (invoicesData) {
+    invoicesData.forEach((inv: any) => {
+      invoicesMap[inv.order_id] = inv;
+    });
+  }
 }
 
 // Helpers
@@ -208,6 +222,19 @@ const getTimelineSteps = (orderStatus: string) => {
 
             <!-- Acciones -->
             <div class="mt-4 flex flex-wrap gap-2">
+              {invoicesMap[order.id] && (
+                <a
+                  href={`/factura/${invoicesMap[order.id].id}`}
+                  target="_blank"
+                  class="btn btn-primary inline-flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Descargar Factura
+                </a>
+              )}
+
               {order.status === 'pagado' && (!cancellation || cancellation.status === 'rechazada') && (
                 <button
                   class="btn btn-danger cancel-order-btn"

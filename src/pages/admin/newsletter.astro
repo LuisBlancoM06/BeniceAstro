@@ -13,16 +13,22 @@ const { data: userData } = await supabaseAdmin
   .from('users').select('role').eq('id', session.user.id).single();
 if (!userData || userData.role !== 'admin') return Astro.redirect('/');
 
-// Obtener suscriptores
+// Obtener TODOS los suscriptores (sin limite)
 const { data: subscribers, count } = await supabaseAdmin
   .from('newsletters')
   .select('*', { count: 'exact' })
-  .order('created_at', { ascending: false })
-  .limit(50);
+  .order('created_at', { ascending: false });
+
+// Obtener codigos promo activos para el modal
+const { data: promoCodes } = await supabaseAdmin
+  .from('promo_codes')
+  .select('code, discount_percentage, expires_at')
+  .eq('active', true)
+  .order('created_at', { ascending: false });
 ---
 
 <AdminLayout title="Newsletter" currentPage="newsletter">
-  
+
   <!-- Estadísticas -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
@@ -34,8 +40,20 @@ const { data: subscribers, count } = await supabaseAdmin
       <p class="text-2xl font-bold text-gray-800 mt-1" id="this-month">-</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-      <p class="text-sm font-medium text-gray-500">Última Semana</p>
+      <p class="text-sm font-medium text-gray-500">Ultima Semana</p>
       <p class="text-2xl font-bold text-gray-800 mt-1" id="this-week">-</p>
+    </div>
+  </div>
+
+  <!-- Barra de seleccion (aparece cuando hay seleccionados) -->
+  <div id="selection-bar" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
+    <div class="flex items-center justify-between">
+      <span class="text-purple-700 font-medium">
+        <span id="selected-count">0</span> suscriptores seleccionados
+      </span>
+      <button id="open-campaign-modal" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+        Enviar Campana
+      </button>
     </div>
   </div>
 
@@ -43,15 +61,15 @@ const { data: subscribers, count } = await supabaseAdmin
   <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
     <div class="flex flex-wrap gap-4 items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800">Gestión de Newsletter</h2>
-        <p class="text-sm text-gray-500 mt-1">Exporta la lista de suscriptores o envía campañas</p>
+        <h2 class="text-lg font-semibold text-gray-800">Gestion de Newsletter</h2>
+        <p class="text-sm text-gray-500 mt-1">Selecciona suscriptores y envia campanas con codigos promo</p>
       </div>
       <div class="flex gap-3">
         <button id="export-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium">
           Exportar CSV
         </button>
         <button id="send-campaign-btn" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-          Nueva Campaña
+          Nueva Campana
         </button>
       </div>
     </div>
@@ -60,16 +78,20 @@ const { data: subscribers, count } = await supabaseAdmin
   <!-- Lista de Suscriptores -->
   <div class="bg-white rounded-xl shadow-sm overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="font-semibold text-gray-800">Últimos Suscriptores</h3>
+      <h3 class="font-semibold text-gray-800">Suscriptores ({count || 0})</h3>
     </div>
-    
+
     {subscribers && subscribers.length > 0 ? (
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-6 py-3 text-left">
+                <input type="checkbox" id="select-all" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer" />
+              </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Suscripción</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Codigo Promo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
@@ -77,9 +99,19 @@ const { data: subscribers, count } = await supabaseAdmin
             {subscribers.map((sub: any) => (
               <tr class="hover:bg-gray-50">
                 <td class="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    class="subscriber-checkbox rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
+                    data-email={sub.email}
+                  />
+                </td>
+                <td class="px-6 py-4">
                   <span class="font-medium text-gray-800">{sub.email}</span>
                 </td>
-                <td class="px-6 py-4 text-gray-500">
+                <td class="px-6 py-4">
+                  <span class="font-mono text-sm text-purple-600">{sub.promo_code}</span>
+                </td>
+                <td class="px-6 py-4 text-gray-500 text-sm">
                   {new Date(sub.created_at).toLocaleDateString('es-ES', {
                     day: '2-digit',
                     month: 'short',
@@ -87,7 +119,7 @@ const { data: subscribers, count } = await supabaseAdmin
                   })}
                 </td>
                 <td class="px-6 py-4 text-right">
-                  <button 
+                  <button
                     class="delete-sub-btn text-red-600 hover:text-red-800 text-sm"
                     data-email={sub.email}
                   >
@@ -104,45 +136,320 @@ const { data: subscribers, count } = await supabaseAdmin
         <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-        <p>No hay suscriptores todavía</p>
+        <p>No hay suscriptores todavia</p>
       </div>
     )}
   </div>
 
+  <!-- Modal de Campana -->
+  <div id="campaign-modal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+    <div class="fixed inset-0 bg-black/50" id="modal-backdrop"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+      <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
+        <button id="close-modal" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+        <h2 class="text-xl font-bold text-gray-800 mb-1">Nueva Campana</h2>
+        <p class="text-sm text-gray-500 mb-6">
+          Enviar email con codigo promocional a <span id="modal-count" class="font-bold text-purple-600">0</span> suscriptores
+        </p>
+
+        <!-- Asunto -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Asunto del email</label>
+          <input type="text" id="campaign-subject"
+            value="Oferta exclusiva para suscriptores"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent text-sm" />
+        </div>
+
+        <!-- Modo de codigo promo -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Codigo Promocional</label>
+          <div class="flex gap-4 mb-3">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="promo-mode" value="new" checked
+                class="text-purple-600 focus:ring-purple-500" />
+              <span class="text-sm">Generar nuevo</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="radio" name="promo-mode" value="existing"
+                class="text-purple-600 focus:ring-purple-500" />
+              <span class="text-sm">Usar existente</span>
+            </label>
+          </div>
+
+          <!-- Opciones: codigo nuevo -->
+          <div id="new-code-section">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Porcentaje de descuento</label>
+            <select id="discount-percentage"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent text-sm">
+              <option value="5">5%</option>
+              <option value="10" selected>10%</option>
+              <option value="15">15%</option>
+              <option value="20">20%</option>
+              <option value="25">25%</option>
+              <option value="30">30%</option>
+              <option value="50">50%</option>
+            </select>
+            <p class="text-xs text-gray-400 mt-1">Se generara un codigo tipo PROMOXXXXXX, valido 30 dias</p>
+          </div>
+
+          <!-- Opciones: codigo existente -->
+          <div id="existing-code-section" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Seleccionar codigo</label>
+            <select id="existing-promo-code"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent text-sm">
+              <option value="">Seleccionar...</option>
+              {promoCodes?.map((pc: any) => (
+                <option value={pc.code}>
+                  {pc.code} ({pc.discount_percentage}%)
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3 mt-6">
+          <button id="cancel-campaign" class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+            Cancelar
+          </button>
+          <button id="confirm-campaign" class="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+            Enviar Campana
+          </button>
+        </div>
+
+        <!-- Progreso / resultado -->
+        <div id="campaign-progress" class="hidden mt-4 p-4 rounded-lg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium"></div>
+
   <script>
     import { supabase } from '../../lib/supabase';
 
-    // Exportar CSV
+    // --- Utilidades ---
+    function showToast(message: string, type: 'success' | 'error' = 'success') {
+      const toast = document.getElementById('toast')!;
+      toast.textContent = message;
+      toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 text-white font-medium ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+      }`;
+      setTimeout(() => toast.classList.add('hidden'), 4000);
+    }
+
+    // --- Estadisticas ---
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthEl = document.getElementById('this-month');
+    const weekEl = document.getElementById('this-week');
+
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('newsletters')
+          .select('created_at');
+
+        if (data) {
+          let month = 0, week = 0;
+          data.forEach((s: any) => {
+            const d = new Date(s.created_at);
+            if (d >= monthStart) month++;
+            if (d >= weekAgo) week++;
+          });
+          if (monthEl) monthEl.textContent = month.toString();
+          if (weekEl) weekEl.textContent = week.toString();
+        }
+      } catch (e) {
+        if (monthEl) monthEl.textContent = '-';
+        if (weekEl) weekEl.textContent = '-';
+      }
+    })();
+
+    // --- Seleccion de suscriptores ---
+    const selectAll = document.getElementById('select-all') as HTMLInputElement;
+    const checkboxes = document.querySelectorAll('.subscriber-checkbox') as NodeListOf<HTMLInputElement>;
+    const selectionBar = document.getElementById('selection-bar')!;
+    const selectedCountEl = document.getElementById('selected-count')!;
+
+    function getSelectedEmails(): string[] {
+      const checked = document.querySelectorAll('.subscriber-checkbox:checked') as NodeListOf<HTMLInputElement>;
+      return [...checked].map(cb => cb.dataset.email!);
+    }
+
+    function updateSelectionUI() {
+      const count = getSelectedEmails().length;
+      selectedCountEl.textContent = count.toString();
+      selectionBar.classList.toggle('hidden', count === 0);
+    }
+
+    selectAll?.addEventListener('change', () => {
+      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      updateSelectionUI();
+    });
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        selectAll.checked = [...checkboxes].every(c => c.checked);
+        updateSelectionUI();
+      });
+    });
+
+    // --- Modal ---
+    const modal = document.getElementById('campaign-modal')!;
+    const modalCount = document.getElementById('modal-count')!;
+    const progressDiv = document.getElementById('campaign-progress')!;
+
+    function openModal() {
+      const emails = getSelectedEmails();
+      if (emails.length === 0) {
+        showToast('Selecciona al menos un suscriptor', 'error');
+        return;
+      }
+      modalCount.textContent = emails.length.toString();
+      progressDiv.classList.add('hidden');
+      progressDiv.innerHTML = '';
+      (document.getElementById('confirm-campaign') as HTMLButtonElement).disabled = false;
+      (document.getElementById('confirm-campaign') as HTMLButtonElement).textContent = 'Enviar Campana';
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+    }
+
+    document.getElementById('open-campaign-modal')?.addEventListener('click', openModal);
+
+    document.getElementById('send-campaign-btn')?.addEventListener('click', () => {
+      // Si no hay seleccion, seleccionar todos
+      if (getSelectedEmails().length === 0) {
+        selectAll.checked = true;
+        checkboxes.forEach(cb => cb.checked = true);
+        updateSelectionUI();
+      }
+      openModal();
+    });
+
+    document.getElementById('cancel-campaign')?.addEventListener('click', closeModal);
+    document.getElementById('close-modal')?.addEventListener('click', closeModal);
+    document.getElementById('modal-backdrop')?.addEventListener('click', closeModal);
+
+    // Toggle modo promo
+    document.querySelectorAll('input[name="promo-mode"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const mode = (e.target as HTMLInputElement).value;
+        document.getElementById('new-code-section')!.classList.toggle('hidden', mode !== 'new');
+        document.getElementById('existing-code-section')!.classList.toggle('hidden', mode !== 'existing');
+      });
+    });
+
+    // --- Enviar campana ---
+    document.getElementById('confirm-campaign')?.addEventListener('click', async () => {
+      const confirmBtn = document.getElementById('confirm-campaign') as HTMLButtonElement;
+      const emails = getSelectedEmails();
+
+      if (emails.length === 0) return;
+
+      const mode = (document.querySelector('input[name="promo-mode"]:checked') as HTMLInputElement).value;
+      const subject = (document.getElementById('campaign-subject') as HTMLInputElement).value.trim();
+
+      const body: any = { emails, promoCodeMode: mode, subject: subject || undefined };
+
+      if (mode === 'new') {
+        body.discountPercentage = parseInt(
+          (document.getElementById('discount-percentage') as HTMLSelectElement).value
+        );
+      } else {
+        body.existingPromoCode = (document.getElementById('existing-promo-code') as HTMLSelectElement).value;
+        if (!body.existingPromoCode) {
+          showToast('Selecciona un codigo promocional', 'error');
+          return;
+        }
+      }
+
+      if (!confirm(`¿Enviar campana a ${emails.length} suscriptor${emails.length > 1 ? 'es' : ''}?`)) return;
+
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Enviando...';
+      progressDiv.classList.remove('hidden');
+      progressDiv.className = 'mt-4 p-4 rounded-lg bg-blue-50';
+      progressDiv.innerHTML = `<p class="text-sm text-blue-700 text-center">Enviando a ${emails.length} suscriptores...</p>`;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch('/api/admin/send-campaign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          progressDiv.className = 'mt-4 p-4 rounded-lg bg-green-50';
+          progressDiv.innerHTML = `
+            <p class="text-green-700 font-medium text-center">Campana enviada</p>
+            <p class="text-green-600 text-xs text-center mt-1">
+              Codigo: <span class="font-mono font-bold">${result.promoCode}</span> |
+              Enviados: ${result.sent} | Fallidos: ${result.failed}
+            </p>
+          `;
+          showToast(`Campana enviada a ${result.sent} suscriptores`);
+        } else {
+          progressDiv.className = 'mt-4 p-4 rounded-lg bg-red-50';
+          progressDiv.innerHTML = `<p class="text-red-700 text-sm text-center">${result.error || 'Error al enviar'}</p>`;
+          showToast(result.error || 'Error al enviar campana', 'error');
+        }
+      } catch (err) {
+        progressDiv.className = 'mt-4 p-4 rounded-lg bg-red-50';
+        progressDiv.innerHTML = `<p class="text-red-700 text-sm text-center">Error de conexion</p>`;
+        showToast('Error de conexion', 'error');
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Enviar Campana';
+      }
+    });
+
+    // --- Exportar CSV ---
     document.getElementById('export-btn')?.addEventListener('click', async () => {
       try {
         const { data } = await supabase
           .from('newsletters')
-          .select('email, created_at')
+          .select('email, promo_code, created_at')
           .order('created_at', { ascending: false });
 
         if (data && data.length > 0) {
-          const csvEscape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;          const csv = 'Email,Fecha\n' + data.map((s: any) => `${csvEscape(s.email)},${csvEscape(s.created_at)}`).join('\n');
+          const csvEscape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+          const csv = 'Email,Codigo Promo,Fecha\n' + data.map((s: any) =>
+            `${csvEscape(s.email)},${csvEscape(s.promo_code)},${csvEscape(s.created_at)}`
+          ).join('\n');
           const blob = new Blob([csv], { type: 'text/csv' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
           a.download = `newsletter-${new Date().toISOString().split('T')[0]}.csv`;
           a.click();
+          URL.revokeObjectURL(url);
         } else {
-          alert('No hay datos para exportar');
+          showToast('No hay datos para exportar', 'error');
         }
       } catch (err) {
         console.error(err);
-        alert('Error al exportar');
+        showToast('Error al exportar', 'error');
       }
     });
 
-    // Nueva campaña (placeholder)
-    document.getElementById('send-campaign-btn')?.addEventListener('click', () => {
-      alert('Función de envío de campañas en desarrollo. Puedes exportar la lista y usar un servicio externo como Mailchimp.');
-    });
-
-    // Eliminar suscriptor
+    // --- Eliminar suscriptor ---
     document.querySelectorAll('.delete-sub-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const email = (btn as HTMLButtonElement).dataset.email;
@@ -158,7 +465,7 @@ const { data: subscribers, count } = await supabaseAdmin
           window.location.reload();
         } catch (err) {
           console.error(err);
-          alert('Error al eliminar');
+          showToast('Error al eliminar', 'error');
         }
       });
     });

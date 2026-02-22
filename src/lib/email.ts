@@ -451,6 +451,82 @@ export async function sendCancellationRejected(email: string, orderId: string, c
   }
 }
 
+// HTML builder para campana promocional (reutilizable en batch)
+export function buildCampaignPromoHtml(promoCode: string, discountPercentage: number): string {
+  const content = `
+    <div class="icon">Oferta Exclusiva</div>
+    <h2>&iexcl;Tenemos una oferta especial para ti!</h2>
+
+    <p>Como suscriptor de Benice, queremos premiarte con un descuento exclusivo
+    para tu pr&oacute;xima compra.</p>
+
+    <div class="highlight">
+      <strong>Tu c&oacute;digo de descuento exclusivo</strong><br><br>
+      <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+        <span style="font-size: 28px; font-weight: bold; color: #7e22ce; letter-spacing: 3px;">
+          ${escapeHtml(promoCode)}
+        </span>
+        <p style="margin: 10px 0 0; color: #6b7280; font-size: 14px;">${discountPercentage}% de descuento en tu compra</p>
+      </div>
+    </div>
+
+    <p style="text-align: center; margin: 30px 0;">
+      <a href="${import.meta.env.PUBLIC_SITE_URL || 'https://benicetiendanimal.victoriafp.online'}/productos" class="btn">
+        Ir a la tienda
+      </a>
+    </p>
+
+    <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+      Introduce el c&oacute;digo en el checkout para aplicar tu descuento.
+    </p>
+  `;
+  return baseTemplate(content, 'Oferta Exclusiva');
+}
+
+// Envio batch de campana promocional via Resend
+export async function sendCampaignBatch(
+  emails: string[],
+  promoCode: string,
+  discountPercentage: number,
+  subject: string = 'Oferta exclusiva para suscriptores'
+): Promise<{ success: boolean; sent: number; failed: number; errors: any[] }> {
+  const html = buildCampaignPromoHtml(promoCode, discountPercentage);
+  const BATCH_SIZE = 100;
+  let sent = 0;
+  let failed = 0;
+  const errors: any[] = [];
+
+  for (let i = 0; i < emails.length; i += BATCH_SIZE) {
+    const chunk = emails.slice(i, i + BATCH_SIZE);
+    const payload = chunk.map(email => ({
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: [email],
+      subject,
+      html,
+    }));
+
+    try {
+      const result = await resend.batch.send(payload);
+      if (result.error) {
+        failed += chunk.length;
+        errors.push(result.error);
+      } else {
+        sent += chunk.length;
+      }
+    } catch (err) {
+      failed += chunk.length;
+      errors.push(err);
+    }
+
+    // Rate limit: esperar 1s entre lotes
+    if (i + BATCH_SIZE < emails.length) {
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+
+  return { success: failed === 0, sent, failed, errors };
+}
+
 // Email de contacto (para el admin)
 export async function sendContactEmail(data: {
   name: string;

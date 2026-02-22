@@ -1,0 +1,219 @@
+---
+export const prerender = false;
+import { createServerClient, supabaseAdmin } from '../../lib/supabase';
+
+const supabase = await createServerClient(Astro.cookies);
+
+// Verificar autenticacion
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) return Astro.redirect('/auth/login');
+
+const { id } = Astro.params;
+if (!id) return new Response('Factura no encontrada', { status: 404 });
+
+// Obtener factura con orden, items y usuario
+const { data: invoice } = await supabaseAdmin
+  .from('invoices')
+  .select(`
+    *,
+    orders (
+      id, status, promo_code, discount_amount, shipping_address, created_at,
+      order_items (
+        id, quantity, price,
+        products (name)
+      )
+    ),
+    users (email, full_name, phone)
+  `)
+  .eq('id', id)
+  .single();
+
+if (!invoice) return new Response('Factura no encontrada', { status: 404 });
+
+// Verificar acceso: admin o propietario
+const { data: userData } = await supabaseAdmin
+  .from('users').select('role').eq('id', session.user.id).single();
+
+const isAdmin = userData?.role === 'admin';
+const isOwner = invoice.user_id === session.user.id;
+
+if (!isAdmin && !isOwner) return Astro.redirect('/');
+
+// Parsear direccion de envio
+let shippingAddress = '';
+try {
+  if (invoice.orders?.shipping_address) {
+    const addr = JSON.parse(invoice.orders.shipping_address);
+    shippingAddress = [addr.name, addr.line1, addr.line2, `${addr.postal_code} ${addr.city}`, addr.province, addr.country]
+      .filter(Boolean).join(', ');
+  }
+} catch {
+  shippingAddress = invoice.orders?.shipping_address || '';
+}
+
+const items = invoice.orders?.order_items || [];
+const isAbono = invoice.invoice_type === 'abono';
+---
+
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{invoice.invoice_number} - Benice</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1f2937; background: #f3f4f6; }
+    .invoice-container { max-width: 800px; margin: 20px auto; background: white; padding: 48px; box-shadow: 0 4px 24px rgba(0,0,0,0.08); border-radius: 12px; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 3px solid #7e22ce; }
+    .brand h1 { font-size: 32px; color: #7e22ce; font-weight: 800; }
+    .brand p { color: #6b7280; font-size: 13px; margin-top: 4px; }
+    .invoice-info { text-align: right; }
+    .invoice-info .invoice-number { font-size: 20px; font-weight: 700; color: #1f2937; }
+    .invoice-info .invoice-type { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 4px; }
+    .type-factura { background: #d1fae5; color: #065f46; }
+    .type-abono { background: #fee2e2; color: #991b1b; }
+    .invoice-info .date { color: #6b7280; font-size: 13px; margin-top: 8px; }
+
+    /* Datos */
+    .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px; }
+    .party h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-bottom: 8px; font-weight: 600; }
+    .party p { font-size: 14px; line-height: 1.6; }
+    .party .name { font-weight: 600; font-size: 15px; }
+
+    /* Tabla */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    thead th { background: #f9fafb; padding: 12px 16px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 600; border-bottom: 2px solid #e5e7eb; }
+    thead th.right { text-align: right; }
+    tbody td { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    tbody td.right { text-align: right; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* Totales */
+    .totals { margin-left: auto; width: 280px; }
+    .totals .row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; }
+    .totals .row.discount { color: #059669; }
+    .totals .row.total { border-top: 2px solid #1f2937; padding-top: 12px; margin-top: 4px; font-size: 18px; font-weight: 700; color: #7e22ce; }
+
+    /* Footer */
+    .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 12px; }
+    .footer p { margin-bottom: 4px; }
+
+    /* Print */
+    .no-print { text-align: center; margin: 20px auto; max-width: 800px; }
+    .no-print button { padding: 10px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin: 0 6px; }
+    .btn-print { background: #7e22ce; color: white; }
+    .btn-print:hover { background: #6b21a8; }
+    .btn-back { background: #e5e7eb; color: #374151; }
+    .btn-back:hover { background: #d1d5db; }
+
+    @media print {
+      body { background: white; }
+      .invoice-container { box-shadow: none; margin: 0; padding: 24px; border-radius: 0; }
+      .no-print { display: none; }
+      @page { margin: 1cm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="btn-print" onclick="window.print()">Descargar / Imprimir PDF</button>
+    <button class="btn-back" onclick="history.back()">Volver</button>
+  </div>
+
+  <div class="invoice-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <h1>Benice</h1>
+        <p>Tienda de Mascotas Online</p>
+        <p>CIF: B12345678</p>
+      </div>
+      <div class="invoice-info">
+        <div class="invoice-number">{invoice.invoice_number}</div>
+        <span class={`invoice-type ${isAbono ? 'type-abono' : 'type-factura'}`}>
+          {isAbono ? 'ABONO' : 'FACTURA'}
+        </span>
+        <div class="date">
+          Fecha: {new Date(invoice.created_at).toLocaleDateString('es-ES', {
+            day: '2-digit', month: 'long', year: 'numeric'
+          })}
+        </div>
+        {invoice.orders?.id && (
+          <div class="date">
+            Pedido: #{invoice.orders.id.substring(0, 8).toUpperCase()}
+          </div>
+        )}
+      </div>
+    </div>
+
+    <!-- Partes -->
+    <div class="parties">
+      <div class="party">
+        <h3>Emisor</h3>
+        <p class="name">Benice - Tienda de Mascotas</p>
+        <p>benice@victoriafp.online</p>
+      </div>
+      <div class="party">
+        <h3>Cliente</h3>
+        <p class="name">{invoice.users?.full_name || 'Cliente'}</p>
+        <p>{invoice.users?.email || ''}</p>
+        {invoice.users?.phone && <p>{invoice.users.phone}</p>}
+        {shippingAddress && <p>{shippingAddress}</p>}
+      </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <table>
+      <thead>
+        <tr>
+          <th>Descripcion</th>
+          <th class="right">Cantidad</th>
+          <th class="right">Precio Ud.</th>
+          <th class="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items.map((item: any) => (
+          <tr>
+            <td>{item.products?.name || 'Producto'}</td>
+            <td class="right">{item.quantity}</td>
+            <td class="right">{Number(item.price).toFixed(2)} &euro;</td>
+            <td class="right">{(item.quantity * item.price).toFixed(2)} &euro;</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <!-- Totales -->
+    <div class="totals">
+      <div class="row">
+        <span>Base imponible:</span>
+        <span>{Math.abs(Number(invoice.subtotal)).toFixed(2)} &euro;</span>
+      </div>
+      <div class="row">
+        <span>IVA (21%):</span>
+        <span>{Math.abs(Number(invoice.tax_amount)).toFixed(2)} &euro;</span>
+      </div>
+      {invoice.orders?.discount_amount > 0 && !isAbono && (
+        <div class="row discount">
+          <span>Descuento ({invoice.orders.promo_code}):</span>
+          <span>-{Number(invoice.orders.discount_amount).toFixed(2)} &euro;</span>
+        </div>
+      )}
+      <div class="row total">
+        <span>Total {isAbono ? '(Abono)' : ''}:</span>
+        <span>{isAbono ? '-' : ''}{Math.abs(Number(invoice.total)).toFixed(2)} &euro;</span>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Este documento sirve como {isAbono ? 'abono/nota de credito' : 'factura simplificada'}.</p>
+      <p>Benice - benice@victoriafp.online</p>
+      <p>Generado el {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+    </div>
+  </div>
+</body>
+</html>
