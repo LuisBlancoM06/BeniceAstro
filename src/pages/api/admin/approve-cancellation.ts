@@ -8,22 +8,14 @@ export const prerender = false;
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || '');
 
 export const POST: APIRoute = async ({ request }) => {
+  const headers = { 'Content-Type': 'application/json' };
+
   try {
-    const { cancellation_id, action, admin_notes } = await request.json();
-
-    if (!cancellation_id || !action || !['aprobar', 'rechazar'].includes(action)) {
-      return new Response(JSON.stringify({ error: 'Datos invalidos' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Verificar admin
+    // 1. Verificar admin ANTES de parsear body
     const authHeader = request.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        status: 401, headers
       });
     }
 
@@ -32,8 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
+        status: 401, headers
       });
     }
 
@@ -46,8 +37,25 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (!adminUser || adminUser.role !== 'admin') {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
+        status: 403, headers
+      });
+    }
+
+    // 2. Ahora sí parsear body
+    const { cancellation_id, action, admin_notes } = await request.json();
+
+    // Validar campos requeridos
+    if (!cancellation_id || !action || !['aprobar', 'rechazar'].includes(action)) {
+      return new Response(JSON.stringify({ error: 'Datos invalidos' }), {
+        status: 400, headers
+      });
+    }
+
+    // Validar UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(cancellation_id)) {
+      return new Response(JSON.stringify({ error: 'ID de cancelación inválido' }), {
+        status: 400, headers
       });
     }
 

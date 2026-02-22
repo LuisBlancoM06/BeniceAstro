@@ -55,6 +55,14 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: `Estado inválido. Valores permitidos: ${validStatuses.join(', ')}` }), { status: 400, headers });
     }
 
+    // Validar transición de estado válida (máquina de estados)
+    const ALLOWED_TRANSITIONS: Record<string, string[]> = {
+      solicitada: ['aprobada', 'rechazada'],
+      aprobada: ['completada', 'rechazada'],
+      rechazada: [],
+      completada: [],
+    };
+
     // 4. Obtener datos de la devolución actual
     const { data: returnData, error: returnError } = await supabaseAdmin
       .from('returns')
@@ -64,6 +72,15 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (returnError || !returnData) {
       return new Response(JSON.stringify({ error: 'Devolución no encontrada' }), { status: 404, headers });
+    }
+
+    // Verificar transición de estado permitida
+    const currentStatus = returnData.status || 'solicitada';
+    const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+    if (!allowed.includes(newStatus)) {
+      return new Response(JSON.stringify({
+        error: `No se puede cambiar de "${currentStatus}" a "${newStatus}". Transiciones permitidas: ${allowed.length ? allowed.join(', ') : 'ninguna (estado final)'}`
+      }), { status: 400, headers });
     }
 
     // 5. Actualizar campos opcionales (refund_amount, admin_notes)

@@ -6,6 +6,14 @@ import RichTextEditor from '../../../components/RichTextEditor';
 
 const supabase = createServerClient(Astro.cookies);
 
+// Verificar autenticación y rol admin
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) return Astro.redirect('/auth/login');
+
+const { data: userData } = await supabase
+  .from('users').select('role').eq('id', session.user.id).single();
+if (!userData || userData.role !== 'admin') return Astro.redirect('/');
+
 // Obtener ID del producto
 const { id } = Astro.params;
 

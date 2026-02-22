@@ -45,8 +45,15 @@ export const POST: APIRoute = async ({ request }) => {
     const body = await request.json();
     const { placeId, sessionToken } = body;
 
-    // Validar placeId (formato: ChIJ seguido de alfanuméricos y guiones bajos)
-    if (!placeId || typeof placeId !== 'string' || !/^[A-Za-z0-9_-]{20,300}$/.test(placeId)) {
+    // Normalizar placeId: puede venir como "ChIJ..." o como resource name "places/ChIJ..."
+    let cleanPlaceId = (typeof placeId === 'string') ? placeId.trim() : '';
+    if (cleanPlaceId.startsWith('places/')) {
+      cleanPlaceId = cleanPlaceId.slice(7);
+    }
+
+    // Validar placeId — formato alfanumérico con guiones bajos/guiones, 10-500 chars
+    if (!cleanPlaceId || !/^[A-Za-z0-9_\-]{10,500}$/.test(cleanPlaceId)) {
+      console.error('placeId inválido recibido:', placeId);
       return new Response(
         JSON.stringify({ error: 'placeId inválido' }),
         { status: 400, headers }
@@ -56,7 +63,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Llamar a Google Place Details (New API)
     // Solo solicitamos addressComponents y formattedAddress para minimizar coste
     const fieldMask = 'addressComponents,formattedAddress,location';
-    const googleUrl = `https://places.googleapis.com/v1/places/${placeId}`;
+    const googleUrl = `https://places.googleapis.com/v1/places/${cleanPlaceId}`;
 
     const googleHeaders: Record<string, string> = {
       'Content-Type': 'application/json',

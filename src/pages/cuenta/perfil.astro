@@ -350,9 +350,14 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
     // Cerrar sesión
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
       await supabase.auth.signOut();
-      // Borrar cookies de sesión
-      document.cookie = 'sb-access-token=; path=/; max-age=0';
-      document.cookie = 'sb-refresh-token=; path=/; max-age=0';
+      // Borrar cookies HttpOnly vía endpoint servidor
+      try {
+        await fetch('/api/auth/session', { method: 'DELETE' });
+      } catch (e) {
+        // Fallback: intentar borrar directamente (no funciona con HttpOnly pero no daña)
+        document.cookie = 'sb-access-token=; path=/; max-age=0';
+        document.cookie = 'sb-refresh-token=; path=/; max-age=0';
+      }
       window.location.href = '/';
     });
   </script>

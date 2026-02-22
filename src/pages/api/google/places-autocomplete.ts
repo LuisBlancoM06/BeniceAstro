@@ -82,14 +82,23 @@ export const POST: APIRoute = async ({ request }) => {
     const data = await googleRes.json();
 
     // Transformar respuesta: solo devolver lo necesario al frontend
+    // NOTA: En la Places API (New), el campo puede ser `placeId` o solo `place`
+    // (resource name "places/ChIJ..."). Extraemos el ID puro en ambos casos.
     const predictions = (data.suggestions || [])
       .filter((s: any) => s.placePrediction)
-      .map((s: any) => ({
-        placeId: s.placePrediction.placeId,
-        description: s.placePrediction.text?.text || '',
-        mainText: s.placePrediction.structuredFormat?.mainText?.text || '',
-        secondaryText: s.placePrediction.structuredFormat?.secondaryText?.text || '',
-      }));
+      .map((s: any) => {
+        const pp = s.placePrediction;
+        const rawId = pp.placeId
+          || pp.placeID
+          || (pp.place ? pp.place.replace(/^places\//, '') : '');
+        return {
+          placeId: rawId,
+          description: pp.text?.text || '',
+          mainText: pp.structuredFormat?.mainText?.text || '',
+          secondaryText: pp.structuredFormat?.secondaryText?.text || '',
+        };
+      })
+      .filter((p: any) => p.placeId);
 
     return new Response(
       JSON.stringify({ predictions }),

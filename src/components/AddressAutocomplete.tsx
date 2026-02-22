@@ -49,6 +49,8 @@ interface AddressAutocompleteProps {
   };
   /** Callback cuando se selecciona una dirección */
   onAddressSelected?: (address: ParsedAddress) => void;
+  /** Callback cuando fallan los detalles de la dirección */
+  onDetailsFailed?: () => void;
   /** Placeholder custom */
   placeholder?: string;
   /** Clases CSS adicionales para el input */
@@ -77,6 +79,7 @@ function generateSessionToken(): string {
 export default function AddressAutocomplete({
   fieldIds = {},
   onAddressSelected,
+  onDetailsFailed,
   placeholder = 'Escribe tu dirección...',
   className = '',
   id = 'address-autocomplete',
@@ -217,6 +220,11 @@ export default function AddressAutocomplete({
     } catch (err) {
       console.error('Place details error:', err);
       setError('No se pudieron cargar los detalles. Completa los campos manualmente.');
+      // Notificar al padre y emitir evento DOM para formularios Astro
+      onDetailsFailed?.();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('address-details-failed'));
+      }
     } finally {
       setIsLoading(false);
     }
