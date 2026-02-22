@@ -270,9 +270,18 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
 
         if (error) throw error;
 
+        // Supabase v2: si el email ya existe y no está confirmado,
+        // devuelve user con identities vacío (sin error) para evitar enumeración.
+        if (data.user && data.user.identities && data.user.identities.length === 0) {
+          errorMessage!.textContent = 'Este email ya está registrado. Revisa tu correo o inicia sesión.';
+          errorMessage!.classList.remove('hidden');
+          successMessage!.classList.add('hidden');
+          return;
+        }
+
         // Crear perfil de usuario (rol 'user' por defecto)
         if (data.user) {
-          await supabase.from('users').insert({
+          const { error: insertError } = await supabase.from('users').insert({
             id: data.user.id,
             email: email,
             full_name: fullName,
@@ -288,6 +297,11 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
             longitude: longitude,
             role: 'user'
           });
+
+          if (insertError) {
+            console.error('Error al crear perfil:', insertError);
+            // No bloquear el registro si el perfil falla — el usuario puede completarlo después
+          }
         }
 
         // Si hay sesion, el usuario ya esta autenticado
@@ -320,15 +334,21 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
           errorMessage!.classList.add('hidden');
         }
       } catch (error: any) {
-        // No exponer mensajes internos de Supabase al usuario
-        const msg = error?.message || '';
-        const userMsg = msg.includes('already registered')
-          ? 'Este email ya está registrado'
-          : msg.includes('valid email')
-            ? 'Introduce un email válido'
-            : msg.includes('password')
-              ? 'La contraseña debe tener al menos 8 caracteres'
-              : 'Error al crear la cuenta. Inténtalo de nuevo.';
+        console.error('Error en registro:', error);
+        // Mapear mensajes de Supabase a mensajes amigables
+        const msg = (error?.message || '').toLowerCase();
+        let userMsg = 'Error al crear la cuenta. Inténtalo de nuevo.';
+        if (msg.includes('already registered') || msg.includes('already been registered') || msg.includes('unique constraint')) {
+          userMsg = 'Este email ya está registrado';
+        } else if (msg.includes('valid email') || msg.includes('invalid email')) {
+          userMsg = 'Introduce un email válido';
+        } else if (msg.includes('password') || msg.includes('weak')) {
+          userMsg = 'La contraseña debe tener al menos 8 caracteres';
+        } else if (msg.includes('rate') || msg.includes('limit') || msg.includes('too many')) {
+          userMsg = 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.';
+        } else if (msg.includes('network') || msg.includes('fetch')) {
+          userMsg = 'Error de conexión. Comprueba tu internet e inténtalo de nuevo.';
+        }
         errorMessage!.textContent = userMsg;
         errorMessage!.classList.remove('hidden');
         successMessage!.classList.add('hidden');

@@ -24,8 +24,11 @@ CREATE TABLE IF NOT EXISTS public.users (
   address_line1 TEXT,                        -- dirección estructurada (Stripe-compatible)
   address_line2 TEXT,
   city        TEXT,
+  state       TEXT,                          -- provincia / comunidad autónoma
   postal_code TEXT,
   country     TEXT DEFAULT 'ES',
+  latitude    DOUBLE PRECISION,              -- coordenadas para envío / mapa
+  longitude   DOUBLE PRECISION,
   avatar_url  TEXT,
   is_subscribed_newsletter BOOLEAN DEFAULT false,
   stripe_customer_id TEXT UNIQUE,
