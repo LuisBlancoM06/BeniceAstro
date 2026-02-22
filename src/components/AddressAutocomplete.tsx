@@ -140,9 +140,14 @@ export default function AddressAutocomplete({
       if (preds.length === 0 && input.length >= 5) {
         setError('No se encontraron direcciones. Puedes escribirla manualmente.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Autocomplete error:', err);
-      setError('Error de conexión. Escribe la dirección manualmente.');
+      // Diferenciar errores de red de errores HTTP para mejor diagnóstico
+      if (err?.message === 'Failed to fetch' || err?.name === 'TypeError') {
+        setError('Sin conexión. Escribe la dirección manualmente.');
+      } else {
+        setError('Error de conexión. Escribe la dirección manualmente.');
+      }
       setPredictions([]);
       setIsOpen(false);
     } finally {

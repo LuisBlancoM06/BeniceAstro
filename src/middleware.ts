@@ -132,7 +132,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
       '/api/stripe/webhook',
     ]);
 
-    if (!csrfExemptPaths.has(path)) {
+    // Los proxies de Google Places son endpoints de solo lectura (no modifican estado).
+    // Ya están protegidos por rate-limiting. Exentos de CSRF para evitar
+    // falsos positivos por mismatch de Origin detrás de reverse proxies.
+    const csrfExemptPrefixes = ['/api/google/'];
+    const isCsrfExemptByPrefix = csrfExemptPrefixes.some(p => path.startsWith(p));
+
+    if (!csrfExemptPaths.has(path) && !isCsrfExemptByPrefix) {
       const origin = context.request.headers.get('origin');
       const authHeader = context.request.headers.get('authorization');
       const expectedOrigin = context.url.origin;
