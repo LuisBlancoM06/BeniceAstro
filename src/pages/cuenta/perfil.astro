@@ -16,50 +16,6 @@ const { data: user } = await supabase
   .select('*')
   .eq('id', session.user.id)
   .single();
-
-// Obtener estadísticas del usuario (solo pedidos completados)
-const validStatuses = ['pagado', 'enviado', 'entregado'];
-
-console.log(`[PERFIL] Obteniendo estadísticas para usuario: ${session.user.id}`);
-console.log(`[PERFIL] Estados válidos:`, validStatuses);
-
-const { count: totalOrders, error: ordersError } = await supabase
-  .from('orders')
-  .select('*', { count: 'exact', head: true })
-  .eq('user_id', session.user.id)
-  .in('status', validStatuses);
-
-if (ordersError) {
-  console.error('[PERFIL] Error obteniendo totalOrders:', ordersError);
-}
-
-console.log(`[PERFIL] Total orders encontrados: ${totalOrders}`);
-
-const { data: allOrders, error: allOrdersError } = await supabase
-  .from('orders')
-  .select('id, status, total, created_at')
-  .eq('user_id', session.user.id)
-  .order('created_at', { ascending: false });
-
-if (allOrdersError) {
-  console.error('[PERFIL] Error obteniendo allOrders:', allOrdersError);
-}
-
-console.log(`[PERFIL] Todos los pedidos del usuario:`, allOrders);
-
-const { data: totalSpentData, error: spentError } = await supabase
-  .from('orders')
-  .select('total')
-  .eq('user_id', session.user.id)
-  .in('status', validStatuses);
-
-if (spentError) {
-  console.error('[PERFIL] Error obteniendo totalSpentData:', spentError);
-}
-
-const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Number(order.total), 0) || 0;
-
-console.log(`[PERFIL] Total gastado calculado: ${totalSpent}`);
 ---
 
 <Layout title="Mi Perfil">
@@ -80,21 +36,6 @@ console.log(`[PERFIL] Total gastado calculado: ${totalSpent}`);
               month: 'long', 
               year: 'numeric' 
             })}</p>
-          </div>
-          <div class="hidden md:flex gap-8">
-            <div class="text-center">
-              <p class="text-3xl font-bold text-purple-600">{totalOrders || 0}</p>
-              <p class="text-sm text-gray-500">Pedidos</p>
-            </div>
-            <div class="text-center">
-              <p class="text-3xl font-bold text-green-600">{totalSpent.toFixed(0)}€</p>
-              <p class="text-sm text-gray-500">Total gastado</p>
-            </div>
-            <button id="refresh-stats" class="text-center hover:bg-gray-50 rounded-lg p-2 transition-colors" title="Actualizar estadísticas">
-              <svg class="w-6 h-6 text-gray-400 hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-              </svg>
-            </button>
           </div>
         </div>
       </div>
@@ -402,67 +343,6 @@ console.log(`[PERFIL] Total gastado calculado: ${totalSpent}`);
         document.cookie = 'sb-refresh-token=; path=/; max-age=0';
       }
       window.location.href = '/';
-    });
-
-    // Actualizar estadísticas dinámicamente
-    document.getElementById('refresh-stats')?.addEventListener('click', async () => {
-      const btn = document.getElementById('refresh-stats') as HTMLButtonElement;
-      const svg = btn.querySelector('svg');
-      
-      // Animación de rotación
-      svg?.classList.add('animate-spin');
-      btn.disabled = true;
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          window.location.href = '/auth/login';
-          return;
-        }
-
-        // Obtener estadísticas actualizadas
-        const validStatuses = ['pagado', 'enviado', 'entregado'];
-        
-        const [{ count: totalOrders }, { data: totalSpentData }] = await Promise.all([
-          supabase
-            .from('orders')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', session.user.id)
-            .in('status', validStatuses),
-          supabase
-            .from('orders')
-            .select('total')
-            .eq('user_id', session.user.id)
-            .in('status', validStatuses)
-        ]);
-
-        const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Number(order.total), 0) || 0;
-
-        // Actualizar UI
-        const ordersElement = Array.from(document.querySelectorAll('.text-3xl')).find(el => 
-          el.nextElementSibling?.textContent === 'Pedidos'
-        );
-        const spentElement = Array.from(document.querySelectorAll('.text-3xl')).find(el => 
-          el.nextElementSibling?.textContent === 'Total gastado'
-        );
-
-        if (ordersElement) {
-          ordersElement.textContent = String(totalOrders || 0);
-        }
-        if (spentElement) {
-          spentElement.textContent = `${totalSpent.toFixed(0)}€`;
-        }
-
-        console.log('[PERFIL] Estadísticas actualizadas:', { totalOrders, totalSpent });
-
-      } catch (error) {
-        console.error('[PERFIL] Error actualizando estadísticas:', error);
-        alert('Error al actualizar las estadísticas. Por favor, recarga la página.');
-      } finally {
-        // Quitar animación
-        svg?.classList.remove('animate-spin');
-        btn.disabled = false;
-      }
     });
   </script>
 </Layout>
