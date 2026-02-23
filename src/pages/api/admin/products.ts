@@ -227,27 +227,73 @@ export const DELETE: APIRoute = async ({ url, request }) => {
       return new Response(JSON.stringify({ error: 'ID de producto requerido' }), { status: 400, headers });
     }
 
+    console.log(`[DELETE PRODUCT] Intentando eliminar producto ID: ${id}`);
+
+    // Primero verificar si el producto existe
+    const { data: product, error: checkError } = await supabaseAdmin
+      .from('products')
+      .select('id, name')
+      .eq('id', id)
+      .single();
+
+    if (checkError) {
+      console.error('[DELETE PRODUCT] Error verificando producto:', checkError);
+      return new Response(JSON.stringify({ error: 'Producto no encontrado' }), { status: 404, headers });
+    }
+
+    console.log(`[DELETE PRODUCT] Producto encontrado: ${product.name}`);
+
     // Desvincular referencias en order_items para no perder historial de pedidos
     // (el frontend ya muestra "Producto eliminado" si products es null)
-    await supabaseAdmin
+    console.log('[DELETE PRODUCT] Desvinculando order_items...');
+    const { error: orderItemsError } = await supabaseAdmin
       .from('order_items')
       .update({ product_id: null })
       .eq('product_id', id);
 
-    // Eliminar referencias en tablas secundarias (favorites, reviews, etc.)
-    try { await supabaseAdmin.from('favorites').delete().eq('product_id', id); } catch {}
-    try { await supabaseAdmin.from('reviews').delete().eq('product_id', id); } catch {}
+    if (orderItemsError) {
+      console.error('[DELETE PRODUCT] Error desvinculando order_items:', orderItemsError);
+      // Continuamos con la eliminación aunque falle esto
+    }
 
+    // Eliminar referencias en tablas secundarias (favorites, reviews, etc.)
+    console.log('[DELETE PRODUCT] Eliminando favorites...');
+    try { 
+      const { error: favError } = await supabaseAdmin.from('favorites').delete().eq('product_id', id);
+      if (favError) console.error('[DELETE PRODUCT] Error eliminando favorites:', favError);
+    } catch (e) {
+      console.error('[DELETE PRODUCT] Excepción eliminando favorites:', e);
+    }
+
+    console.log('[DELETE PRODUCT] Eliminando reviews...');
+    try { 
+      const { error: revError } = await supabaseAdmin.from('reviews').delete().eq('product_id', id);
+      if (revError) console.error('[DELETE PRODUCT] Error eliminando reviews:', revError);
+    } catch (e) {
+      console.error('[DELETE PRODUCT] Excepción eliminando reviews:', e);
+    }
+
+    console.log('[DELETE PRODUCT] Eliminando producto...');
     const { error } = await supabaseAdmin
       .from('products')
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('[DELETE PRODUCT] Error eliminando producto:', error);
+      return new Response(JSON.stringify({ 
+        error: `Error al eliminar producto: ${error.message}`,
+        details: error
+      }), { status: 500, headers });
+    }
 
+    console.log('[DELETE PRODUCT] Producto eliminado exitosamente');
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (error: any) {
-    console.error('Error al eliminar producto:', error);
-    return new Response(JSON.stringify({ error: error?.message || 'Error al eliminar producto' }), { status: 500, headers });
+    console.error('[DELETE PRODUCT] Error general:', error);
+    return new Response(JSON.stringify({ 
+      error: error?.message || 'Error al eliminar producto',
+      stack: error?.stack
+    }), { status: 500, headers });
   }
 };

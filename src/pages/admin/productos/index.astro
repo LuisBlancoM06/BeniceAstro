@@ -251,6 +251,8 @@ const { data: products } = await supabaseAdmin
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
+        console.log(`[FRONTEND] Intentando eliminar producto ID: ${productToDelete}`);
+        
         const response = await fetch(`/api/admin/products?id=${productToDelete}`, {
           method: 'DELETE',
           headers: {
@@ -258,16 +260,27 @@ const { data: products } = await supabaseAdmin
           }
         });
 
+        console.log(`[FRONTEND] Response status: ${response.status}`);
+
         if (response.ok) {
           // Recargar página para ver cambios
           window.location.reload();
         } else {
           const result = await response.json();
-          alert(result.error || 'Error al eliminar producto');
+          console.error('[FRONTEND] Error response:', result);
+          
+          let errorMessage = result.error || 'Error al eliminar producto';
+          
+          // Mostrar error detallado
+          if (result.details) {
+            errorMessage += `\n\nDetalles: ${JSON.stringify(result.details, null, 2)}`;
+          }
+          
+          alert(errorMessage);
         }
       } catch (error) {
-        console.error('Error:', error);
-        alert('Error al eliminar producto');
+        console.error('[FRONTEND] Error general:', error);
+        alert(`Error al eliminar producto: ${error}`);
       }
 
       deleteModal?.classList.add('hidden');
