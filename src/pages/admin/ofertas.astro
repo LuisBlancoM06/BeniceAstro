@@ -224,9 +224,15 @@ const { data: allProducts } = await supabaseAdmin
         if (!confirm('¿Quitar este producto de las ofertas?')) return;
 
         try {
+          const token = await getAuthToken();
+          if (!token) { alert('Sesión expirada. Recarga la página.'); return; }
+
           const response = await fetch('/api/admin/products', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
             body: JSON.stringify({ id: productId, on_sale: false, sale_price: null })
           });
 
@@ -257,9 +263,15 @@ const { data: allProducts } = await supabaseAdmin
       }
 
       try {
+        const token = await getAuthToken();
+        if (!token) { alert('Sesión expirada. Recarga la página.'); return; }
+
         const response = await fetch('/api/admin/products', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
           body: JSON.stringify({ id: productId, on_sale: true, sale_price: salePrice })
         });
 

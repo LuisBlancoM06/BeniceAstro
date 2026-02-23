@@ -1,12 +1,14 @@
 import type { APIRoute } from 'astro';
 import { supabaseAdmin } from '../../../lib/supabase';
-import { createServerClient } from '../../../lib/supabase';
 
 export const prerender = false;
 
-async function verifyAdmin(cookies: any): Promise<boolean> {
-  const supabase = await createServerClient(cookies);
-  const { data: { user }, error } = await supabase.auth.getUser();
+async function verifyAdmin(request: Request): Promise<boolean> {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader) return false;
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
   if (error || !user) return false;
 
   const { data: userData } = await supabaseAdmin
@@ -16,10 +18,10 @@ async function verifyAdmin(cookies: any): Promise<boolean> {
 }
 
 // GET: Listar códigos promocionales
-export const GET: APIRoute = async ({ cookies }) => {
+export const GET: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
@@ -39,10 +41,10 @@ export const GET: APIRoute = async ({ cookies }) => {
 };
 
 // POST: Crear código promocional
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
@@ -84,10 +86,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 };
 
 // DELETE: Eliminar código promocional
-export const DELETE: APIRoute = async ({ url, cookies }) => {
+export const DELETE: APIRoute = async ({ url, request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 

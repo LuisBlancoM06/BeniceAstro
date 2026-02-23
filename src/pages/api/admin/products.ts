@@ -1,13 +1,15 @@
 import type { APIRoute } from 'astro';
-import { createServerClient, supabaseAdmin } from '../../../lib/supabase';
-import type { AstroCookies } from 'astro';
+import { supabaseAdmin } from '../../../lib/supabase';
 
 export const prerender = false;
 
-// Verificar admin usando cookies (valida JWT server-side)
-async function verifyAdmin(cookies: AstroCookies): Promise<boolean> {
-  const supabaseClient = await createServerClient(cookies);
-  const { data: { user }, error } = await supabaseClient.auth.getUser();
+// Verificar admin usando Bearer token (valida JWT server-side)
+async function verifyAdmin(request: Request): Promise<boolean> {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader) return false;
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
 
   if (error || !user) return false;
 
@@ -21,10 +23,10 @@ async function verifyAdmin(cookies: AstroCookies): Promise<boolean> {
 }
 
 // GET: Obtener todos los productos o uno específico (requiere admin)
-export const GET: APIRoute = async ({ url, cookies }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
@@ -56,10 +58,10 @@ export const GET: APIRoute = async ({ url, cookies }) => {
 };
 
 // POST: Crear nuevo producto
-export const POST: APIRoute = async ({ request, cookies }) => {
+export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
@@ -137,10 +139,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 };
 
 // PUT: Actualizar producto
-export const PUT: APIRoute = async ({ request, cookies }) => {
+export const PUT: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
@@ -211,10 +213,10 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 };
 
 // DELETE: Eliminar producto
-export const DELETE: APIRoute = async ({ url, cookies }) => {
+export const DELETE: APIRoute = async ({ url, request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
-  if (!(await verifyAdmin(cookies))) {
+  if (!(await verifyAdmin(request))) {
     return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
   }
 
