@@ -66,13 +66,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Solo se puede devolver si está entregado
-    if (order.status !== 'entregado') {
-      return new Response(JSON.stringify({ error: 'Solo se pueden devolver pedidos entregados' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // Verificar que el pedido pertenece al usuario
+    // Ya no se restringe por estado - se puede devolver en cualquier estado
 
     // Verificar que no existe ya una devolución para este pedido
     const { data: existingReturn } = await supabaseAdmin

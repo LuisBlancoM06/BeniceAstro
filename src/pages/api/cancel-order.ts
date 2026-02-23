@@ -51,17 +51,18 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Verificar que el pedido pertenece al usuario y esta en estado cancelable
+    // Verificar que el pedido pertenece al usuario
+    // Ya no se restringe por estado - se puede cancelar en cualquier estado
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('status')
+      .select('id')
       .eq('id', order_id)
       .eq('user_id', user.id)
       .single();
 
-    if (!order || !['pagado', 'enviado'].includes(order.status)) {
-      return new Response(JSON.stringify({ error: 'El pedido no puede ser cancelado' }), {
-        status: 400,
+    if (!order) {
+      return new Response(JSON.stringify({ error: 'Pedido no encontrado' }), {
+        status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
