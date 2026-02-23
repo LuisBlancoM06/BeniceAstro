@@ -67,41 +67,15 @@ const { data: usersHoyData } = await supabaseAdmin
 
 const usuariosActivosHoy = new Set(usersHoyData?.map((v: any) => v.user_id)).size;
 
-// Top usuarios registrados (últimos 7 días)
+// Visitas últimos 7 días (solo conteo para stats card)
 const hace7dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-const { data: visitasSemana } = await supabaseAdmin
+const { count: visitasSemanaCount } = await supabaseAdmin
   .from('visits')
-  .select('user_id, page')
-  .not('user_id', 'is', null)
+  .select('*', { count: 'exact', head: true })
   .gte('created_at', hace7dias);
 
-// Agrupar por usuario
-const userCounts: Record<string, { count: number; pages: Set<string> }> = {};
-visitasSemana?.forEach((v: any) => {
-  if (!v.user_id) return;
-  if (!userCounts[v.user_id]) {
-    userCounts[v.user_id] = { count: 0, pages: new Set() };
-  }
-  userCounts[v.user_id].count++;
-  userCounts[v.user_id].pages.add(v.page);
-});
-
-const topUserIds = Object.entries(userCounts)
-  .sort((a, b) => b[1].count - a[1].count)
-  .slice(0, 10);
-
-// Obtener emails de los top usuarios
-const topUserIdsArray = topUserIds.map(([id]) => id);
-const { data: topUsersData } = topUserIdsArray.length > 0
-  ? await supabaseAdmin.from('users').select('id, email, full_name').in('id', topUserIdsArray)
-  : { data: [] };
-
+// Obtener info de los usuarios de las visitas en la tabla actual
 const usersMap: Record<string, { email: string; full_name?: string }> = {};
-topUsersData?.forEach((u: any) => {
-  usersMap[u.id] = { email: u.email, full_name: u.full_name };
-});
-
-// También obtener info de los usuarios de las visitas en la tabla actual
 const visitaUserIds = [...new Set(visitas?.filter((v: any) => v.user_id).map((v: any) => v.user_id) || [])];
 if (visitaUserIds.length > 0) {
   const { data: visitaUsersData } = await supabaseAdmin.from('users').select('id, email, full_name').in('id', visitaUserIds);
@@ -109,21 +83,6 @@ if (visitaUserIds.length > 0) {
     usersMap[u.id] = { email: u.email, full_name: u.full_name };
   });
 }
-
-// Páginas más visitadas (últimos 7 días)
-const { data: allVisitasSemana } = await supabaseAdmin
-  .from('visits')
-  .select('page')
-  .gte('created_at', hace7dias);
-
-const pageCounts: Record<string, number> = {};
-allVisitasSemana?.forEach((v: any) => {
-  pageCounts[v.page] = (pageCounts[v.page] || 0) + 1;
-});
-
-const topPages = Object.entries(pageCounts)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10);
 ---
 
 <AdminLayout title="Visitas" currentPage="visitas">
@@ -179,76 +138,9 @@ const topPages = Object.entries(pageCounts)
             </svg>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-800">{visitasSemana?.length || 0}</p>
+            <p class="text-2xl font-bold text-gray-800">{visitasSemanaCount || 0}</p>
             <p class="text-sm text-gray-500">Visitas últimos 7 días</p>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top Usuarios y Top Páginas -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Top Usuarios Registrados -->
-      <div class="bg-white rounded-xl shadow-sm border">
-        <div class="p-5 border-b">
-          <h2 class="font-semibold text-gray-800">👤 Usuarios más activos (7 días)</h2>
-        </div>
-        <div class="p-4">
-          {topUserIds.length === 0 ? (
-            <p class="text-gray-400 text-center py-4">Ningún usuario registrado ha visitado aún</p>
-          ) : (
-            <div class="space-y-3">
-              {topUserIds.map(([userId, data], i) => {
-                const user = usersMap[userId];
-                const displayName = user?.full_name || user?.email || userId.slice(0, 8) + '...';
-                return (
-                  <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
-                    <div class="flex items-center gap-3">
-                      <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-orange-500' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-amber-600' : 'bg-gray-300'}`}>
-                        {i + 1}
-                      </span>
-                      <div>
-                        <a href={`?usuario=${userId}`} class="text-sm font-medium text-purple-700 hover:underline">{displayName}</a>
-                        <p class="text-xs text-gray-400">{data.pages.size} páginas visitadas</p>
-                      </div>
-                    </div>
-                    <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">
-                      {data.count} visitas
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <!-- Top Páginas -->
-      <div class="bg-white rounded-xl shadow-sm border">
-        <div class="p-5 border-b">
-          <h2 class="font-semibold text-gray-800">📄 Páginas más visitadas (7 días)</h2>
-        </div>
-        <div class="p-4">
-          {topPages.length === 0 ? (
-            <p class="text-gray-400 text-center py-4">Sin datos aún</p>
-          ) : (
-            <div class="space-y-3">
-              {topPages.map(([pagina, count], i) => (
-                <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
-                  <div class="flex items-center gap-3">
-                    <span class={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-green-400' : i === 2 ? 'bg-green-300' : 'bg-gray-300'}`}>
-                      {i + 1}
-                    </span>
-                    <span class="text-sm font-medium text-gray-700">{pagina}</span>
-                  </div>
-                  <span class="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full">
-                    {count}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
