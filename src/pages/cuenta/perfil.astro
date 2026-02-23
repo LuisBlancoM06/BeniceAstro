@@ -17,17 +17,20 @@ const { data: user } = await supabase
   .eq('id', session.user.id)
   .single();
 
-// Obtener estadísticas del usuario
+// Obtener estadísticas del usuario (solo pedidos completados)
+const validStatuses = ['pagado', 'enviado', 'entregado'];
+
 const { count: totalOrders } = await supabase
   .from('orders')
   .select('*', { count: 'exact', head: true })
-  .eq('user_id', session.user.id);
+  .eq('user_id', session.user.id)
+  .in('status', validStatuses);
 
 const { data: totalSpentData } = await supabase
   .from('orders')
   .select('total')
   .eq('user_id', session.user.id)
-  .in('status', ['pagado', 'enviado', 'entregado']);
+  .in('status', validStatuses);
 
 const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Number(order.total), 0) || 0;
 ---
