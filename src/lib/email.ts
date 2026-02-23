@@ -527,6 +527,89 @@ export async function sendCampaignBatch(
   return { success: failed === 0, sent, failed, errors };
 }
 
+// Email de aprobación de devolución
+export async function sendReturnApproved(email: string, orderId: string, customerName: string, refundAmount?: number) {
+  const content = `
+    <div class="icon">Aprobado</div>
+    <h2>Devolución aprobada</h2>
+
+    <p>Hola ${escapeHtml(customerName)},</p>
+    <p>Tu solicitud de devolución para el pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong> ha sido aprobada.</p>
+
+    <div class="highlight success">
+      <strong>Instrucciones para el envío:</strong><br>
+      <strong>Dirección:</strong><br>
+      Benice Pet Shop - Devoluciones<br>
+      Calle Principal, 123<br>
+      28001 Madrid, España<br><br>
+      <strong>Importe a reembolsar:</strong> ${refundAmount ? refundAmount.toFixed(2) : 'N/A'}€<br><br>
+      <em>El reembolso se procesará en 5-7 días hábiles una vez recibamos el producto.</em>
+    </div>
+
+    <h3>Consejos para el envío:</h3>
+    <ul>
+      <li>Usa el embalaje original si es posible</li>
+      <li>Incluye todos los accesorios y manuales</li>
+      <li>Asegura el paquete adecuadamente</li>
+      <li>Conserva el comprobante de envío</li>
+    </ul>
+
+    <p style="color: #6b7280; margin-top: 30px;">
+      Si tienes alguna pregunta sobre el proceso de devolución, no dudes en contactarnos.
+    </p>
+  `;
+
+  try {
+    const response = await sendEmail(
+      email,
+      `Devolución aprobada - Pedido #${orderId.slice(0, 8).toUpperCase()}`,
+      baseTemplate(content, 'Devolución Aprobada')
+    );
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('Error enviando email de aprobación de devolución:', error);
+    return { success: false, error };
+  }
+}
+
+// Email de rechazo de devolución
+export async function sendReturnRejected(email: string, orderId: string, customerName: string, adminNotes?: string) {
+  const content = `
+    <div class="icon">Información</div>
+    <h2>Solicitud de devolución no aprobada</h2>
+
+    <p>Hola ${escapeHtml(customerName)},</p>
+    <p>Tu solicitud de devolución para el pedido <strong>#${orderId.slice(0, 8).toUpperCase()}</strong>
+    no ha podido ser aprobada.</p>
+
+    ${adminNotes ? `
+    <div class="highlight">
+      <strong>Motivo:</strong><br>
+      ${escapeHtml(adminNotes)}
+    </div>
+    ` : ''}
+
+    <p>Tu pedido seguirá su curso normal. Si tienes alguna pregunta,
+    no dudes en contactarnos.</p>
+
+    <p style="color: #6b7280; margin-top: 30px;">
+      Estamos aquí para ayudarte en lo que necesites.
+    </p>
+  `;
+
+  try {
+    const response = await sendEmail(
+      email,
+      `Solicitud de devolución - Pedido #${orderId.slice(0, 8).toUpperCase()}`,
+      baseTemplate(content, 'Devolución no aprobada')
+    );
+    return { success: true, data: response };
+  } catch (error) {
+    console.error('Error enviando email de rechazo de devolución:', error);
+    return { success: false, error };
+  }
+}
+
 // Email de contacto (para el admin)
 export async function sendContactEmail(data: {
   name: string;

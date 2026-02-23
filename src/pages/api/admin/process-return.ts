@@ -12,6 +12,7 @@
  */
 import type { APIRoute } from 'astro';
 import { supabaseAdmin } from '../../../lib/supabase';
+import { sendReturnApproved, sendReturnRejected } from '../../../lib/email';
 
 export const prerender = false;
 
@@ -66,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
     // 4. Obtener datos de la devolución actual
     const { data: returnData, error: returnError } = await supabaseAdmin
       .from('returns')
-      .select('*, orders(id, total, user_id)')
+      .select('*, orders(id, total, user_id), users(email, full_name)')
       .eq('id', returnId)
       .single();
 
@@ -161,6 +162,30 @@ export const POST: APIRoute = async ({ request }) => {
     if (updateError) {
       console.error('Error actualizando devolución:', updateError);
       return new Response(JSON.stringify({ error: 'Error actualizando estado de la devolución' }), { status: 500, headers });
+    }
+
+    // 8. Enviar email al cliente si hay cambio de estado
+    if (newStatus !== currentStatus && returnData.users?.email) {
+      try {
+        if (newStatus === 'aprobada') {
+          await sendReturnApproved(
+            returnData.users.email,
+            returnData.order_id,
+            returnData.users.full_name || 'Cliente',
+            updateData.refund_amount as number || returnData.refund_amount
+          );
+        } else if (newStatus === 'rechazada') {
+          await sendReturnRejected(
+            returnData.users.email,
+            returnData.order_id,
+            returnData.users.full_name || 'Cliente',
+            updateData.admin_notes as string || returnData.admin_notes
+          );
+        }
+      } catch (emailError) {
+        console.error('Error enviando email de devolución:', emailError);
+        // No fallamos la petición por error de email
+      }
     }
 
     return new Response(JSON.stringify({
