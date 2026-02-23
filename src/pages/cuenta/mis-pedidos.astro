@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
-import { createServerClient } from '../../lib/supabase';
+import { createServerClient, supabaseAdmin } from '../../lib/supabase';
 
 // Proteger la ruta - verificar autenticacion
 const supabase = await createServerClient(Astro.cookies);
@@ -12,7 +12,8 @@ if (!session) {
 }
 
 // Obtener pedidos del usuario con sus items
-const { data: orders } = await supabase
+// Usar supabaseAdmin para bypasear RLS y garantizar que los pedidos se muestran
+const { data: orders } = await supabaseAdmin
   .from('orders')
   .select(`
     *,
@@ -29,14 +30,14 @@ const orderIds = orders?.map((o: any) => o.id) || [];
 let cancellationRequests: any[] = [];
 let invoicesMap: Record<string, any> = {};
 if (orderIds.length > 0) {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('cancellation_requests')
     .select('*')
     .in('order_id', orderIds);
   cancellationRequests = data || [];
 
   // Obtener facturas de los pedidos
-  const { data: invoicesData } = await supabase
+  const { data: invoicesData } = await supabaseAdmin
     .from('invoices')
     .select('id, order_id, invoice_number')
     .in('order_id', orderIds)

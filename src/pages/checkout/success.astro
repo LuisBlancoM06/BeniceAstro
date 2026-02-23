@@ -3,12 +3,14 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Stripe from 'stripe';
 import { ensureOrderFromStripeSession } from '../../lib/process-order';
+import { supabaseAdmin } from '../../lib/supabase';
 
 const sessionId = Astro.url.searchParams.get('session_id');
 
 // Verificar el pago server-side con Stripe
 let paymentVerified = false;
 let orderId: string | null = null;
+let orderDetails: any = null;
 
 if (sessionId && sessionId.startsWith('cs_')) {
   try {
@@ -26,6 +28,26 @@ if (sessionId && sessionId.startsWith('cs_')) {
         orderId = await ensureOrderFromStripeSession(sessionId);
       } catch (e) {
         console.error('[SUCCESS] Error asegurando pedido:', e);
+      }
+
+      // Cargar detalles del pedido para mostrar en la página
+      if (orderId) {
+        try {
+          const { data } = await supabaseAdmin
+            .from('orders')
+            .select(`
+              *,
+              order_items (
+                *,
+                products (name, image_url)
+              )
+            `)
+            .eq('id', orderId)
+            .single();
+          orderDetails = data;
+        } catch (e) {
+          console.error('[SUCCESS] Error cargando detalles del pedido:', e);
+        }
       }
     }
   } catch {
@@ -101,6 +123,15 @@ if (!sessionId || !paymentVerified) {
         </div>
 
         <div class="p-6 space-y-4">
+          {orderId && (
+            <div class="flex items-center justify-between py-3 border-b border-gray-100">
+              <span class="text-gray-500 text-sm">N.&ordm; de pedido</span>
+              <span class="font-mono text-sm bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-bold">
+                #{orderId.slice(0, 8).toUpperCase()}
+              </span>
+            </div>
+          )}
+
           {sessionId && (
             <div class="flex items-center justify-between py-3 border-b border-gray-100">
               <span class="text-gray-500 text-sm">Referencia de pago</span>
@@ -139,6 +170,57 @@ if (!sessionId || !paymentVerified) {
           </div>
         </div>
       </div>
+
+      <!-- Detalle de productos del pedido -->
+      {orderDetails && orderDetails.order_items && orderDetails.order_items.length > 0 && (
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+              Productos del pedido
+            </h3>
+          </div>
+          <div class="p-6 space-y-3">
+            {orderDetails.order_items.map((item: any) => {
+              const imgUrl = item.products?.image_url || '';
+              const productName = item.products?.name || 'Producto';
+              const isPlaceholder = !imgUrl || imgUrl.includes('placehold');
+              return (
+                <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                  <div class="w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-white">
+                    {isPlaceholder ? (
+                      <div class="w-full h-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                        <span class="text-white text-[8px] font-bold text-center px-1">{productName}</span>
+                      </div>
+                    ) : (
+                      <img src={imgUrl} alt={productName} class="w-full h-full object-contain p-1" />
+                    )}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-gray-800 truncate">{productName}</p>
+                    <p class="text-xs text-gray-500">Cantidad: {item.quantity} x {Number(item.price).toFixed(2)}&euro;</p>
+                  </div>
+                  <span class="font-bold text-sm text-purple-700 shrink-0">
+                    {(item.quantity * item.price).toFixed(2)}&euro;
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div class="px-6 pb-5 pt-2 border-t border-gray-100">
+            {orderDetails.promo_code && (
+              <div class="flex justify-between text-sm text-green-600 mb-2">
+                <span>Descuento ({orderDetails.promo_code}):</span>
+                <span>-{Number(orderDetails.discount_amount || 0).toFixed(2)}&euro;</span>
+              </div>
+            )}
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-medium text-gray-600">Total pagado</span>
+              <span class="text-xl font-extrabold text-purple-700">{Number(orderDetails.total).toFixed(2)}&euro;</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <!-- Timeline: Qué esperar -->
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
