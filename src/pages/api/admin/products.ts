@@ -214,13 +214,13 @@ export const PUT: APIRoute = async ({ request }) => {
 
 // DELETE: Eliminar producto
 export const DELETE: APIRoute = async ({ url, request }) => {
-  const headers = { 'Content-Type': 'application/json' };
-
-  if (!(await verifyAdmin(request))) {
-    return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
-  }
+  const headers = { 'Content-Type': 'application/json; charset=utf-8' };
 
   try {
+    if (!(await verifyAdmin(request))) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401, headers });
+    }
+
     const id = url.searchParams.get('id');
 
     if (!id) {
@@ -291,9 +291,11 @@ export const DELETE: APIRoute = async ({ url, request }) => {
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (error: any) {
     console.error('[DELETE PRODUCT] Error general:', error);
+    // Asegurarnos de siempre retornar JSON válido
+    const errorMessage = error?.message || 'Error al eliminar producto';
     return new Response(JSON.stringify({ 
-      error: error?.message || 'Error al eliminar producto',
-      stack: error?.stack
+      error: errorMessage,
+      timestamp: new Date().toISOString()
     }), { status: 500, headers });
   }
 };

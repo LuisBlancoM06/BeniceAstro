@@ -168,10 +168,22 @@ export const onRequest = defineMiddleware(async (context, next) => {
           }
         } catch { /* URL inválida, ignorar */ }
       }
+      
+      // Para desarrollo local, permitir también orígenes sin https
+      if (expectedOrigin.startsWith('http://localhost:') || expectedOrigin.startsWith('http://127.0.0.1:')) {
+        allowedOrigins.add(expectedOrigin.replace('http://', 'https://'));
+        allowedOrigins.add(expectedOrigin.replace('https://', 'http://'));
+      }
 
       if (origin && !allowedOrigins.has(origin)) {
         console.warn(`[CSRF] Origin bloqueado: ${origin} (esperados: ${[...allowedOrigins].join(', ')})`);
-        return addSecurityHeaders(new Response(JSON.stringify({ error: 'CSRF blocked: origin inválido' }), {
+        console.warn(`[CSRF] Request URL: ${context.url.href}`);
+        console.warn(`[CSRF] User-Agent: ${context.request.headers.get('user-agent')}`);
+        return addSecurityHeaders(new Response(JSON.stringify({ 
+          error: 'CSRF blocked: origin inválido',
+          expected: [...allowedOrigins],
+          received: origin
+        }), {
           status: 403,
           headers: { 'Content-Type': 'application/json; charset=utf-8' },
         }));
