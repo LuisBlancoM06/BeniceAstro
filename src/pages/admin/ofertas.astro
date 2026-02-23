@@ -179,18 +179,29 @@ const { data: allProducts } = await supabaseAdmin
   <script>
     import { supabase } from '../../lib/supabase';
 
+    async function getAuthToken(): Promise<string | null> {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    }
+
     // Toggle ofertas
     const toggle = document.getElementById('ofertas-toggle') as HTMLInputElement;
     const toggleText = document.getElementById('toggle-text');
 
     toggle?.addEventListener('change', async () => {
       const enabled = toggle.checked;
-      
+
       try {
+        const token = await getAuthToken();
+        if (!token) { alert('Sesión expirada. Recarga la página.'); toggle.checked = !enabled; return; }
+
         const response = await fetch('/api/admin/ofertas-toggle', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ enabled })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ active: enabled })
         });
 
         if (response.ok) {
@@ -205,33 +216,37 @@ const { data: allProducts } = await supabaseAdmin
       }
     });
 
-    // Quitar producto de oferta
+    // Quitar producto de oferta (via API server-side)
     document.querySelectorAll('.remove-oferta-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const productId = (btn as HTMLButtonElement).dataset.id;
-        
+
         if (!confirm('¿Quitar este producto de las ofertas?')) return;
 
         try {
-          const { error } = await supabase
-            .from('products')
-            .update({ on_sale: false, sale_price: null })
-            .eq('id', productId);
+          const response = await fetch('/api/admin/products', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: productId, on_sale: false, sale_price: null })
+          });
 
-          if (error) throw error;
+          if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.error || 'Error al quitar oferta');
+          }
           window.location.reload();
-        } catch (err) {
+        } catch (err: any) {
           console.error(err);
-          alert('Error al quitar producto de ofertas');
+          alert(err.message || 'Error al quitar producto de ofertas');
         }
       });
     });
 
-    // Añadir producto a oferta
+    // Añadir producto a oferta (via API server-side)
     const form = document.getElementById('add-oferta-form') as HTMLFormElement;
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const formData = new FormData(form);
       const productId = formData.get('product_id');
       const salePrice = parseFloat(formData.get('sale_price') as string);
@@ -242,16 +257,20 @@ const { data: allProducts } = await supabaseAdmin
       }
 
       try {
-        const { error } = await supabase
-          .from('products')
-          .update({ on_sale: true, sale_price: salePrice })
-          .eq('id', productId);
+        const response = await fetch('/api/admin/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: productId, on_sale: true, sale_price: salePrice })
+        });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const result = await response.json();
+          throw new Error(result.error || 'Error al añadir oferta');
+        }
         window.location.reload();
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        alert('Error al añadir producto a ofertas');
+        alert(err.message || 'Error al añadir producto a ofertas');
       }
     });
   </script>

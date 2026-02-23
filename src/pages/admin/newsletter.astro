@@ -13,11 +13,64 @@ const { data: userData } = await supabaseAdmin
   .from('users').select('role').eq('id', session.user.id).single();
 if (!userData || userData.role !== 'admin') return Astro.redirect('/');
 
-// Obtener TODOS los suscriptores (sin limite)
-const { data: subscribers, count } = await supabaseAdmin
+// Obtener suscriptores del newsletter
+const { data: subscribers } = await supabaseAdmin
   .from('newsletters')
-  .select('*', { count: 'exact' })
+  .select('email, promo_code, created_at')
   .order('created_at', { ascending: false });
+
+// Obtener clientes registrados (no admin)
+const { data: registeredUsers } = await supabaseAdmin
+  .from('users')
+  .select('email, full_name, created_at')
+  .neq('role', 'admin')
+  .order('created_at', { ascending: false });
+
+// Combinar y deduplicar por email
+interface Contact {
+  email: string;
+  name: string;
+  source: 'newsletter' | 'cliente' | 'ambos';
+  promo_code: string;
+  created_at: string;
+}
+
+const contactMap = new Map<string, Contact>();
+
+// Primero los suscriptores del newsletter
+(subscribers || []).forEach((sub: any) => {
+  contactMap.set(sub.email, {
+    email: sub.email,
+    name: '',
+    source: 'newsletter',
+    promo_code: sub.promo_code || '',
+    created_at: sub.created_at,
+  });
+});
+
+// Luego los usuarios registrados (merge o crear)
+(registeredUsers || []).forEach((u: any) => {
+  const existing = contactMap.get(u.email);
+  if (existing) {
+    existing.source = 'ambos';
+    existing.name = u.full_name || '';
+  } else {
+    contactMap.set(u.email, {
+      email: u.email,
+      name: u.full_name || '',
+      source: 'cliente',
+      promo_code: '',
+      created_at: u.created_at,
+    });
+  }
+});
+
+const contacts: Contact[] = [...contactMap.values()];
+contacts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+const totalContacts = contacts.length;
+const totalNewsletter = contacts.filter(c => c.source === 'newsletter' || c.source === 'ambos').length;
+const totalClientes = contacts.filter(c => c.source === 'cliente' || c.source === 'ambos').length;
 
 // Obtener codigos promo activos para el modal
 const { data: promoCodes } = await supabaseAdmin
@@ -32,24 +85,24 @@ const { data: promoCodes } = await supabaseAdmin
   <!-- Estadísticas -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
-      <p class="text-sm font-medium text-gray-500">Total Suscriptores</p>
-      <p class="text-2xl font-bold text-gray-800 mt-1">{count || 0}</p>
+      <p class="text-sm font-medium text-gray-500">Total Contactos</p>
+      <p class="text-2xl font-bold text-gray-800 mt-1">{totalContacts}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-      <p class="text-sm font-medium text-gray-500">Este Mes</p>
-      <p class="text-2xl font-bold text-gray-800 mt-1" id="this-month">-</p>
+      <p class="text-sm font-medium text-gray-500">Suscriptores Newsletter</p>
+      <p class="text-2xl font-bold text-gray-800 mt-1">{totalNewsletter}</p>
     </div>
     <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-      <p class="text-sm font-medium text-gray-500">Ultima Semana</p>
-      <p class="text-2xl font-bold text-gray-800 mt-1" id="this-week">-</p>
+      <p class="text-sm font-medium text-gray-500">Clientes Registrados</p>
+      <p class="text-2xl font-bold text-gray-800 mt-1">{totalClientes}</p>
     </div>
   </div>
 
-  <!-- Barra de seleccion (aparece cuando hay seleccionados) -->
+  <!-- Barra de seleccion -->
   <div id="selection-bar" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
     <div class="flex items-center justify-between">
       <span class="text-purple-700 font-medium">
-        <span id="selected-count">0</span> suscriptores seleccionados
+        <span id="selected-count">0</span> contactos seleccionados
       </span>
       <button id="open-campaign-modal" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
         Enviar Campana
@@ -61,10 +114,17 @@ const { data: promoCodes } = await supabaseAdmin
   <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
     <div class="flex flex-wrap gap-4 items-center justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800">Gestion de Newsletter</h2>
-        <p class="text-sm text-gray-500 mt-1">Selecciona suscriptores y envia campanas con codigos promo</p>
+        <h2 class="text-lg font-semibold text-gray-800">Contactos</h2>
+        <p class="text-sm text-gray-500 mt-1">Suscriptores del newsletter + clientes registrados. Selecciona y envia campanas.</p>
       </div>
       <div class="flex gap-3">
+        <!-- Filtro por origen -->
+        <select id="filter-source" class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-400">
+          <option value="">Todos</option>
+          <option value="newsletter">Solo Newsletter</option>
+          <option value="cliente">Solo Clientes</option>
+          <option value="ambos">Ambos</option>
+        </select>
         <button id="export-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium">
           Exportar CSV
         </button>
@@ -75,13 +135,13 @@ const { data: promoCodes } = await supabaseAdmin
     </div>
   </div>
 
-  <!-- Lista de Suscriptores -->
+  <!-- Lista de Contactos -->
   <div class="bg-white rounded-xl shadow-sm overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="font-semibold text-gray-800">Suscriptores ({count || 0})</h3>
+      <h3 class="font-semibold text-gray-800">Todos los contactos ({totalContacts})</h3>
     </div>
 
-    {subscribers && subscribers.length > 0 ? (
+    {contacts.length > 0 ? (
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead class="bg-gray-50">
@@ -90,41 +150,44 @@ const { data: promoCodes } = await supabaseAdmin
                 <input type="checkbox" id="select-all" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer" />
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Codigo Promo</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Origen</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-              <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            {subscribers.map((sub: any) => (
-              <tr class="hover:bg-gray-50">
+            {contacts.map((contact) => (
+              <tr class="hover:bg-gray-50 contact-row" data-source={contact.source}>
                 <td class="px-6 py-4">
                   <input
                     type="checkbox"
                     class="subscriber-checkbox rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
-                    data-email={sub.email}
+                    data-email={contact.email}
                   />
                 </td>
                 <td class="px-6 py-4">
-                  <span class="font-medium text-gray-800">{sub.email}</span>
+                  <span class="font-medium text-gray-800">{contact.email}</span>
+                </td>
+                <td class="px-6 py-4 text-gray-600 text-sm">
+                  {contact.name || '-'}
                 </td>
                 <td class="px-6 py-4">
-                  <span class="font-mono text-sm text-purple-600">{sub.promo_code}</span>
+                  {contact.source === 'newsletter' && (
+                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">Newsletter</span>
+                  )}
+                  {contact.source === 'cliente' && (
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">Cliente</span>
+                  )}
+                  {contact.source === 'ambos' && (
+                    <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">Ambos</span>
+                  )}
                 </td>
                 <td class="px-6 py-4 text-gray-500 text-sm">
-                  {new Date(sub.created_at).toLocaleDateString('es-ES', {
+                  {new Date(contact.created_at).toLocaleDateString('es-ES', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric'
                   })}
-                </td>
-                <td class="px-6 py-4 text-right">
-                  <button
-                    class="delete-sub-btn text-red-600 hover:text-red-800 text-sm"
-                    data-email={sub.email}
-                  >
-                    Eliminar
-                  </button>
                 </td>
               </tr>
             ))}
@@ -136,7 +199,7 @@ const { data: promoCodes } = await supabaseAdmin
         <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
         </svg>
-        <p>No hay suscriptores todavia</p>
+        <p>No hay contactos todavia</p>
       </div>
     )}
   </div>
@@ -154,14 +217,14 @@ const { data: promoCodes } = await supabaseAdmin
 
         <h2 class="text-xl font-bold text-gray-800 mb-1">Nueva Campana</h2>
         <p class="text-sm text-gray-500 mb-6">
-          Enviar email con codigo promocional a <span id="modal-count" class="font-bold text-purple-600">0</span> suscriptores
+          Enviar email con codigo promocional a <span id="modal-count" class="font-bold text-purple-600">0</span> contactos
         </p>
 
         <!-- Asunto -->
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Asunto del email</label>
           <input type="text" id="campaign-subject"
-            value="Oferta exclusiva para suscriptores"
+            value="Oferta exclusiva para ti"
             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent text-sm" />
         </div>
 
@@ -244,36 +307,27 @@ const { data: promoCodes } = await supabaseAdmin
       setTimeout(() => toast.classList.add('hidden'), 4000);
     }
 
-    // --- Estadisticas ---
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const monthEl = document.getElementById('this-month');
-    const weekEl = document.getElementById('this-week');
+    // --- Filtro por origen ---
+    const filterSource = document.getElementById('filter-source') as HTMLSelectElement;
+    const contactRows = document.querySelectorAll('.contact-row') as NodeListOf<HTMLElement>;
 
-    (async () => {
-      try {
-        const { data } = await supabase
-          .from('newsletters')
-          .select('created_at');
-
-        if (data) {
-          let month = 0, week = 0;
-          data.forEach((s: any) => {
-            const d = new Date(s.created_at);
-            if (d >= monthStart) month++;
-            if (d >= weekAgo) week++;
-          });
-          if (monthEl) monthEl.textContent = month.toString();
-          if (weekEl) weekEl.textContent = week.toString();
+    filterSource?.addEventListener('change', () => {
+      const value = filterSource.value;
+      contactRows.forEach(row => {
+        const source = row.dataset.source || '';
+        if (!value || source === value) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+          // Desmarcar checkbox de filas ocultas
+          const cb = row.querySelector('.subscriber-checkbox') as HTMLInputElement;
+          if (cb) cb.checked = false;
         }
-      } catch (e) {
-        if (monthEl) monthEl.textContent = '-';
-        if (weekEl) weekEl.textContent = '-';
-      }
-    })();
+      });
+      updateSelectionUI();
+    });
 
-    // --- Seleccion de suscriptores ---
+    // --- Seleccion ---
     const selectAll = document.getElementById('select-all') as HTMLInputElement;
     const checkboxes = document.querySelectorAll('.subscriber-checkbox') as NodeListOf<HTMLInputElement>;
     const selectionBar = document.getElementById('selection-bar')!;
@@ -284,6 +338,13 @@ const { data: promoCodes } = await supabaseAdmin
       return [...checked].map(cb => cb.dataset.email!);
     }
 
+    function getVisibleCheckboxes(): HTMLInputElement[] {
+      return [...checkboxes].filter(cb => {
+        const row = cb.closest('.contact-row') as HTMLElement;
+        return row && row.style.display !== 'none';
+      });
+    }
+
     function updateSelectionUI() {
       const count = getSelectedEmails().length;
       selectedCountEl.textContent = count.toString();
@@ -291,13 +352,15 @@ const { data: promoCodes } = await supabaseAdmin
     }
 
     selectAll?.addEventListener('change', () => {
-      checkboxes.forEach(cb => cb.checked = selectAll.checked);
+      // Solo afecta filas visibles
+      getVisibleCheckboxes().forEach(cb => cb.checked = selectAll.checked);
       updateSelectionUI();
     });
 
     checkboxes.forEach(cb => {
       cb.addEventListener('change', () => {
-        selectAll.checked = [...checkboxes].every(c => c.checked);
+        const visible = getVisibleCheckboxes();
+        selectAll.checked = visible.length > 0 && visible.every(c => c.checked);
         updateSelectionUI();
       });
     });
@@ -310,7 +373,7 @@ const { data: promoCodes } = await supabaseAdmin
     function openModal() {
       const emails = getSelectedEmails();
       if (emails.length === 0) {
-        showToast('Selecciona al menos un suscriptor', 'error');
+        showToast('Selecciona al menos un contacto', 'error');
         return;
       }
       modalCount.textContent = emails.length.toString();
@@ -328,10 +391,10 @@ const { data: promoCodes } = await supabaseAdmin
     document.getElementById('open-campaign-modal')?.addEventListener('click', openModal);
 
     document.getElementById('send-campaign-btn')?.addEventListener('click', () => {
-      // Si no hay seleccion, seleccionar todos
+      // Si no hay seleccion, seleccionar todos los visibles
       if (getSelectedEmails().length === 0) {
         selectAll.checked = true;
-        checkboxes.forEach(cb => cb.checked = true);
+        getVisibleCheckboxes().forEach(cb => cb.checked = true);
         updateSelectionUI();
       }
       openModal();
@@ -374,13 +437,13 @@ const { data: promoCodes } = await supabaseAdmin
         }
       }
 
-      if (!confirm(`¿Enviar campana a ${emails.length} suscriptor${emails.length > 1 ? 'es' : ''}?`)) return;
+      if (!confirm(`¿Enviar campana a ${emails.length} contacto${emails.length > 1 ? 's' : ''}?`)) return;
 
       confirmBtn.disabled = true;
       confirmBtn.textContent = 'Enviando...';
       progressDiv.classList.remove('hidden');
       progressDiv.className = 'mt-4 p-4 rounded-lg bg-blue-50';
-      progressDiv.innerHTML = `<p class="text-sm text-blue-700 text-center">Enviando a ${emails.length} suscriptores...</p>`;
+      progressDiv.innerHTML = `<p class="text-sm text-blue-700 text-center">Enviando a ${emails.length} contactos...</p>`;
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -404,7 +467,7 @@ const { data: promoCodes } = await supabaseAdmin
               Enviados: ${result.sent} | Fallidos: ${result.failed}
             </p>
           `;
-          showToast(`Campana enviada a ${result.sent} suscriptores`);
+          showToast(`Campana enviada a ${result.sent} contactos`);
         } else {
           progressDiv.className = 'mt-4 p-4 rounded-lg bg-red-50';
           progressDiv.innerHTML = `<p class="text-red-700 text-sm text-center">${result.error || 'Error al enviar'}</p>`;
@@ -421,53 +484,34 @@ const { data: promoCodes } = await supabaseAdmin
     });
 
     // --- Exportar CSV ---
-    document.getElementById('export-btn')?.addEventListener('click', async () => {
-      try {
-        const { data } = await supabase
-          .from('newsletters')
-          .select('email, promo_code, created_at')
-          .order('created_at', { ascending: false });
+    document.getElementById('export-btn')?.addEventListener('click', () => {
+      const rows = document.querySelectorAll('.contact-row') as NodeListOf<HTMLElement>;
+      const csvEscape = (v: string) => `"${String(v || '').replace(/"/g, '""')}"`;
+      const csvRows = ['Email,Nombre,Origen,Fecha'];
 
-        if (data && data.length > 0) {
-          const csvEscape = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
-          const csv = 'Email,Codigo Promo,Fecha\n' + data.map((s: any) =>
-            `${csvEscape(s.email)},${csvEscape(s.promo_code)},${csvEscape(s.created_at)}`
-          ).join('\n');
-          const blob = new Blob([csv], { type: 'text/csv' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `newsletter-${new Date().toISOString().split('T')[0]}.csv`;
-          a.click();
-          URL.revokeObjectURL(url);
-        } else {
-          showToast('No hay datos para exportar', 'error');
-        }
-      } catch (err) {
-        console.error(err);
-        showToast('Error al exportar', 'error');
-      }
-    });
-
-    // --- Eliminar suscriptor ---
-    document.querySelectorAll('.delete-sub-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const email = (btn as HTMLButtonElement).dataset.email;
-        if (!confirm(`¿Eliminar suscriptor ${email}?`)) return;
-
-        try {
-          const { error } = await supabase
-            .from('newsletters')
-            .delete()
-            .eq('email', email);
-
-          if (error) throw error;
-          window.location.reload();
-        } catch (err) {
-          console.error(err);
-          showToast('Error al eliminar', 'error');
-        }
+      rows.forEach(row => {
+        if (row.style.display === 'none') return;
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 5) return;
+        csvRows.push([
+          csvEscape(cells[1]?.textContent?.trim() || ''),
+          csvEscape(cells[2]?.textContent?.trim() || ''),
+          csvEscape(cells[3]?.textContent?.trim() || ''),
+          csvEscape(cells[4]?.textContent?.trim() || ''),
+        ].join(','));
       });
+
+      if (csvRows.length <= 1) {
+        showToast('No hay datos para exportar', 'error');
+        return;
+      }
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `contactos-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
     });
   </script>
 </AdminLayout>
