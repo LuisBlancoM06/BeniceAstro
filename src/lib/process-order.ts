@@ -63,7 +63,8 @@ export async function ensureOrderFromStripeSession(sessionId: string): Promise<s
         .insert({
           email: customerEmail,
           full_name: customerName,
-          role: 'user'
+          role: 'user',
+          created_at: new Date().toISOString()
         })
         .select('id')
         .single();

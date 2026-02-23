@@ -48,7 +48,11 @@ const totalSpent = totalSpentData?.reduce((sum: number, order: any) => sum + Num
           <div class="flex-1">
             <h1 class="text-3xl font-bold text-gray-800">{user?.full_name || 'Usuario'}</h1>
             <p class="text-gray-600">{session.user.email}</p>
-            <p class="text-sm text-gray-500 mt-1">Miembro desde {new Date(user?.created_at || Date.now()).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}</p>
+            <p class="text-sm text-gray-500 mt-1">Miembro desde {new Date(user?.created_at || session.user?.user_metadata?.created_at || Date.now()).toLocaleDateString('es-ES', { 
+              day: 'numeric', 
+              month: 'long', 
+              year: 'numeric' 
+            })}</p>
           </div>
           <div class="hidden md:flex gap-8">
             <div class="text-center">

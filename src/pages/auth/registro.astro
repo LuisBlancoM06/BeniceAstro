@@ -293,7 +293,8 @@ import AddressAutocomplete from '../../components/AddressAutocomplete.tsx';
             country: country || 'ES',
             latitude: latitude,
             longitude: longitude,
-            role: 'user'
+            role: 'user',
+            created_at: new Date().toISOString()
           };
 
           const { error: insertError } = await supabase.from('users').insert(profileData);
