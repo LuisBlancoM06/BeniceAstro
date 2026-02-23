@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase, supabaseAdmin } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
 import { sendShippingNotification, sendDeliveryConfirmation } from '../../../lib/email';
 
 export const prerender = false;
@@ -30,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'No autorizado' }), {
