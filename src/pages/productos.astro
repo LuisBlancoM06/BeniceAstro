@@ -308,6 +308,23 @@ const products = allProducts || [];
       applyFilters();
     }
 
+    // Función para marcar casillas según filtros activos
+    function updateCheckboxesFromFilters() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Verificar si hay filtros en la URL
+      if (urlParams.has('animal_type')) {
+        const animalType = urlParams.get('animal_type');
+        const checkbox = document.querySelector(`input[data-filter="animal_type"][value="${animalType}"]`) as HTMLInputElement;
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      }
+      
+      // Aplicar filtros después de marcar las casillas
+      applyFilters();
+    }
+
     // Filtrar al instante al cambiar checkbox
     document.querySelectorAll('.filter-check').forEach(cb => {
       cb.addEventListener('change', applyFilters);
@@ -321,5 +338,8 @@ const products = allProducts || [];
       document.querySelectorAll<HTMLInputElement>('.filter-check').forEach(cb => cb.checked = false);
       applyFilters();
     });
+
+    // Inicializar filtros desde URL al cargar la página
+    updateCheckboxesFromFilters();
   </script>
 </Layout>
