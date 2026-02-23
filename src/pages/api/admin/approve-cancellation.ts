@@ -92,9 +92,9 @@ export const POST: APIRoute = async ({ request }) => {
     const customerName = order.users?.full_name || 'Cliente';
 
     if (action === 'aprobar') {
-      // Verificar que el pedido sigue en estado pagado
-      if (order.status !== 'pagado') {
-        return new Response(JSON.stringify({ error: 'El pedido ya no esta en estado pagado, no se puede cancelar' }), {
+      // Verificar que el pedido sigue en estado cancelable
+      if (!['pagado', 'enviado'].includes(order.status)) {
+        return new Response(JSON.stringify({ error: 'El pedido ya no se puede cancelar (estado actual: ' + order.status + ')' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         });

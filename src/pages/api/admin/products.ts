@@ -227,6 +227,17 @@ export const DELETE: APIRoute = async ({ url, request }) => {
       return new Response(JSON.stringify({ error: 'ID de producto requerido' }), { status: 400, headers });
     }
 
+    // Desvincular referencias en order_items para no perder historial de pedidos
+    // (el frontend ya muestra "Producto eliminado" si products es null)
+    await supabaseAdmin
+      .from('order_items')
+      .update({ product_id: null })
+      .eq('product_id', id);
+
+    // Eliminar referencias en tablas secundarias (favorites, reviews, etc.)
+    try { await supabaseAdmin.from('favorites').delete().eq('product_id', id); } catch {}
+    try { await supabaseAdmin.from('reviews').delete().eq('product_id', id); } catch {}
+
     const { error } = await supabaseAdmin
       .from('products')
       .delete()
@@ -237,6 +248,6 @@ export const DELETE: APIRoute = async ({ url, request }) => {
     return new Response(JSON.stringify({ success: true }), { status: 200, headers });
   } catch (error: any) {
     console.error('Error al eliminar producto:', error);
-    return new Response(JSON.stringify({ error: 'Error interno del servidor' }), { status: 500, headers });
+    return new Response(JSON.stringify({ error: error?.message || 'Error al eliminar producto' }), { status: 500, headers });
   }
 };

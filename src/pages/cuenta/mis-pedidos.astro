@@ -205,7 +205,7 @@ const getTimelineSteps = (orderStatus: string) => {
                 </a>
               )}
 
-              {order.status === 'pagado' && (!cancellation || cancellation.status === 'rechazada') && (
+              {['pagado', 'enviado'].includes(order.status) && (!cancellation || cancellation.status === 'rechazada') && (
                 <button
                   class="btn btn-danger cancel-order-btn"
                   data-order-id={order.id}
