@@ -1025,6 +1025,30 @@ const breadcrumbLD =
     <script>
       import { supabase } from "../lib/supabase";
 
+      // Sincronizar tokens de sesion con cookies para que las paginas SSR funcionen
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (session) {
+            try {
+              await fetch('/api/auth/session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  access_token: session.access_token,
+                  refresh_token: session.refresh_token,
+                }),
+              });
+            } catch (e) {
+              console.error('[AUTH] Error syncing session cookies:', e);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          try {
+            await fetch('/api/auth/session', { method: 'DELETE' });
+          } catch {}
+        }
+      });
+
       // Verificar sesión del usuario
       async function checkAuth() {
         const {

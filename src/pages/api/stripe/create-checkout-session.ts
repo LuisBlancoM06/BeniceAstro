@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
-import { supabase, supabaseAdmin } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase';
 import { getOrCreateStripeCustomer } from '../../../lib/stripe-customer';
 import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST_CENTS } from '../../../lib/constants';
 
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     const authHeader = request.headers.get('Authorization');
     if (authHeader?.startsWith('Bearer ')) {
       const token = authHeader.replace('Bearer ', '');
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
       if (!authError && user) {
         userId = user.id;
         try {
