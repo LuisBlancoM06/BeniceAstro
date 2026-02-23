@@ -74,13 +74,15 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Devolución no encontrada' }), { status: 404, headers });
     }
 
-    // Verificar transición de estado permitida
+    // Verificar transición de estado permitida (saltar si no cambia)
     const currentStatus = returnData.status || 'solicitada';
-    const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
-    if (!allowed.includes(newStatus)) {
-      return new Response(JSON.stringify({
-        error: `No se puede cambiar de "${currentStatus}" a "${newStatus}". Transiciones permitidas: ${allowed.length ? allowed.join(', ') : 'ninguna (estado final)'}`
-      }), { status: 400, headers });
+    if (newStatus !== currentStatus) {
+      const allowed = ALLOWED_TRANSITIONS[currentStatus] || [];
+      if (!allowed.includes(newStatus)) {
+        return new Response(JSON.stringify({
+          error: `No se puede cambiar de "${currentStatus}" a "${newStatus}". Transiciones permitidas: ${allowed.length ? allowed.join(', ') : 'ninguna (estado final)'}`
+        }), { status: 400, headers });
+      }
     }
 
     // 5. Actualizar campos opcionales (refund_amount, admin_notes)
