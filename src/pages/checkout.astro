@@ -591,22 +591,22 @@ import AddressAutocomplete from '../components/AddressAutocomplete.tsx';
       btn.textContent = '...';
 
       try {
-        const { data: promo, error } = await supabase
-          .from('promo_codes')
-          .select('discount_percentage')
-          .eq('code', code)
-          .eq('active', true)
-          .single();
+        const response = await fetch('/api/validate-promo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const result = await response.json();
 
-        if (error || !promo) {
-          message!.textContent = '✕ Código no válido o expirado';
+        if (!result.valid) {
+          message!.textContent = `✕ ${result.error || 'Código no válido o expirado'}`;
           message!.className = 'text-xs mt-1.5 text-red-600 font-medium';
           message!.classList.remove('hidden');
           return;
         }
 
         appliedPromoCode = code;
-        discountPercent = promo.discount_percentage;
+        discountPercent = result.discount_percentage;
         
         message!.textContent = `✓ ¡${discountPercent}% de descuento aplicado!`;
         message!.className = 'text-xs mt-1.5 text-green-600 font-bold';

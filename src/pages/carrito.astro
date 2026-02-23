@@ -200,28 +200,21 @@ import Layout from '../layouts/Layout.astro';
       }
 
       try {
-        const { data, error } = await supabase
-          .from('promo_codes')
-          .select('*')
-          .eq('code', code)
-          .eq('active', true)
-          .single();
+        const response = await fetch('/api/validate-promo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const result = await response.json();
 
-        if (error || !data) {
-          message!.textContent = 'Código inválido o expirado';
+        if (!result.valid) {
+          message!.textContent = result.error || 'Código inválido o expirado';
           message!.className = 'mt-2 text-sm text-red-600';
           appliedPromo = null;
         } else {
-          // Verificar fecha de expiración
-          if (data.expires_at && new Date(data.expires_at) < new Date()) {
-            message!.textContent = 'El código ha expirado';
-            message!.className = 'mt-2 text-sm text-red-600';
-            appliedPromo = null;
-          } else {
-            message!.textContent = `¡Código aplicado! ${data.discount_percentage}% de descuento`;
-            message!.className = 'mt-2 text-sm text-green-600';
-            appliedPromo = data;
-          }
+          message!.textContent = `¡Código aplicado! ${result.discount_percentage}% de descuento`;
+          message!.className = 'mt-2 text-sm text-green-600';
+          appliedPromo = { discount_percentage: result.discount_percentage };
         }
 
         updateSummary();
